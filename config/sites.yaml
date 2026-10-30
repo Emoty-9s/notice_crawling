@@ -1,0 +1,4477 @@
+{
+  "audit": {
+    "status": "PASS",
+    "checked_on": "2026-10-30",
+    "source_file": "사업공고모니터링리스트_2024 (version 1).xlsb",
+    "source_sha256": "08bdd298d4219349cbf9b5a0ae0ef23dd39d93e8c865687f2f4a11e05e24ee3a",
+    "source_url_occurrences": 67,
+    "unique_normalized_source_urls": 49,
+    "inventory_sources": 47,
+    "distinct_hostnames": 35,
+    "institution_groups": 30,
+    "source_urls_attempted": 49,
+    "list_detail_pagination_verified": 6,
+    "classifications": {
+      "STATIC_HTML": 24,
+      "JSON_API": 0,
+      "DYNAMIC": 0,
+      "LOGIN": 1,
+      "SPECIAL": 21,
+      "UNSUPPORTED": 1
+    },
+    "mvp_candidates": [
+      "khidi_business",
+      "kised_bid_public",
+      "rda_bid",
+      "seoul_rnd_notice",
+      "kipa_bid",
+      "kista_ippro",
+      "ripc_pms"
+    ],
+    "method_notes": [
+      "Source extraction: stdlib ZIP/XML/BIFF12 record parsing; original workbook not modified.",
+      "Site evidence: web open/click HTML text and tool error observations; some pages are cached.",
+      "Local urllib HTTP failed with DNS getaddrinfo; browser host unavailable; native UI stopped because current URL could not be verified.",
+      "No browser network/XHR inspection; JSON API and mandatory JavaScript remain unknown, not absent.",
+      "SPECIAL includes inaccessible/unverified endpoints, not proof of a special runtime.",
+      "All enabled=false: inventory decisions only, no scraper or production activation.",
+      "Completion round: 5 unresolved sources only; 6 already verified sources were not resurveyed. Selected MVP 5 from existing verified paths; 2 unverified candidates moved to reserve.",
+      "사용자 업무 범위 정정: KIPA IP 디딤돌은 수혜기업 게시판이므로 예비 후보에서도 제외. 원본 URL/기술 이력은 보존.",
+      "사용자 요청 후속: 기존 kista_ippro 수집원의 목록을 협력기관 모집공고(bbsType=ac)로 지정하고 MVP 추가. 총 선정 6개, 구현 경로 검증 완료 5개, 페이지 이동 확인 대기 1개. 원본 URL 49개 추적 집합은 변경하지 않음.",
+      "사용자 요청 후속: ripc_pms의 모니터링 대상을 기업회원 지원공고에서 협력기관 입찰공고로 지정. 공개 입찰 상세/변리업체 참여 조건 확인으로 MVP 대상 추가. 총 선정 7개, 구현 경로 검증 완료 5개, 검증 대기 2개(KISTA/RIPC). RIPC는 목록/페이지 요청 미확정으로 SPECIAL/MANUAL_ONLY/HIGH 유지."
+    ],
+    "completion_basis": "사용자 지정 M01 PASS 4기준: 전체 coverage, 전 수집원 결정, 구현 가능한 MVP 5개, 미확인 사유와 fallback 기록",
+    "additional_sources_rechecked": [
+      "kipa_ip_didimdol",
+      "smtech_announcements",
+      "kaia_legacy_bid",
+      "tipa_legacy_bid",
+      "ripc_pms"
+    ],
+    "additional_sources_rechecked_count": 5,
+    "reserve_candidates": [
+      "smtech_announcements"
+    ],
+    "mvp_implementation_ready_count": 5,
+    "remaining_unverified_sources": 41,
+    "remaining_unverified_definition": "목록·상세·2페이지 응답 확인을 모두 충족하지 않는 수집원 수. 의도적으로 내부 접근하지 않은 로그인 전용/옛 경로/수동 보류도 포함. 공통 API/JS 미확인 필드 개수가 아님.",
+    "supersedes": "이 파일의 audit가 현재 집계. docs/site-audit/AUDIT_SUMMARY.json 및 build_inventory.py는 초기 조사 스냅샷이며 이번 보완을 반영하지 않음.",
+    "business_context": {
+      "organization_type": "특허법인",
+      "source": "사용자 직접 확인",
+      "selection_guidance": "특허법인의 수행기관·협력기관 참여 및 입찰 관점에서 대상 적합성을 판단한다. 수혜기업 전용 게시판을 기술 접근성만으로 후보에 넣지 않는다."
+    },
+    "scope_exclusions": [
+      {
+        "source_id": "kipa_ip_didimdol",
+        "reason": "사용자 확인: 당사는 특허법인이며 해당 게시판은 수혜기업 대상이므로 모니터링 대상이 아님."
+      }
+    ],
+    "remaining_in_scope_unverified_sources": 40,
+    "mvp_selected_count": 7,
+    "mvp_pending_validation_count": 2,
+    "user_requested_mvp_additions": [
+      {
+        "source_id": "kista_ippro",
+        "url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+        "checked_on": "2026-10-30",
+        "validation": "LIST_DETAIL_VERIFIED_PAGINATION_PENDING"
+      },
+      {
+        "source_id": "ripc_pms",
+        "url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do",
+        "checked_on": "2026-10-30",
+        "validation": "PUBLIC_TENDER_DETAIL_VERIFIED_LIST_PENDING"
+      }
+    ]
+  },
+  "sites": [
+    {
+      "source_id": "khidi_business",
+      "institution": "한국보건산업진흥원",
+      "name": "사업공고",
+      "source_urls": [
+        {
+          "url": "https://www.khidi.or.kr/board?menuId=MENU01108",
+          "references": [
+            "Sheet1!R6C3"
+          ],
+          "original_institution_labels": [
+            "보건산업진흥원"
+          ]
+        },
+        {
+          "url": "https://www.khidi.or.kr/board?menuId=MENU01108&siteId=null",
+          "references": [
+            "Sheet1!R72C3",
+            "Sheet2!R13C1"
+          ],
+          "original_institution_labels": [
+            "한국보건산업진흥원"
+          ]
+        }
+      ],
+      "list_url": "https://www.khidi.or.kr/board?menuId=MENU01108",
+      "detail_url_pattern": "/board/view?menuId=MENU01108&linkId={linkId}",
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "QUERY",
+        "parameter": "pageNum",
+        "example_url": "https://www.khidi.or.kr/board?boardStyle=&categoryId=&continent=&country=&maxIndex=00489508879998&menuId=MENU01108&minIndex=00489499069998&pageNum=2&rowCnt=10&schEndDate=&schStartDate=&schText=&schType=0&upDown=0",
+        "second_page_verified": true,
+        "notes": "목록 링크를 따라 pageNum=2 조회 성공."
+      },
+      "detail": {
+        "example_url": "https://www.khidi.or.kr/board/view?boardStyle=&categoryId=&continent=&country=&linkId=48951946&maxIndex=00489508879998&menuId=MENU01108&minIndex=00489499069998&no1=9999999998&pageNum=1&rowCnt=10&schEndDate=&schStartDate=&schText=&schType=0",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "표본 상세에서 지원대상/지원규모/신청기간을 웹 텍스트로 확인. 첨부 열지 않음."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "비로그인 웹 조회로 목록/상세/2페이지 열람."
+      },
+      "anti_bot": {
+        "detected": false,
+        "notes": "표본 응답에서 CAPTCHA/차단 화면 미관찰. 장기 수집 허용 여부는 별도."
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "LOW",
+        "notes": "표본 상세에서 지원대상/지원규모/신청기간을 웹 텍스트로 확인. 첨부 열지 않음."
+      },
+      "audit_status": "LIST_DETAIL_PAGINATION_VERIFIED",
+      "checked_on": "2026-10-30",
+      "blocker": null,
+      "mvp_priority": 1,
+      "mvp_notes": "공개 목록/상세/페이지 이동 확인, 웹 본문에 관련성 판단용 설명 제공.",
+      "evidence": [
+        {
+          "url": "https://www.khidi.or.kr/board?menuId=MENU01108",
+          "method": "web.open",
+          "result": "text/html 목록: 931건, 페이지 1/94, 제목/등록일과 상세 링크 확인."
+        },
+        {
+          "url": "https://www.khidi.or.kr/board/view?boardStyle=&categoryId=&continent=&country=&linkId=48951946&maxIndex=00489508879998&menuId=MENU01108&minIndex=00489499069998&no1=9999999998&pageNum=1&rowCnt=10&schEndDate=&schStartDate=&schText=&schType=0",
+          "method": "web.open/click",
+          "result": "상세 웹 본문과 첨부 링크가 분리되어 있음."
+        },
+        {
+          "url": "https://www.khidi.or.kr/board?boardStyle=&categoryId=&continent=&country=&maxIndex=00489508879998&menuId=MENU01108&minIndex=00489499069998&pageNum=2&rowCnt=10&schEndDate=&schStartDate=&schText=&schType=0&upDown=0",
+          "method": "web.open/click",
+          "result": "2페이지 응답 확인."
+        },
+        {
+          "url": "https://www.khidi.or.kr/board?menuId=MENU01108&siteId=null",
+          "method": "web.open",
+          "result": "동일 MENU01108 사업공고 HTML, 489줄. 원본 URL과 같은 게시판 제목/목록 구조."
+        }
+      ],
+      "merged_aliases": [
+        "khidi_business_alias"
+      ],
+      "mvp_status": "SELECTED_IMPLEMENTABLE",
+      "strategy_decision": "MVP_READY",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "목록/상세/페이지 요청 실패 또는 실제 응답 변경 시",
+        "url": "https://www.khidi.or.kr/board?menuId=MENU01108",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "koat_bid",
+      "institution": "한국농업기술진흥원",
+      "name": "입찰정보",
+      "source_urls": [
+        {
+          "url": "https://www.koat.or.kr/board/bid/list.do",
+          "references": [
+            "Sheet1!R11C3"
+          ],
+          "original_institution_labels": [
+            "한국농업기술진흥원"
+          ]
+        }
+      ],
+      "list_url": "https://www.koat.or.kr/board/bid/list.do",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UI_NUMERIC_UNRESOLVED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "1~10/다음/마지막 UI 관찰. 실제 이동 요청 미검증."
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "목록은 비로그인 열람; 상세 미확인."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "상세 링크/페이지 이동 실제 요청 인자 미확인."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "상세 링크/페이지 이동 실제 요청 인자 미확인.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.koat.or.kr/board/bid/list.do",
+          "method": "web.open",
+          "result": "text/html 목록 121건, 제목/날짜/첨부 표시. 제목 링크가 도구에서 동일 목록으로 해석됨."
+        },
+        {
+          "url": "https://www.koat.or.kr/board/bid/list.do",
+          "method": "web.open/click",
+          "result": "제목 링크 클릭 결과 동일 목록. 상세 성공으로 집계하지 않음."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "상세 링크/페이지 이동 실제 요청 인자 미확인.",
+        "url": "https://www.koat.or.kr/board/bid/list.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "ipnavi_legacy_board",
+      "institution": "한국지식재산보호원",
+      "name": "IP-NAVI 기존 게시판",
+      "source_urls": [
+        {
+          "url": "https://www.ip-navi.or.kr/ipnavi/board/boardList.navi?boardCode=B00013",
+          "references": [
+            "Sheet1!R12C3"
+          ],
+          "original_institution_labels": [
+            "한국지식재산보호원"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "EMPTY_LIST_SHELL",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "게시판 코드 유효성/실제 데이터 로딩 경로 미확인. 빈 행만으로 DYNAMIC 판단 불가."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "게시판 코드 유효성/실제 데이터 로딩 경로 미확인. 빈 행만으로 DYNAMIC 판단 불가.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.ip-navi.or.kr/ipnavi/board/boardList.navi?boardCode=B00013",
+          "method": "web.open",
+          "result": "text/html 응답에 메뉴/검색/표 헤더만 보이고 목록 행과 총 건수가 비어 있음."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "게시판 코드 유효성/실제 데이터 로딩 경로 미확인. 빈 행만으로 DYNAMIC 판단 불가.",
+        "url": "https://www.ip-navi.or.kr/ipnavi/board/boardList.navi?boardCode=B00013",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "ripc_pms",
+      "institution": "한국발명진흥회",
+      "name": "지역지식재산센터 PMS 협력기관 입찰공고",
+      "source_urls": [
+        {
+          "url": "https://pms.ripc.org/",
+          "references": [
+            "Sheet1!R21C3",
+            "Sheet2!R18C1"
+          ],
+          "original_institution_labels": [
+            "한국발명진흥회"
+          ]
+        }
+      ],
+      "list_url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do",
+      "detail_url_pattern": "/pms/biz/partner/tenderNotice/info.do?bizYear={year}&noticeSeq={id}",
+      "enabled": false,
+      "access_status": "PUBLIC_TENDER_DETAIL_EMPTY_LIST",
+      "content_type": "SPECIAL",
+      "classification_notes": "협력기관 입찰 목록 응답은 검색/표 헤더만 반환. 표본 상세는 실질 HTML 본문 확인. 목록 로딩/탐색 방식 미확정으로 SPECIAL 유지. JS 필수나 로그인 필수로 단정하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "협력기관 입찰 목록의 공고 행과 페이지 UI/요청을 확보하지 못함. 2페이지 미검증. 임의 ID 순회나 요청 인자 추측을 하지 않음."
+      },
+      "detail": {
+        "example_url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/info.do?bizYear=2026&noticeSeq=553",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "공개 표본에서 공고명/기간/예산/용역 내용/변리업체 참여 조건과 첨부 링크 확인. 첨부 자체는 열지 않음. 기존 기업회원 지원공고와 다른 협력기관 입찰 상세."
+      },
+      "html": {
+        "list_visible_in_web_html": false,
+        "local_http_verified": false,
+        "notes": "web.open text/html 변환 응답 기준. 목록은 공고 행 미확보, 표본 상세 본문은 확인. 로컬 urllib는 DNS getaddrinfo failed로 원문 재현 불가."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "목록 화면과 표본 상세는 비로그인 조회. 목록 데이터의 인증 필요 여부는 미확인. 표본 본문에 제안서 제출은 협력기관 회원가입 필수라고 명시되어 있으나 열람 인증과 구분."
+      },
+      "anti_bot": {
+        "detected": false,
+        "notes": "조회한 목록 화면/표본 상세에서 CAPTCHA나 차단 화면 미관찰. 빈 목록을 봇 차단으로 해석하지 않음."
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "MVP 수집 대상으로 포함하되 자동수집 구현 경로는 미확정. 현재 MANUAL_ONLY로 공식 목록/원문 확인. 실제 목록 데이터 및 페이지 요청 검증 후 REQUESTS/API/PLAYWRIGHT 중 근거 있는 전략으로 변경. scraper 구현/인증 우회 없음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "특허법인 업무 적합성과 공개 입찰 상세는 확인. 목록 공고 탐색/페이지 이동/데이터 로딩 방식 및 로컬 HTTP 재현 미확인."
+      },
+      "audit_status": "PUBLIC_TENDER_DETAIL_VERIFIED_LIST_PENDING",
+      "checked_on": "2026-10-30",
+      "blocker": "자동수집 도입 전 확인 필요: 입찰 목록 공고 행/탐색 경로, 페이지 이동, 데이터 요청 방식. 목록 화면만으로 로그인 또는 JS 필수를 판정할 수 없음.",
+      "mvp_priority": 7,
+      "mvp_notes": "특허법인 업무와 맞는 협력기관 입찰공고로 MVP 대상에 추가. 자동수집 구현 가능 검증 완료 수에는 포함하지 않으며 목록/페이지 검증 전 수동 확인.",
+      "evidence": [
+        {
+          "url": "https://pms.ripc.org/",
+          "method": "web.open",
+          "result": "text/html 응답이나 읽을 수 있는 본문 0줄."
+        },
+        {
+          "url": "https://pms.ripc.org/pms/biz/applicant/notice/info.do?bizYear=2026&noticeSeq=4963",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "공개 상세 HTML 텍스트 확인. 지원대상/기간/사업설명 존재."
+        },
+        {
+          "url": "https://pms.ripc.org/pms/biz/applicant/notice/list.do",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "상세 메뉴의 목록 링크에서 세션 식별자를 제거해 조회. 51줄 응답, 검색/표 헤더만 보이며 공고 행 미확보."
+        },
+        {
+          "url": "https://pms.ripc.org/pms/biz/applicant/board/viewBoardList.do?boardCategoryCode=BD10000",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "48줄 응답. 검색/목록 틀만 보이며 공고 행 미확보."
+        },
+        {
+          "url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "result": "협력기관 > 입찰사업 공고 화면, 검색/공고번호/센터/사업형태/공고제목/기간/배정예산/상태 헤더 확인. 공고 행/페이지 이동은 응답에 없음. 로그인 리다이렉트나 CAPTCHA는 관찰되지 않음."
+        },
+        {
+          "url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/info.do?bizYear=2026&noticeSeq=553",
+          "method": "web.search + web.open",
+          "checked_on": "2026-10-30",
+          "result": "검색에서 찾은 실제 협력기관 상세를 직접 열람. 경기센터 소상공인 IP출원지원 상표(B과제), 공고기간/예산/용역 내용 및 변리업체 참여 조건이 공개 HTML 텍스트에 존재. 첨부 링크는 있으나 파일 자체는 열지 않음. 수집본/캐시 포함."
+        },
+        {
+          "url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do",
+          "method": "local urllib.request.urlopen",
+          "checked_on": "2026-10-30",
+          "result": "URLError: getaddrinfo failed. 조사 환경 DNS 제약이며 대상 사이트 장애/인증/JS 필수 근거로 사용하지 않음."
+        }
+      ],
+      "mvp_status": "SELECTED_VALIDATION_PENDING",
+      "strategy_decision": "MVP_SELECTED_LIST_PAGINATION_PENDING",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "목록 데이터/페이지 탐색 방식 확인 전 또는 자동수집 실패 시",
+        "url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      },
+      "followup_checked_on": "2026-10-30",
+      "previous_assessment": {
+        "scope": "이전 기업회원 지원사업 공고 조사. 현재 협력기관 입찰 게시판의 근거와 구분.",
+        "list_url": "https://pms.ripc.org/pms/biz/applicant/notice/list.do",
+        "detail_url_pattern": "/pms/biz/applicant/notice/info.do?bizYear={year}&noticeSeq={id}",
+        "detail": {
+          "example_url": "https://pms.ripc.org/pms/biz/applicant/notice/info.do?bizYear=2026&noticeSeq=4963",
+          "reachable_without_login": true,
+          "body_available_in_html": true,
+          "notes": "공개 표본 상세에서 사업개요/지원대상/기간/지원내용 텍스트 확인. 목록의 공고 행은 확보하지 못함."
+        },
+        "audit_status": "LIMITED"
+      },
+      "user_selected_urls": [
+        {
+          "url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do",
+          "source": "사용자 MVP 추가 요청",
+          "selected_on": "2026-10-30"
+        }
+      ],
+      "monitoring_scope": "INCLUDED",
+      "scope_evidence": "사용자 지정 협력기관 입찰 게시판. 공개 표본 noticeSeq=553에서 상표출원 지원사업(협력기관), 직접 상표출원 대리 가능한 변리업체 및 단독입찰 가능 조건 확인. 개별 공고별 자격 판단은 별도."
+    },
+    {
+      "source_id": "kipa_bid",
+      "institution": "한국발명진흥회",
+      "name": "입찰공고",
+      "source_urls": [
+        {
+          "url": "https://www.kipa.org/kipa/notice/kw_0402.jsp",
+          "references": [
+            "Sheet1!R24C3",
+            "Sheet2!R17C1"
+          ],
+          "original_institution_labels": [
+            "한국발명진흥회"
+          ]
+        }
+      ],
+      "list_url": "https://www.kipa.org/kipa/notice/kw_0402.jsp",
+      "detail_url_pattern": "/kipa/notice/kw_0402.jsp?mode=view&article_no={id}&board_no=15",
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "OFFSET",
+        "parameter": "pager.offset",
+        "example_url": "https://www.kipa.org/kipa/notice/kw_0402.jsp?board_no=15&mode=list&pager.offset=10",
+        "second_page_verified": true,
+        "notes": "목록의 2페이지 링크가 offset=10이며 응답 열람 성공."
+      },
+      "detail": {
+        "example_url": "https://www.kipa.org/kipa/notice/kw_0402.jsp?article_no=134746&board_no=15&board_wrapper=/kipa/notice/kw_0402.jsp&mode=view&pager.offset=0",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "표본 상세는 용역명/나라장터 안내 중심으로 짧음. 핵심 조건은 외부/첨부에 있어 본문만 판별 제약."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "목록/상세/2페이지 비로그인 열람."
+      },
+      "anti_bot": {
+        "detected": false,
+        "notes": "표본 응답에서 CAPTCHA/차단 화면 미관찰."
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "표본 상세는 용역명/나라장터 안내 중심으로 짧음. 핵심 조건은 외부/첨부에 있어 본문만 판별 제약."
+      },
+      "audit_status": "LIST_DETAIL_PAGINATION_VERIFIED",
+      "checked_on": "2026-10-30",
+      "blocker": null,
+      "mvp_priority": 5,
+      "mvp_notes": "기존 검증된 공개 목록·article_no 상세·pager.offset=10 페이지 이동을 재사용. 제목/등록일/짧은 웹 설명 수집 가능. 상세 자격/과업 내용은 외부·첨부에 있어 자동 판정 범위를 제한해야 함.",
+      "evidence": [
+        {
+          "url": "https://www.kipa.org/kipa/notice/kw_0402.jsp",
+          "method": "web.open",
+          "result": "text/html 목록 2081건, 페이지 1/209. 상세와 pager.offset=10 조회 성공."
+        },
+        {
+          "url": "https://www.kipa.org/kipa/notice/kw_0402.jsp?article_no=134746&board_no=15&board_wrapper=/kipa/notice/kw_0402.jsp&mode=view&pager.offset=0",
+          "method": "web.open/click",
+          "result": "상세에 짧은 설명, 나라장터 링크, HWP 첨부 링크."
+        },
+        {
+          "url": "https://www.kipa.org/kipa/notice/kw_0402.jsp?board_no=15&mode=list&pager.offset=10",
+          "method": "web.open/click",
+          "result": "2페이지 조회 성공."
+        }
+      ],
+      "mvp_status": "SELECTED_IMPLEMENTABLE",
+      "strategy_decision": "MVP_READY",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "목록/상세/페이지 요청 실패 또는 실제 응답 변경 시",
+        "url": "https://www.kipa.org/kipa/notice/kw_0402.jsp",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kipa_ip_didimdol",
+      "institution": "한국발명진흥회",
+      "name": "IP 디딤돌 사업공고",
+      "source_urls": [
+        {
+          "url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp",
+          "references": [
+            "Sheet1!R25C3"
+          ],
+          "original_institution_labels": [
+            "-"
+          ]
+        }
+      ],
+      "list_url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp",
+      "detail_url_pattern": "/kipa/ip001/kw_business_1602.jsp?mode=view&article_no={id}&board_no=28&default:category_id=239",
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "OFFSET",
+        "parameter": "pager.offset",
+        "example_url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp?board_no=28&default:category_id=239&mode=list&pager.offset=10",
+        "second_page_verified": false,
+        "notes": "pager.offset=10 링크와 파라미터 축약 URL 2종 재확인 실패. 페이지 이동 성공으로 판정하지 않음."
+      },
+      "detail": {
+        "example_url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp?article_no=122253&board_no=28&board_wrapper=/kipa/ip001/kw_business_1602.jsp&default:category_id=239&mode=view&pager.offset=0",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "표본 상세에 지원대상/지원내용/신청방법을 텍스트로 확인."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "목록과 표본 상세는 비로그인 조회."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "REQUESTS는 과거 기술 조사상의 수집 가능 전략만 의미한다. 업무 범위에서 제외되었으므로 수집 구현/페이지 추가 검증을 계획하지 않는다.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "2페이지 응답 재현 필요."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": null,
+      "mvp_priority": null,
+      "mvp_notes": "예비 후보에서도 제외. 원본 URL coverage와 과거 기술 조사 이력만 보존.",
+      "evidence": [
+        {
+          "url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp",
+          "method": "web.open",
+          "result": "원본 기관 셀은 대시(-). 응답의 기관명과 IP 디딤돌 메뉴로 보완. 목록 23건/3페이지."
+        },
+        {
+          "url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp?article_no=122253&board_no=28&board_wrapper=/kipa/ip001/kw_business_1602.jsp&default:category_id=239&mode=view&pager.offset=0",
+          "method": "web.open/click",
+          "result": "2026 IP 디딤돌 사업 설명 텍스트 확인."
+        },
+        {
+          "url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp?board_no=28&default:category_id=239&mode=list&pager.offset=10",
+          "method": "web.open/click",
+          "result": "도구 Cache miss. 성공으로 집계하지 않음."
+        },
+        {
+          "url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "보완 조사: 목록 HTML 응답과 23건/3페이지 표시 확인. 상세의 기존 확인 근거는 유지."
+        },
+        {
+          "url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp?board_no=28&default:category_id=239&mode=list&pager.offset=10",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "보완 조사: Cache miss. 목록 페이지 이동 미검증."
+        },
+        {
+          "url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp?pager.offset=10",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "보완 조사: 도구 접근 불가. 우회/추가 반복 없이 보류."
+        },
+        {
+          "url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp?board_no=28&mode=list&pager.offset=10",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "보완 조사: 도구 접근 불가. 우회/추가 반복 없이 보류."
+        }
+      ],
+      "mvp_status": "EXCLUDED_BUSINESS_SCOPE",
+      "strategy_decision": "EXCLUDED_BY_BUSINESS_SCOPE",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "원본 추적용 기록. 현재 모니터링 범위 제외.",
+        "url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp",
+        "action": "모니터링/자동수집/예비 후보에 포함하지 않는다. 사용자가 범위를 다시 변경할 때만 검토한다."
+      },
+      "followup_checked_on": "2026-10-30",
+      "monitoring_scope": "EXCLUDED",
+      "scope_exclusion_reason": "사용자 확인: 당사는 특허법인이며 해당 게시판은 수혜기업 대상이므로 모니터링 대상이 아님.",
+      "scope_evidence": "사용자 직접 확인"
+    },
+    {
+      "source_id": "exportvoucher_notice",
+      "institution": "수출바우처",
+      "name": "수출지원기반활용사업 공지사항",
+      "source_urls": [
+        {
+          "url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
+          "references": [
+            "Sheet1!R27C3"
+          ],
+          "original_institution_labels": [
+            "수출바우처"
+          ]
+        },
+        {
+          "url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1&active_menu_cd=EZ005004000",
+          "references": [
+            "Sheet2!R26C1"
+          ],
+          "original_institution_labels": []
+        }
+      ],
+      "list_url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UI_NUMERIC_UNRESOLVED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "페이지 UI 확인, 인자/전송방식 미확인."
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "목록 비로그인 조회. 로그인 메뉴 자체는 로그인 필수 근거가 아님."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "상세 URL/본문 및 페이지 요청 검증 필요."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "상세 URL/본문 및 페이지 요청 검증 필요.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
+          "method": "web.open",
+          "result": "text/html 목록 905건과 페이지 1~10/다음 표시. 제목에 이동 가능한 링크가 노출되지 않음."
+        },
+        {
+          "url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1&active_menu_cd=EZ005004000",
+          "method": "web.open",
+          "result": "active_menu_cd 변형에서 동일 공지사항 905건/제목/페이지 구조 확인."
+        }
+      ],
+      "merged_aliases": [
+        "exportvoucher_notice_alias"
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "상세 URL/본문 및 페이지 요청 검증 필요.",
+        "url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "mssmiv_notice",
+      "institution": "제조중소기업혁신바우처",
+      "name": "중소기업혁신바우처 공지사항",
+      "source_urls": [
+        {
+          "url": "https://www.mssmiv.com/portal/board/BoardList?bbsId=1",
+          "references": [
+            "Sheet1!R29C3",
+            "Sheet2!R21C1"
+          ],
+          "original_institution_labels": [
+            "제조중소기업혁신바우처"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "QUEUE_PAGE",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "접속 대기열은 관찰했으나 CAPTCHA나 봇 차단으로 확정하지 않음."
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "대기열 때문에 실제 목록/상세 미확인."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "대기열 때문에 실제 목록/상세 미확인.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.mssmiv.com/portal/board/BoardList?bbsId=1",
+          "method": "web.open",
+          "result": "요청이 /_queue/index.html 대기열로 이동하고 순차 접속 안내를 표시."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "대기열 때문에 실제 목록/상세 미확인.",
+        "url": "https://www.mssmiv.com/portal/board/BoardList?bbsId=1",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kista_biz_portal",
+      "institution": "한국특허전략개발원",
+      "name": "IP통합지원포털",
+      "source_urls": [
+        {
+          "url": "https://biz.kista.re.kr/main.do",
+          "references": [
+            "Sheet1!R31C3"
+          ],
+          "original_institution_labels": [
+            "한국특허전략개발원"
+          ]
+        }
+      ],
+      "list_url": "https://biz.kista.re.kr/main.do",
+      "detail_url_pattern": "/ippro/com/iprndMain/selectBusinessAnnounceView.do?annId={id}&annYy={year}&bbsType={type}",
+      "enabled": false,
+      "access_status": "READABLE_PORTAL",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "PORTAL_PREVIEW",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "포털은 미리보기. 사업별 전체 목록 페이지 이동은 미확인."
+      },
+      "detail": {
+        "example_url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceView.do?DepthCode1=3&DepthCode2=1&annId=3&annYy=2026&bbsType=ac",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "표본 상세는 공고명/접수기간/사업구분 메타데이터. 대상과제는 비어 있음."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "표본 공고 상세는 로그인 없이 열림. 사업 신청은 별도."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "사업별 공고 전체 범위와 페이지 이동 미확정."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "사업별 공고 전체 범위와 페이지 이동 미확정.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://biz.kista.re.kr/main.do",
+          "method": "web.open",
+          "result": "text/html 포털에 여러 사업 공고/기간과 상세 링크를 제공. 공개 상세도 확인."
+        },
+        {
+          "url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceView.do?DepthCode1=3&DepthCode2=1&annId=3&annYy=2026&bbsType=ac",
+          "method": "web.open/click",
+          "result": "협력기관 풀 공고명과 접수기간 열람."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "사업별 공고 전체 범위와 페이지 이동 미확정.",
+        "url": "https://biz.kista.re.kr/main.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kista_business_board",
+      "institution": "한국특허전략개발원",
+      "name": "사업정보 게시판",
+      "source_urls": [
+        {
+          "url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000382",
+          "references": [
+            "Sheet1!R31C3"
+          ],
+          "original_institution_labels": [
+            "한국특허전략개발원"
+          ]
+        }
+      ],
+      "list_url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000382",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "QUERY_CONTEXT_REQUIRED",
+        "parameter": "pageIndex",
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "2 링크는 /user/board.do?pageIndex=2로 해석되어 메인으로 이동. bbsId 보존 필요성만 관찰, 동작 미검증."
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "상세 ID/요청 방식과 bbsId 유지 페이지 요청 검증 필요."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "상세 ID/요청 방식과 bbsId 유지 페이지 요청 검증 필요.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000382",
+          "method": "web.open",
+          "result": "text/html 목록 859건. 표에 제목/등록일이 보이나 상세 링크가 도구에 노출되지 않음."
+        },
+        {
+          "url": "https://www.kista.re.kr/user/board.do?pageIndex=2",
+          "method": "web.open/click",
+          "result": "메인 /main.do로 이동, 유효한 게시판 2페이지가 아님."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "상세 ID/요청 방식과 bbsId 유지 페이지 요청 검증 필요.",
+        "url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000382",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kista_bid_board",
+      "institution": "한국특허전략개발원",
+      "name": "입찰공고 게시판",
+      "source_urls": [
+        {
+          "url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442",
+          "references": [
+            "Sheet1!R31C3",
+            "Sheet2!R25C1"
+          ],
+          "original_institution_labels": [
+            "한국특허전략개발원"
+          ]
+        }
+      ],
+      "list_url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "QUERY_CONTEXT_REQUIRED",
+        "parameter": "pageIndex",
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "2 링크 조회에서 bbsId 없이 메인으로 이동. 1/5 표시는 전체 페이지수로 신뢰하지 않음."
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "상세/페이지 요청 컨텍스트 추가 확인 필요."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "상세/페이지 요청 컨텍스트 추가 확인 필요.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442",
+          "method": "web.open",
+          "result": "text/html 목록 1279건. 제목/진행상태가 있으나 상세 URL 미확인."
+        },
+        {
+          "url": "https://www.kista.re.kr/user/board.do?pageIndex=2",
+          "method": "web.open/click",
+          "result": "메인으로 이동."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "상세/페이지 요청 컨텍스트 추가 확인 필요.",
+        "url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kista_ipams",
+      "institution": "한국특허전략개발원",
+      "name": "산업재산진단기관 관리시스템",
+      "source_urls": [
+        {
+          "url": "https://biz.kista.re.kr/ipams/",
+          "references": [
+            "Sheet1!R33C3"
+          ],
+          "original_institution_labels": [
+            "한국특허전략개발원"
+          ]
+        }
+      ],
+      "list_url": "https://biz.kista.re.kr/ipams/",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "READABLE_PORTAL",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "로그인 폼과 공개 미리보기 공존. 공고 열람 로그인 필수 여부 미확인."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "모집공고/공지의 실제 전체 목록, 상세/페이지 이동 미확인."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "모집공고/공지의 실제 전체 목록, 상세/페이지 이동 미확인.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://biz.kista.re.kr/ipams/",
+          "method": "web.open",
+          "result": "원본 /ipams/는 현재 IEPMS 제목과 공개 공지 제목/날짜를 표시. 로그인 폼도 존재."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "모집공고/공지의 실제 전체 목록, 상세/페이지 이동 미확인.",
+        "url": "https://biz.kista.re.kr/ipams/",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kista_ippro",
+      "institution": "한국특허전략개발원",
+      "name": "IP-R&D 협력기관 모집공고",
+      "source_urls": [
+        {
+          "url": "https://biz.kista.re.kr/ippro/uat/uia/egovLoginUsr.do",
+          "references": [
+            "Sheet1!R34C3",
+            "Sheet2!R19C1"
+          ],
+          "original_institution_labels": [
+            "한국특허전략개발원"
+          ]
+        }
+      ],
+      "list_url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+      "detail_url_pattern": "/ippro/com/iprndMain/selectBusinessAnnounceView.do?annId={id}&annYy={year}&bbsType=ac",
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UI_NUMERIC_UNRESOLVED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "숫자 2~20 UI 확인. web 도구에서 2 링크 클릭은 같은 URL/같은 첫 페이지 목록으로 반환되어 실제 2페이지 이동은 미확인. 요청 인자를 추측하지 않음."
+      },
+      "detail": {
+        "example_url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceView.do?DepthCode1=3&DepthCode2=1&annId=3&annYy=2026&bbsType=ac",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "협력기관 POOL 모집 표본의 공고명/담당부서/연도/접수기간을 비로그인 HTML에서 확인. 상세 설명 및 첨부 내용은 확보하지 못했으며 신청 자격은 추론하지 않음."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "사용자 지정 협력기관 목록과 표본 상세는 로그인 없이 조회됨. 신청 절차의 인증 여부와 구분."
+      },
+      "anti_bot": {
+        "detected": false,
+        "notes": "이번 목록/표본 상세 응답에서 CAPTCHA/차단 화면 미관찰. 장기 운영 안정성은 미검증."
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "사용자 지정 MVP로 포함. 공개 목록/상세 HTML 조회를 먼저 재현하는 REQUESTS 전략. 페이지 이동 요청과 상세 설명 범위는 도입 시 검증하며 불확실한 경우 공식 페이지 수동 확인.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "목록/표본 상세 메타데이터 확인. 2페이지 이동 요청과 상세 설명/첨부 범위, 로컬 HTTP 재현 미확인."
+      },
+      "audit_status": "LIST_DETAIL_VERIFIED_PAGINATION_PENDING",
+      "checked_on": "2026-10-30",
+      "blocker": "2페이지 이동 요청 미확인. 목록/표본 상세는 공개 확인했으나 전체 설명/첨부 내용 및 로컬 HTTP 재현은 미검증. MVP 포함을 막는 조건은 아님.",
+      "mvp_priority": 6,
+      "mvp_notes": "사용자 직접 지정에 따라 협력기관 모집공고를 MVP에 추가. 기존 구현 경로 검증 완료 5개와 구분하여 페이지 이동 확인 대기로 기록.",
+      "evidence": [
+        {
+          "url": "https://biz.kista.re.kr/ippro/uat/uia/egovLoginUsr.do",
+          "method": "web.open",
+          "result": "로그인 경로지만 text/html에 사업공고/접수기간을 공개 표시. 포털에서 같은 시스템 공고 상세 열람."
+        },
+        {
+          "url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceView.do?DepthCode1=3&DepthCode2=1&annId=3&annYy=2026&bbsType=ac",
+          "method": "web.open/click",
+          "result": "로그인 없이 상세 메타데이터 열림."
+        },
+        {
+          "url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "result": "text/html 목록: 총 773건, 첫 페이지 20개 행과 협력기관 POOL/협력기관 후보군 모집 제목 및 접수기간 확인. 수집본/캐시 포함."
+        },
+        {
+          "url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceView.do?DepthCode1=3&DepthCode2=1&annId=3&annYy=2026&bbsType=ac",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "result": "로그인 없이 협력기관 POOL 모집 공고명/담당/연도/접수기간 확인. 상세 설명 및 첨부 내용 확보로 간주하지 않음."
+        },
+        {
+          "url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+          "method": "web.click (2 링크)",
+          "checked_on": "2026-10-30",
+          "result": "같은 URL 및 첫 페이지 목록 반환. 실제 2페이지 이동 성공으로 집계하지 않음."
+        }
+      ],
+      "mvp_status": "SELECTED_USER_REQUEST",
+      "strategy_decision": "MVP_SELECTED_PAGINATION_PENDING",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "페이지 이동 재현 실패 또는 상세 설명 부족 시",
+        "url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      },
+      "user_selected_urls": [
+        {
+          "url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+          "source": "사용자 직접 지정",
+          "selected_on": "2026-10-30"
+        }
+      ],
+      "monitoring_scope": "INCLUDED",
+      "scope_evidence": "사용자가 특허법인 업무 대상인 협력기관 모집공고 URL을 MVP에 직접 추가 요청.",
+      "followup_checked_on": "2026-10-30"
+    },
+    {
+      "source_id": "kista_ipas",
+      "institution": "한국특허전략개발원",
+      "name": "국가 R&D 특허동향 심층분석 사업",
+      "source_urls": [
+        {
+          "url": "https://biz.kista.re.kr/ipas/uat/uia/egovLoginUsr.do",
+          "references": [
+            "Sheet1!R37C3"
+          ],
+          "original_institution_labels": [
+            "한국특허전략개발원"
+          ]
+        }
+      ],
+      "list_url": "https://biz.kista.re.kr/ipas/uat/uia/egovLoginUsr.do",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "READABLE_PORTAL",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "공개 미리보기와 로그인 폼 공존. 상세 열람의 로그인 필요 여부 미확인."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "상세/전체 목록/페이지 이동 미확인."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "상세/전체 목록/페이지 이동 미확인.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://biz.kista.re.kr/ipas/uat/uia/egovLoginUsr.do",
+          "method": "web.open",
+          "result": "로그인 URL에서 text/html에 공고 제목/상태/날짜가 보임."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "상세/전체 목록/페이지 이동 미확인.",
+        "url": "https://biz.kista.re.kr/ipas/uat/uia/egovLoginUsr.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kabit_home",
+      "institution": "한국BI기술사업화협회",
+      "name": "대표 홈페이지",
+      "source_urls": [
+        {
+          "url": "http://www.kabit.or.kr/",
+          "references": [
+            "Sheet1!R42C3"
+          ],
+          "original_institution_labels": [
+            "한국BI기술사업화협회"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "도구 접근 실패. 사이트 폐쇄/로그인/JS 여부로 해석하지 않음."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "도구 접근 실패. 사이트 폐쇄/로그인/JS 여부로 해석하지 않음.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "http://www.kabit.or.kr/",
+          "method": "web.open",
+          "result": "원본 HTTP 조회와 HTTPS 재확인 모두 웹 도구 Timeout."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "도구 접근 실패. 사이트 폐쇄/로그인/JS 여부로 해석하지 않음.",
+        "url": "http://www.kabit.or.kr/",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kautm_home",
+      "institution": "한국대학기술이전협회",
+      "name": "대표 홈페이지",
+      "source_urls": [
+        {
+          "url": "http://www.kautm.net/",
+          "references": [
+            "Sheet1!R43C3"
+          ],
+          "original_institution_labels": [
+            "한국대학기술이전협회"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "본문과 목록 경로 확인 불가. 실제 서버 상태와 도구 오류를 구분해야 함."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "본문과 목록 경로 확인 불가. 실제 서버 상태와 도구 오류를 구분해야 함.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "http://www.kautm.net/",
+          "method": "web.open",
+          "result": "원본 HTTP 요청의 HTTPS 조회에서 웹 도구 502 Bad Gateway."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "본문과 목록 경로 확인 불가. 실제 서버 상태와 도구 오류를 구분해야 함.",
+        "url": "http://www.kautm.net/",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "ketep_home",
+      "institution": "한국에너지기술평가원",
+      "name": "대표 홈페이지",
+      "source_urls": [
+        {
+          "url": "https://www.ketep.re.kr/",
+          "references": [
+            "Sheet1!R45C3"
+          ],
+          "original_institution_labels": [
+            "한국에너지기술평가원"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "공개 목록/상세/페이지 이동 미확인."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "공개 목록/상세/페이지 이동 미확인.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.ketep.re.kr/",
+          "method": "web.open",
+          "result": "웹 도구 Timeout. 원본의 별도 입찰 경로도 접근 제한."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "공개 목록/상세/페이지 이동 미확인.",
+        "url": "https://www.ketep.re.kr/",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "gbsa_bid",
+      "institution": "경기도경제과학진흥원",
+      "name": "입찰정보",
+      "source_urls": [
+        {
+          "url": "https://www.gbsa.or.kr/board/bid_info.do",
+          "references": [
+            "Sheet1!R46C3"
+          ],
+          "original_institution_labels": [
+            "경기도경제과학진흥원"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "검색 인덱스는 직접 게시판 조회 성공 증거가 아님. 목록/상세 요청 재확인 필요."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "검색 인덱스는 직접 게시판 조회 성공 증거가 아님. 목록/상세 요청 재확인 필요.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.gbsa.or.kr/board/bid_info.do",
+          "method": "web.open",
+          "result": "원본 게시판과 홈페이지 직접 조회는 웹 도구 Bad Request. 공식 도메인 검색 결과에는 입찰 제목 존재."
+        },
+        {
+          "url": "https://www.gbsa.or.kr/",
+          "method": "web.open/click",
+          "result": "공식 도메인 검색 인덱스에 입찰정보가 있으나 web.open은 Bad Request."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "검색 인덱스는 직접 게시판 조회 성공 증거가 아님. 목록/상세 요청 재확인 필요.",
+        "url": "https://www.gbsa.or.kr/board/bid_info.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kist_general",
+      "institution": "한국과학기술연구원",
+      "name": "일반공지",
+      "source_urls": [
+        {
+          "url": "https://www.kist.re.kr/ko/notice/general-notice.do",
+          "references": [
+            "Sheet1!R47C3"
+          ],
+          "original_institution_labels": [
+            "한국과학기술연구원"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "원본 게시판 접근 검증 필요."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "원본 게시판 접근 검증 필요.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.kist.re.kr/ko/notice/general-notice.do",
+          "method": "web.open",
+          "result": "원본은 웹 도구 Bad Request. mode=list 추가 조회도 도구 접근 불가."
+        },
+        {
+          "url": "https://www.kist.re.kr/ko/notice/general-notice.do?mode=list",
+          "method": "web.open/click",
+          "result": "웹 도구 접근 불가."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "원본 게시판 접근 검증 필요.",
+        "url": "https://www.kist.re.kr/ko/notice/general-notice.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kfrm_home",
+      "institution": "범부처재생의료기술개발사업단",
+      "name": "대표 홈페이지",
+      "source_urls": [
+        {
+          "url": "http://www.kfrm.org/doc/html/main/main.asp",
+          "references": [
+            "Sheet1!R48C3",
+            "Sheet2!R11C1"
+          ],
+          "original_institution_labels": [
+            "범부처재생의료기술개발사업단"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "원본 및 대체 루트에서 목록 접근 불가."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "원본 및 대체 루트에서 목록 접근 불가.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "http://www.kfrm.org/doc/html/main/main.asp",
+          "method": "web.open",
+          "result": "원본 경로와 도메인 루트 재조회 모두 웹 도구 502 Bad Gateway."
+        },
+        {
+          "url": "http://www.kfrm.org/",
+          "method": "web.open/click",
+          "result": "HTTPS 조회로 도구 502."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "원본 및 대체 루트에서 목록 접근 불가.",
+        "url": "http://www.kfrm.org/doc/html/main/main.asp",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "yongin_support",
+      "institution": "용인기업지원시스템",
+      "name": "지원사업 공고",
+      "source_urls": [
+        {
+          "url": "https://ybs.ypa.or.kr/portal.do",
+          "references": [
+            "Sheet1!R49C3",
+            "Sheet2!R10C1"
+          ],
+          "original_institution_labels": [
+            "용인기업지원시스템"
+          ]
+        }
+      ],
+      "list_url": "https://ybs.ypa.or.kr/application.do",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "ALTERNATIVE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UI_UNRESOLVED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "로그인 안내는 있으나 목록은 공개. 상세/신청은 구분 필요."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "상세 URL 및 페이지 이동 요청 미확인."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "상세 URL 및 페이지 이동 요청 미확인.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://ybs.ypa.or.kr/portal.do",
+          "method": "web.open",
+          "result": "포털 공개 사업 제목/기간 확인. 더보기에서 /application.do 목록 398건 확인."
+        },
+        {
+          "url": "https://ybs.ypa.or.kr/application.do",
+          "method": "web.open/click",
+          "result": "지원사업 제목/기간 목록 398건 열람."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "상세 URL 및 페이지 이동 요청 미확인.",
+        "url": "https://ybs.ypa.or.kr/application.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kaips_ip_business",
+      "institution": "한국지식재산서비스협회",
+      "name": "IP사업 게시판 기존 경로",
+      "source_urls": [
+        {
+          "url": "http://www.kaips.or.kr/bbs/kaips_12",
+          "references": [
+            "Sheet1!R50C3"
+          ],
+          "original_institution_labels": [
+            "한국지식재산서비스협회"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "원본 목록 접근 실패. 별도 Sheet2 경로도 Timeout."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "원본 목록 접근 실패. 별도 Sheet2 경로도 Timeout.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "http://www.kaips.or.kr/bbs/kaips_12",
+          "method": "web.open",
+          "result": "원본 HTTP의 HTTPS 조회에서 웹 도구 502 Bad Gateway."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "원본 목록 접근 실패. 별도 Sheet2 경로도 Timeout.",
+        "url": "http://www.kaips.or.kr/bbs/kaips_12",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "smtech_announcements",
+      "institution": "중소기업기술개발사업 종합관리시스템",
+      "name": "R&D 사업공고",
+      "source_urls": [
+        {
+          "url": "https://www.smtech.go.kr/front/ifg/no/notice02_intro.do",
+          "references": [
+            "Sheet1!R51C3"
+          ],
+          "original_institution_labels": [
+            "중소기업기술개발사업 종합관리시스템"
+          ]
+        }
+      ],
+      "list_url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do",
+      "detail_url_pattern": "/front/ifg/no/notice02_detail.do?ancmId={id}&aplySn={n}&dtlAncmSn={n}&buclCd={code}",
+      "enabled": false,
+      "access_status": "ALTERNATIVE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UI_NUMERIC_UNRESOLVED",
+        "parameter": "pageIndex",
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "페이지 UI와 상세 ID는 기존 근거 유지. pageIndex=2 및 검색 인자 포함 URL은 재확인 실패; 확인되지 않은 GET/POST 방식을 확정하지 않음."
+      },
+      "detail": {
+        "example_url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?ancmId=S02881&aplySn=1&buclCd=S9121&buclYy=&dtlAncmSn=1&pageIndex=1&schdSe=MO5005&searchCondition=&searchKeyword=",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "표본 수출지원프로그램 상세에서 사업 설명/시작일/종료일 확인. 세부 조건은 첨부 참조."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "로그인 안내 모달 텍스트와 별개로 표본 공고 목록/상세 비로그인 조회 가능."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "페이지 이동 요청 방식과 세션 없는 URL 재현 검증 필요."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "보완 조사에서도 pageIndex=2 단독/검색 인자 포함 URL 모두 도구 접근 불가. 정확한 페이지 요청의 메서드/필터/세션 요구 미확정. 최종 MVP 제외.",
+      "mvp_priority": null,
+      "mvp_notes": "기존 공개 목록/상세는 확인됨. 페이지 요청 미검증으로 최종 MVP 제외; 예비 후보.",
+      "evidence": [
+        {
+          "url": "https://www.smtech.go.kr/front/ifg/no/notice02_intro.do",
+          "method": "web.open",
+          "result": "원본은 연간 일정표. /notice02_list.do에서 공고/접수기간 목록, 표본 상세 웹 본문 확인."
+        },
+        {
+          "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do",
+          "method": "web.open/click",
+          "result": "공고 목록 HTML 텍스트 확인."
+        },
+        {
+          "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?ancmId=S02881&aplySn=1&buclCd=S9121&buclYy=&dtlAncmSn=1&pageIndex=1&schdSe=MO5005&searchCondition=&searchKeyword=",
+          "method": "web.open/click",
+          "result": "URL 내 세션 식별자를 제외하고 공개 상세 열람 성공."
+        },
+        {
+          "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do?pageIndex=2",
+          "method": "web.open/click",
+          "result": "도구 접근 불가. 페이지 이동 성공으로 집계하지 않음."
+        },
+        {
+          "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "보완 조사: 목록 text/html 응답 열림. 상세는 기존 공개 표본 근거 유지."
+        },
+        {
+          "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do?pageIndex=2",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "보완 조사: 도구 접근 불가. 페이지 이동 성공으로 집계하지 않음."
+        },
+        {
+          "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do?pageIndex=2&searchCondition=&searchKeyword=",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "보완 조사: 도구 접근 불가. 페이지 이동 성공으로 집계하지 않음."
+        }
+      ],
+      "mvp_status": "RESERVE_NOT_VERIFIED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "보완 조사에서도 pageIndex=2 단독/검색 인자 포함 URL 모두 도구 접근 불가. 정확한 페이지 요청의 메서드/필터/세션 요구 미확정. 최종 MVP 제외.",
+        "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      },
+      "followup_checked_on": "2026-10-30"
+    },
+    {
+      "source_id": "iris_announcements",
+      "institution": "범부처통합연구지원시스템",
+      "name": "IRIS 사업공고",
+      "source_urls": [
+        {
+          "url": "https://www.iris.go.kr/main.do",
+          "references": [
+            "Sheet1!R52C3",
+            "Sheet2!R16C1"
+          ],
+          "original_institution_labels": [
+            "범부처통합연구지원시스템"
+          ]
+        }
+      ],
+      "list_url": "https://www.iris.go.kr/contents/retrieveBsnsAncmBtinSituListView.do",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "ALTERNATIVE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UI_UNRESOLVED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "사업공고 목록은 공개. 연구업무 로그인과 분리."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "상세 식별자/클릭 요청 및 페이지 이동 미확인."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "상세 식별자/클릭 요청 및 페이지 이동 미확인.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.iris.go.kr/main.do",
+          "method": "web.open",
+          "result": "메인 사업공고 링크에서 공개 목록 /contents/retrieveBsnsAncmBtinSituListView.do 확인. 17건/2페이지."
+        },
+        {
+          "url": "https://www.iris.go.kr/contents/retrieveBsnsAncmBtinSituListView.do",
+          "method": "web.open/click",
+          "result": "제목/공고일/공고번호 및 1/2 페이지 표시."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "상세 식별자/클릭 요청 및 페이지 이동 미확인.",
+        "url": "https://www.iris.go.kr/contents/retrieveBsnsAncmBtinSituListView.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "g2b_legacy",
+      "institution": "나라장터",
+      "name": "나라장터 기존 진입점",
+      "source_urls": [
+        {
+          "url": "https://www.g2b.go.kr/index.jsp",
+          "references": [
+            "Sheet1!R53C3",
+            "Sheet2!R14C1"
+          ],
+          "original_institution_labels": [
+            "나라장터"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "SSO_REDIRECT",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "SSO 리다이렉트 관찰. 모든 공개 공고가 로그인 필수라는 의미는 아님."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "이 진입점으로 비로그인 공고 조회를 확인하지 못함. 공개 API/새 화면은 별도 검증 필요."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "이 진입점으로 비로그인 공고 조회를 확인하지 못함. 공개 API/새 화면은 별도 검증 필요.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.g2b.go.kr/index.jsp",
+          "method": "web.open",
+          "result": "원본 /index.jsp 요청이 sso.g2b.go.kr OIDC 인증 흐름으로 이동하며 웹 도구에서 열리지 않음."
+        },
+        {
+          "url": "https://www.g2b.go.kr/index.jsp",
+          "method": "web.open/click",
+          "result": "동적 OIDC state/nonce 값은 기록/재사용하지 않음."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "이 진입점으로 비로그인 공고 조회를 확인하지 못함. 공개 API/새 화면은 별도 검증 필요.",
+        "url": "https://www.g2b.go.kr/index.jsp",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "hsbiz_home",
+      "institution": "화성산업진흥원",
+      "name": "대표 홈페이지",
+      "source_urls": [
+        {
+          "url": "https://www.hsbiz.or.kr/",
+          "references": [
+            "Sheet1!R63C3"
+          ],
+          "original_institution_labels": [
+            "화성산업진흥원"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "현재 공식 목록/상세 직접 검증 필요. 첨부 다운로드 API의 존재만으로 JSON_API 분류하지 않음."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "현재 공식 목록/상세 직접 검증 필요. 첨부 다운로드 API의 존재만으로 JSON_API 분류하지 않음.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.hsbiz.or.kr/",
+          "method": "web.open",
+          "result": "원본 루트는 웹 도구 Timeout. 공식 검색에 새 /bbs/.../view.do 상세는 있으나 직접 열기는 Cache miss."
+        },
+        {
+          "url": "https://www.hsbiz.or.kr/bbs/BBSMSTR_000000000041/view.do?nttId=B000000002215Hs8cN5",
+          "method": "web.open/click",
+          "result": "검색 인덱스에는 입찰 상세, 직접 조회는 도구 Cache miss."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "현재 공식 목록/상세 직접 검증 필요. 첨부 다운로드 API의 존재만으로 JSON_API 분류하지 않음.",
+        "url": "https://www.hsbiz.or.kr/",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "rda_bid",
+      "institution": "농촌진흥청",
+      "name": "입찰공고",
+      "source_urls": [
+        {
+          "url": "https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry",
+          "references": [
+            "Sheet1!R64C3",
+            "Sheet2!R2C1"
+          ],
+          "original_institution_labels": [
+            "농촌진흥청"
+          ]
+        }
+      ],
+      "list_url": "https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry",
+      "detail_url_pattern": "/board/board.do?mode=updateCnt&boardId=bidancm&prgId=bid_bidancmEntry&dataNo={id}",
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "QUERY",
+        "parameter": "currPage",
+        "example_url": "https://www.rda.go.kr/board/board.do?boardId=bidancm&catgId=&currPage=2&mode=list&prgId=bid_bidancmEntry&searchEDate=&searchKey=&searchOrgDeptKey=&searchOrgDeptVal=&searchSDate=&searchVal=",
+        "second_page_verified": true,
+        "notes": "목록 2 링크의 currPage=2 응답 확인."
+      },
+      "detail": {
+        "example_url": "https://www.rda.go.kr/board/board.do?boardId=bidancm&currPage=1&dataNo=100000813836&menu_id=ofc&mode=updateCnt&prgId=bid_bidancmEntry&searchKey=&searchVal=",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "표본에 입찰 대상/납품기한/장소/방법 텍스트 존재. 세부 규격은 첨부에만 있어 본문 판별 범위 제한."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "비로그인 목록/상세/2페이지 열람."
+      },
+      "anti_bot": {
+        "detected": false,
+        "notes": "표본 응답에서 CAPTCHA/차단 미관찰."
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "표본에 입찰 대상/납품기한/장소/방법 텍스트 존재. 세부 규격은 첨부에만 있어 본문 판별 범위 제한."
+      },
+      "audit_status": "LIST_DETAIL_PAGINATION_VERIFIED",
+      "checked_on": "2026-10-30",
+      "blocker": null,
+      "mvp_priority": 3,
+      "mvp_notes": "공개 상세 텍스트와 안정적 게시물 ID/페이지 인자 확인. 첨부 내용 분석 제외.",
+      "evidence": [
+        {
+          "url": "https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry",
+          "method": "web.open",
+          "result": "공개 HTML 목록 3859건, 표본 상세와 currPage=2 조회 성공."
+        },
+        {
+          "url": "https://www.rda.go.kr/board/board.do?boardId=bidancm&currPage=1&dataNo=100000813836&menu_id=ofc&mode=updateCnt&prgId=bid_bidancmEntry&searchKey=&searchVal=",
+          "method": "web.open/click",
+          "result": "공고 설명 웹 본문 확인."
+        },
+        {
+          "url": "https://www.rda.go.kr/board/board.do?boardId=bidancm&catgId=&currPage=2&mode=list&prgId=bid_bidancmEntry&searchEDate=&searchKey=&searchOrgDeptKey=&searchOrgDeptVal=&searchSDate=&searchVal=",
+          "method": "web.open/click",
+          "result": "2페이지 열람 성공."
+        }
+      ],
+      "mvp_status": "SELECTED_IMPLEMENTABLE",
+      "strategy_decision": "MVP_READY",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "목록/상세/페이지 요청 실패 또는 실제 응답 변경 시",
+        "url": "https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "seoul_rnd_notice",
+      "institution": "서울경제진흥원",
+      "name": "서울 R&D 지원센터 공지사항",
+      "source_urls": [
+        {
+          "url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp",
+          "references": [
+            "Sheet1!R65C3",
+            "Sheet2!R3C1"
+          ],
+          "original_institution_labels": [
+            "서울경제진흥원"
+          ]
+        }
+      ],
+      "list_url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp",
+      "detail_url_pattern": "/client/c030200/c030200_04.jsp?seqNo={id}",
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "QUERY",
+        "parameter": "cPage",
+        "example_url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp?cPage=2&sField=&sWord=",
+        "second_page_verified": true,
+        "notes": "목록의 2 링크 cPage=2 응답 확인."
+      },
+      "detail": {
+        "example_url": "https://seoul.rnbd.kr/client/c030200/c030200_04.jsp?cPage=1&sField=&sWord=&seqNo=1129",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "표본 선정 결과 안내에서 웹 설명/일정/문의 내용 확인. 첫 표본 Timeout 이력 있음."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "공개 공지 목록/상세 조회 성공. 신청/과제번호 확인의 로그인 요구와 구분."
+      },
+      "anti_bot": {
+        "detected": false,
+        "notes": "성공한 표본에서 CAPTCHA/차단 미관찰."
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "표본 선정 결과 안내에서 웹 설명/일정/문의 내용 확인. 첫 표본 Timeout 이력 있음."
+      },
+      "audit_status": "LIST_DETAIL_PAGINATION_VERIFIED",
+      "checked_on": "2026-10-30",
+      "blocker": null,
+      "mvp_priority": 4,
+      "mvp_notes": "목록/본문/페이지 이동 확인. 첫 상세 Timeout을 고려해 구현 전 재현 확인.",
+      "evidence": [
+        {
+          "url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp",
+          "method": "web.open",
+          "result": "공개 HTML 제목/등록일 목록. 첫 상세 seqNo=1130은 Timeout, 다른 표본 seqNo=1129는 성공."
+        },
+        {
+          "url": "https://seoul.rnbd.kr/client/c030200/c030200_04.jsp?cPage=1&sField=&sWord=&seqNo=1129",
+          "method": "web.open/click",
+          "result": "대체 표본 상세 웹 본문 열람."
+        },
+        {
+          "url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp?cPage=2&sField=&sWord=",
+          "method": "web.open/click",
+          "result": "2페이지 열람 성공."
+        },
+        {
+          "url": "https://seoul.rnbd.kr/client/c030200/c030200_04.jsp?cPage=1&sField=&sWord=&seqNo=1130",
+          "method": "web.open/click",
+          "result": "첫 상세는 도구 Timeout."
+        }
+      ],
+      "mvp_status": "SELECTED_IMPLEMENTABLE",
+      "strategy_decision": "MVP_READY",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "목록/상세/페이지 요청 실패 또는 실제 응답 변경 시",
+        "url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "tipa_legacy_bid",
+      "institution": "중소기업기술정보진흥원",
+      "name": "입찰구매정보 기존 경로",
+      "source_urls": [
+        {
+          "url": "https://www.tipa.or.kr/s040305",
+          "references": [
+            "Sheet1!R66C3",
+            "Sheet2!R4C1"
+          ],
+          "original_institution_labels": [
+            "중소기업기술정보진흥원"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "REDIRECT_OTHER",
+      "content_type": "SPECIAL",
+      "classification_notes": "직접 조회와 검색 인덱스가 불일치하므로 SPECIAL/보류 유지. 로그인 또는 JS 필수라고 추정하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "입찰 게시판으로 연결되는 현재 공개 경로 재확인 필요. 원본 링크가 목록을 제공하지 않음."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "공식 도메인 검색에는 입찰 목록/상세가 있으나 실제 목록·2페이지·상세 직접 조회는 모두 /eng로 이동. 검색 결과만으로 STATIC_HTML로 승격하지 않고 MANUAL_ONLY 유지.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.tipa.or.kr/s040305",
+          "method": "web.open",
+          "result": "원본 /s040305가 /eng로 이동하고 읽을 수 있는 본문 0줄."
+        },
+        {
+          "url": "https://www.tipa.or.kr/eng",
+          "method": "web.open/click",
+          "result": "원본 조회의 도착 URL. 목록/상세 미확인."
+        },
+        {
+          "url": "https://tipa.or.kr/s040305",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "보완 조사: 직접 조회는 /eng로 이동, 본문 0줄."
+        },
+        {
+          "url": "https://tipa.or.kr/s040305/index/page/2",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "보완 조사: 검색에서 발견한 목록 2페이지 경로를 직접 열었으나 /eng로 이동."
+        },
+        {
+          "url": "https://tipa.or.kr/s040305/view/id/17776",
+          "method": "web.open",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "보완 조사: 검색에서 발견한 공고 상세를 직접 열었으나 /eng로 이동."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "공식 도메인 검색에는 입찰 목록/상세가 있으나 실제 목록·2페이지·상세 직접 조회는 모두 /eng로 이동. 검색 결과만으로 STATIC_HTML로 승격하지 않고 MANUAL_ONLY 유지.",
+        "url": "https://www.tipa.or.kr/s040305",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      },
+      "followup_checked_on": "2026-10-30"
+    },
+    {
+      "source_id": "snip_bid",
+      "institution": "성남산업진흥원",
+      "name": "입찰공고",
+      "source_urls": [
+        {
+          "url": "https://www.snip.or.kr/SNIP/contents/notice12.do",
+          "references": [
+            "Sheet1!R67C3",
+            "Sheet2!R5C1"
+          ],
+          "original_institution_labels": [
+            "성남산업진흥원"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "게시판 접근/렌더링 확인 필요. 원본만으로 STATIC 또는 DYNAMIC 단정 불가."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "게시판 접근/렌더링 확인 필요. 원본만으로 STATIC 또는 DYNAMIC 단정 불가.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.snip.or.kr/SNIP/contents/notice12.do",
+          "method": "web.open",
+          "result": "원본 게시판은 웹 도구 접근 불가. 루트는 text/html이나 본문 0줄."
+        },
+        {
+          "url": "https://www.snip.or.kr/",
+          "method": "web.open/click",
+          "result": "본문 0줄."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "게시판 접근/렌더링 확인 필요. 원본만으로 STATIC 또는 DYNAMIC 단정 불가.",
+        "url": "https://www.snip.or.kr/SNIP/contents/notice12.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kised_home",
+      "institution": "창업진흥원",
+      "name": "대표 포털 진입점",
+      "source_urls": [
+        {
+          "url": "https://www.kised.or.kr/",
+          "references": [
+            "Sheet1!R68C3"
+          ],
+          "original_institution_labels": [
+            "창업진흥원"
+          ]
+        }
+      ],
+      "list_url": "https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "ALTERNATIVE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "실제 조사 상세는 kised_bid_public 항목 참조. 원본 루트 자체는 공고 목록이 아님."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "실제 조사 상세는 kised_bid_public 항목 참조. 원본 루트 자체는 공고 목록이 아님.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.kised.or.kr/",
+          "method": "web.open",
+          "result": "기관/K-Startup 선택 화면. 원본 Sheet2 입찰 안내 경로에서 별도 공개 입찰 게시판 확인."
+        },
+        {
+          "url": "https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000",
+          "method": "web.open/click",
+          "result": "기관 공개 입찰 목록. 대표 루트와 별도 경로."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "실제 조사 상세는 kised_bid_public 항목 참조. 원본 루트 자체는 공고 목록이 아님.",
+        "url": "https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다.",
+        "related_source_id": "kised_bid_public"
+      }
+    },
+    {
+      "source_id": "kised_ebid",
+      "institution": "창업진흥원",
+      "name": "계약관리시스템 8443 포트",
+      "source_urls": [
+        {
+          "url": "https://ebid.kised.or.kr:8443/opro/main/emgncLoginForm.do",
+          "references": [
+            "Sheet1!R69C3",
+            "Sheet2!R6C1"
+          ],
+          "original_institution_labels": [
+            "창업진흥원"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_UNSUPPORTED_URL",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "8443 포트 접근 도구 제약. 로그인 필요 여부 미확인. 공개 대안 kised_bid_public 존재."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "8443 포트 접근 도구 제약. 로그인 필요 여부 미확인. 공개 대안 kised_bid_public 존재.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://ebid.kised.or.kr:8443/opro/main/emgncLoginForm.do",
+          "method": "web.open",
+          "result": "웹 도구가 원본 8443 URL을 invalid ref_id/arguments로 처리해 본문 조회 자체가 불가."
+        },
+        {
+          "url": "https://www.kised.or.kr/menu.es?mid=a10313000000",
+          "method": "web.open/click",
+          "result": "공식 안내에 계약관리시스템 링크 존재. 조회 오류를 로그인 증거로 보지 않음."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "8443 포트 접근 도구 제약. 로그인 필요 여부 미확인. 공개 대안 kised_bid_public 존재.",
+        "url": "https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다.",
+        "related_source_id": "kised_bid_public"
+      }
+    },
+    {
+      "source_id": "kaia_rnd",
+      "institution": "국토교통과학기술진흥원",
+      "name": "국토교통 R&D 공고",
+      "source_urls": [
+        {
+          "url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do",
+          "references": [
+            "Sheet1!R70C3"
+          ],
+          "original_institution_labels": [
+            "국토교통과학기술진흥원"
+          ]
+        }
+      ],
+      "list_url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do",
+      "detail_url_pattern": "/KAIA/contents/K30101000000.do?schM=view&id={id}",
+      "enabled": false,
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "QUERY",
+        "parameter": "page",
+        "example_url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do?page=2",
+        "second_page_verified": true,
+        "notes": "2페이지 링크 page=2 응답 확인."
+      },
+      "detail": {
+        "example_url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do?id=20260820101844013278&schM=view",
+        "reachable_without_login": true,
+        "body_available_in_html": false,
+        "notes": "표본 상세는 제목/기간과 PDF 본문 문서뷰어 중심. 핵심 설명의 HTML 본문 확보 실패. 첨부 분석 제외 정책상 MVP 우선 제외."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "목록/상세/2페이지는 공개."
+      },
+      "anti_bot": {
+        "detected": false,
+        "notes": "표본에서 CAPTCHA/차단 미관찰."
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "표본 상세는 제목/기간과 PDF 본문 문서뷰어 중심. 핵심 설명의 HTML 본문 확보 실패. 첨부 분석 제외 정책상 MVP 우선 제외."
+      },
+      "audit_status": "LIST_DETAIL_PAGINATION_VERIFIED",
+      "checked_on": "2026-10-30",
+      "blocker": null,
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do",
+          "method": "web.open",
+          "result": "HTML 목록 1224건/123페이지. 상세와 page=2 조회 성공."
+        },
+        {
+          "url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do?id=20260820101844013278&schM=view",
+          "method": "web.open/click",
+          "result": "PDF 본문 뷰어 링크, 제목/기간만 확인."
+        },
+        {
+          "url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do?page=2",
+          "method": "web.open/click",
+          "result": "2페이지 열람 성공."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "목록/상세/페이지 요청 실패 또는 실제 응답 변경 시",
+        "url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kiat_home",
+      "institution": "한국산업기술진흥원",
+      "name": "대표 홈페이지 공고 미리보기",
+      "source_urls": [
+        {
+          "url": "https://kiat.or.kr/front/user/main.do",
+          "references": [
+            "Sheet1!R71C3",
+            "Sheet2!R9C1"
+          ],
+          "original_institution_labels": [
+            "한국산업기술진흥원"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "READABLE_PORTAL",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "원본은 메인. 정확한 전체 목록/상세 ID/페이지 이동 미확인."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "원본은 메인. 정확한 전체 목록/상세 ID/페이지 이동 미확인.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://kiat.or.kr/front/user/main.do",
+          "method": "web.open",
+          "result": "text/html 메인에 사업공고 제목/기간과 새소식 미리보기. 더보기/제목 URL은 도구에서 구분되지 않음."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "원본은 메인. 정확한 전체 목록/상세 ID/페이지 이동 미확인.",
+        "url": "https://kiat.or.kr/front/user/main.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "mss_business",
+      "institution": "중소벤처기업부",
+      "name": "사업공고",
+      "source_urls": [
+        {
+          "url": "https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310&searchRltnYn=A",
+          "references": [
+            "Sheet1!R73C3",
+            "Sheet2!R15C1"
+          ],
+          "original_institution_labels": [
+            "중소벤처기업부"
+          ]
+        }
+      ],
+      "list_url": "https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "ALTERNATIVE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "UI_NUMERIC_UNRESOLVED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "페이지 UI 관찰. 상세 링크 클릭은 동일 목록으로 돌아옴."
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "대체 목록은 도구에서 공개 열람. 메뉴에 로그아웃 문구가 있어도 인증 세션으로 단정하지 않음."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "원본 필터와 대체 목록의 범위 동등성, 상세 요청/페이지 이동 미검증."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "원본 필터와 대체 목록의 범위 동등성, 상세 요청/페이지 이동 미검증.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310&searchRltnYn=A",
+          "method": "web.open",
+          "result": "원본 searchRltnYn=A URL은 Timeout. 해당 인자를 뺀 동일 cbIdx=310 목록은 HTML 2224건/223페이지."
+        },
+        {
+          "url": "https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310",
+          "method": "web.open/click",
+          "result": "목록 확인, 제목 클릭은 동일 목록으로 해석됨."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "원본 필터와 대체 목록의 범위 동등성, 상세 요청/페이지 이동 미검증.",
+        "url": "https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "technopark_main",
+      "institution": "한국테크노파크진흥회",
+      "name": "사업공고 및 TP 공고 집계",
+      "source_urls": [
+        {
+          "url": "https://www.technopark.or.kr/www/main.do",
+          "references": [
+            "Sheet1!R74C3"
+          ],
+          "original_institution_labels": [
+            "한국테크노파크진흥회"
+          ]
+        }
+      ],
+      "list_url": "https://www.technopark.or.kr/www/bbsPost/72/list.do?mid=1008",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "ALTERNATIVE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "SINGLE_PAGE_OBSERVED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "진흥회 게시판은 5건/1페이지. TP 집계는 별도 목록으로 유지해야 함."
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "진흥회 게시판 상세 클릭과 외부 TP별 본문/집계 페이지를 추가 확인해야 함."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "진흥회 게시판 상세 클릭과 외부 TP별 본문/집계 페이지를 추가 확인해야 함.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.technopark.or.kr/www/main.do",
+          "method": "web.open",
+          "result": "메인에 외부 TP 공고 링크. TP진흥회 사업공고는 5건/1페이지, TP 집계 목록은 Timeout."
+        },
+        {
+          "url": "https://www.technopark.or.kr/www/bbsPost/72/list.do?mid=1008",
+          "method": "web.open/click",
+          "result": "진흥회 공고 5건, 표/접수기간 확인."
+        },
+        {
+          "url": "https://www.technopark.or.kr/www/linkBoard/list.do?mid=1012&type=P",
+          "method": "web.open/click",
+          "result": "TP별 사업공고 집계 목록은 Timeout."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "진흥회 게시판 상세 클릭과 외부 TP별 본문/집계 페이지를 추가 확인해야 함.",
+        "url": "https://www.technopark.or.kr/www/bbsPost/72/list.do?mid=1008",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kier_ebid",
+      "institution": "한국에너지기술연구원",
+      "name": "전자입찰 공고",
+      "source_urls": [
+        {
+          "url": "https://ebid.kier.re.kr/noticeList.do?boardGbn=3",
+          "references": [
+            "Sheet1!R75C3"
+          ],
+          "original_institution_labels": [
+            "한국에너지기술연구원"
+          ]
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "목록/상세/로그인/페이지 요청 미확인."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "목록/상세/로그인/페이지 요청 미확인.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://ebid.kier.re.kr/noticeList.do?boardGbn=3",
+          "method": "web.open",
+          "result": "원본 noticeList.do 조회에서 웹 도구 502 Bad Gateway."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "목록/상세/로그인/페이지 요청 미확인.",
+        "url": "https://ebid.kier.re.kr/noticeList.do?boardGbn=3",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "krict_bid",
+      "institution": "한국화학연구원",
+      "name": "입찰공고",
+      "source_urls": [
+        {
+          "url": "https://www.krict.re.kr/prog/bidAnncm/kor/sub04_02/list.do?pageIndex=1&bidStatus=A&searchStartDate=&searchEndDate=",
+          "references": [
+            "Sheet1!R76C3"
+          ],
+          "original_institution_labels": [
+            "한국화학연구원"
+          ]
+        }
+      ],
+      "list_url": "https://www.krict.re.kr/prog/bidAnncm/kor/sub04_02/list.do",
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "ALTERNATIVE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "SINGLE_PAGE_EMPTY",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "현재 진행 공고 없음, 1/1 표시. 여러 페이지 요청 미확인."
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "현재 표본 공고가 0개라 웹 상세 본문 유무를 판단할 수 없음."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "공고가 있는 시점의 상세와 상태/검색 필터 및 과거 공고 경로 재검증 필요."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "공고가 있는 시점의 상세와 상태/검색 필터 및 과거 공고 경로 재검증 필요.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.krict.re.kr/prog/bidAnncm/kor/sub04_02/list.do?pageIndex=1&bidStatus=A&searchStartDate=&searchEndDate=",
+          "method": "web.open",
+          "result": "원본 쿼리 URL은 도구 접근 불가. 쿼리 없는 같은 목록 경로는 0건/1페이지의 빈 입찰 표를 반환."
+        },
+        {
+          "url": "https://www.krict.re.kr/prog/bidAnncm/kor/sub04_02/list.do",
+          "method": "web.open/click",
+          "result": "공고문/사양서 컬럼과 현재 공고 없음 안내 확인."
+        },
+        {
+          "url": "https://www.krict.re.kr/prog/bidAnncm/kor/sub04_02/list.do?bidStatus=B",
+          "method": "web.open/click",
+          "result": "다른 상태 조회도 도구 접근 불가."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "공고가 있는 시점의 상세와 상태/검색 필터 및 과거 공고 경로 재검증 필요.",
+        "url": "https://www.krict.re.kr/prog/bidAnncm/kor/sub04_02/list.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "hipa_legacy_notice",
+      "institution": "화성산업진흥원",
+      "name": "과거 hscity 공고·공시",
+      "source_urls": [
+        {
+          "url": "https://hipa.hscity.go.kr/support/notice/list",
+          "references": [
+            "Sheet2!R1C1"
+          ],
+          "original_institution_labels": []
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "과거 도메인 목록 접근 불가. hsbiz와 동일 게시판인지 확인되지 않아 자동 통합하지 않음."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "과거 도메인 목록 접근 불가. hsbiz와 동일 게시판인지 확인되지 않아 자동 통합하지 않음.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://hipa.hscity.go.kr/support/notice/list",
+          "method": "web.open",
+          "result": "Sheet2의 hipa.hscity.go.kr/support/notice/list는 웹 도구 접근 불가."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "과거 도메인 목록 접근 불가. hsbiz와 동일 게시판인지 확인되지 않아 자동 통합하지 않음.",
+        "url": "https://hipa.hscity.go.kr/support/notice/list",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kised_bid_public",
+      "institution": "창업진흥원",
+      "name": "공개 입찰공고",
+      "source_urls": [
+        {
+          "url": "https://www.kised.or.kr/menu.es?mid=a10313000000",
+          "references": [
+            "Sheet2!R7C1"
+          ],
+          "original_institution_labels": []
+        }
+      ],
+      "list_url": "https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000",
+      "detail_url_pattern": "/board.es?act=view&bid=0005&mid=a10303000000&list_no={id}",
+      "enabled": false,
+      "access_status": "ALTERNATIVE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "pagination": {
+        "type": "QUERY",
+        "parameter": "nPage",
+        "example_url": "https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000&nPage=2",
+        "second_page_verified": true,
+        "notes": "공식 목록의 2 링크 nPage=2 조회 성공."
+      },
+      "detail": {
+        "example_url": "https://www.kised.or.kr/board.es?act=view&bid=0005&list_no=4648&mid=a10303000000&nPage=1&tag=",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "표본 상세에 용역명/접수기간/설명 텍스트. 세부 자격은 나라장터/첨부를 참조하므로 판단 범위 제한."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "8443 계약관리시스템 로그인 없이 별도 기관 공개 게시판 열람."
+      },
+      "anti_bot": {
+        "detected": false,
+        "notes": "공개 목록/상세/2페이지에서 CAPTCHA/차단 미관찰."
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "표본 상세에 용역명/접수기간/설명 텍스트. 세부 자격은 나라장터/첨부를 참조하므로 판단 범위 제한."
+      },
+      "audit_status": "LIST_DETAIL_PAGINATION_VERIFIED",
+      "checked_on": "2026-10-30",
+      "blocker": null,
+      "mvp_priority": 2,
+      "mvp_notes": "로그인 시스템과 분리된 공개 입찰 목록/상세/페이지 경로 확보.",
+      "evidence": [
+        {
+          "url": "https://www.kised.or.kr/menu.es?mid=a10313000000",
+          "method": "web.open",
+          "result": "원본 안내 페이지의 입찰공고 바로가기에서 공개 board.es 목록 835건/84페이지 발견."
+        },
+        {
+          "url": "https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000",
+          "method": "web.open/click",
+          "result": "공식 안내의 링크를 통해 공개 목록 확인."
+        },
+        {
+          "url": "https://www.kised.or.kr/board.es?act=view&bid=0005&list_no=4648&mid=a10303000000&nPage=1&tag=",
+          "method": "web.open/click",
+          "result": "상세 웹 텍스트 확인."
+        },
+        {
+          "url": "https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000&nPage=2",
+          "method": "web.open/click",
+          "result": "2페이지 응답 확인."
+        }
+      ],
+      "mvp_status": "SELECTED_IMPLEMENTABLE",
+      "strategy_decision": "MVP_READY",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "목록/상세/페이지 요청 실패 또는 실제 응답 변경 시",
+        "url": "https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kaia_legacy_bid",
+      "institution": "국토교통과학기술진흥원",
+      "name": "입찰공고 (현재 공식 경로 확인)",
+      "source_urls": [
+        {
+          "url": "https://www.kaia.re.kr/portal/bbs/list/B0000054.do?menuNo=200786",
+          "references": [
+            "Sheet2!R8C1"
+          ],
+          "original_institution_labels": []
+        }
+      ],
+      "list_url": "https://www.kaia.re.kr/KAIA/contents/K30300000000.do",
+      "detail_url_pattern": "/KAIA/contents/K30300000000.do?schM=view&id={id}",
+      "enabled": false,
+      "access_status": "ALTERNATIVE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "과거 URL의 404 이력은 보존. 공식 메뉴에서 현재 입찰 목록/상세 HTML을 확인하여 현행 수집 경로 기준 STATIC_HTML로 보완. R&D 공고와 별도 게시판이며 과거 데이터 동등성을 주장하지 않음.",
+      "pagination": {
+        "type": "QUERY",
+        "parameter": "page",
+        "example_url": "https://www.kaia.re.kr/KAIA/contents/K30300000000.do?page=2",
+        "second_page_verified": false,
+        "notes": "공식 목록의 2페이지 링크에서 page=2를 확인했으나 조회는 Cache miss. 성공으로 집계하지 않음."
+      },
+      "detail": {
+        "example_url": "https://www.kaia.re.kr/KAIA/contents/K30300000000.do?id=20261019180300941761&schM=view",
+        "reachable_without_login": true,
+        "body_available_in_html": false,
+        "notes": "확인 표본은 공고명/등록일과 HWP 본문 문서뷰어/첨부 중심. 실질 본문 텍스트는 확보하지 못함. 첨부 분석 없이 상세 자격을 판별할 수 없음."
+      },
+      "html": {
+        "list_visible_in_web_html": true,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": false,
+        "method": null,
+        "notes": "공식 목록과 표본 상세는 비로그인 web 조회 가능. 내부 업무 로그인과 분리."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "현재 공식 K30300000000 입찰 게시판 HTML 조회 권고. 본문이 문서뷰어 중심이고 2페이지 응답은 미검증이므로 최종 MVP에는 포함하지 않음.",
+      "risk": {
+        "level": "MEDIUM",
+        "notes": "공식 현재 목록/상세 확보. 2페이지 Cache miss와 첨부/뷰어 중심 본문 제약."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "현재 공식 입찰 경로를 찾았으나 2페이지 재현 및 첨부 없는 본문 적합성은 미확인. 최종 MVP 제외.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.kaia.re.kr/portal/bbs/list/B0000054.do?menuNo=200786",
+          "method": "web.open",
+          "result": "원본 /portal/bbs/list/B0000054.do?menuNo=200786는 웹 도구가 404 Not Found 보고."
+        },
+        {
+          "url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do",
+          "method": "web.open/click",
+          "result": "동일 기관의 새 R&D 공고는 열림. 입찰 게시판과 다른 종류이므로 대체로 간주하지 않음."
+        },
+        {
+          "url": "https://www.kaia.re.kr/KAIA/contents/K30300000000.do",
+          "method": "web.click",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "공식 KAIA 메뉴의 입찰공고 링크로 열람: 738건/74페이지 HTML 목록, 게시물별 id 링크 확인."
+        },
+        {
+          "url": "https://www.kaia.re.kr/KAIA/contents/K30300000000.do?id=20261019180300941761&schM=view",
+          "method": "web.click",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "공개 상세 응답 확인. 제목/등록일과 HWP 본문 문서뷰어, 첨부 링크 제공."
+        },
+        {
+          "url": "https://www.kaia.re.kr/KAIA/contents/K30300000000.do?id=20261014181744115765&schM=view",
+          "method": "web.click",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "두 번째 자체입찰 상세 URL도 text/html 응답 열림. 본문 제공 범위를 일반화하지 않음."
+        },
+        {
+          "url": "https://www.kaia.re.kr/KAIA/contents/K30300000000.do?page=2",
+          "method": "web.click",
+          "checked_on": "2026-10-30",
+          "audit_round": "M01 completion",
+          "result": "공식 2페이지 링크 조회는 Cache miss."
+        }
+      ],
+      "source_url_status": "LEGACY_404_OFFICIAL_REPLACEMENT_FOUND",
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "현재 공식 입찰 경로를 찾았으나 2페이지 재현 및 첨부 없는 본문 적합성은 미확인. 최종 MVP 제외.",
+        "url": "https://www.kaia.re.kr/KAIA/contents/K30300000000.do",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      },
+      "followup_checked_on": "2026-10-30"
+    },
+    {
+      "source_id": "kaips_ip_business_alt",
+      "institution": "한국지식재산서비스협회",
+      "name": "IP사업 게시판 별도 경로",
+      "source_urls": [
+        {
+          "url": "http://www.kaips.or.kr/bbs_shop/list.htm?board_code=kaips_4",
+          "references": [
+            "Sheet2!R12C1"
+          ],
+          "original_institution_labels": []
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "기존 kaips_12와 게시판 동등성/상세/페이지 이동 미확인. 별도 원본 URL 유지."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "기존 kaips_12와 게시판 동등성/상세/페이지 이동 미확인. 별도 원본 URL 유지.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "http://www.kaips.or.kr/bbs_shop/list.htm?board_code=kaips_4",
+          "method": "web.open",
+          "result": "원본 /bbs_shop/list.htm?board_code=kaips_4 조회는 웹 도구 Timeout."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "기존 kaips_12와 게시판 동등성/상세/페이지 이동 미확인. 별도 원본 URL 유지.",
+        "url": "http://www.kaips.or.kr/bbs_shop/list.htm?board_code=kaips_4",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "ipnavi_ipds_login",
+      "institution": "한국지식재산보호원",
+      "name": "IPDS 전문기관 수행관리",
+      "source_urls": [
+        {
+          "url": "https://www.ip-navi.or.kr/cooperationLogin/loginForm.navi",
+          "references": [
+            "Sheet2!R20C1"
+          ],
+          "original_institution_labels": []
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "LOGIN_PAGE",
+      "content_type": "LOGIN",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "NOT_APPLICABLE_LOGIN",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "인증 화면만 확인. 내부 목록 조사/접근 안 함."
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": true,
+        "method": "공동인증서 또는 이메일/비밀번호",
+        "notes": "공동인증서/이메일 로그인 후 기업정보 등록 안내를 실제 확인. 로그인하지 않음."
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "전문기관 전용 인증 서비스. 공개 공고 수집 대상으로 자동화하지 않음."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "전문기관 전용 인증 서비스. 공개 공고 수집 대상으로 자동화하지 않음.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.ip-navi.or.kr/cooperationLogin/loginForm.navi",
+          "method": "web.open",
+          "result": "로그인 화면이 기업용 공동인증서 또는 이메일 로그인, 로그인 후 기업정보 등록 필요를 명시."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "전문기관 전용 인증 서비스. 공개 공고 수집 대상으로 자동화하지 않음.",
+        "url": "https://www.ip-navi.or.kr/cooperationLogin/loginForm.navi",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "kautm_tlo_news",
+      "institution": "한국대학기술이전협회",
+      "name": "TLO 뉴스",
+      "source_urls": [
+        {
+          "url": "http://www.kautm.net/bbs/?so_table=tlo_news",
+          "references": [
+            "Sheet2!R22C1"
+          ],
+          "original_institution_labels": []
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "공개 목록/상세 접근 불가. 과거 세션 식별자는 재사용하지 않음."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "공개 목록/상세 접근 불가. 과거 세션 식별자는 재사용하지 않음.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "http://www.kautm.net/bbs/?so_table=tlo_news",
+          "method": "web.open",
+          "result": "원본 과거 PHPSESSID를 제거한 공개 URL을 조회했으나 웹 도구 502 Bad Gateway."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "공개 목록/상세 접근 불가. 과거 세션 식별자는 재사용하지 않음.",
+        "url": "http://www.kautm.net/bbs/?so_table=tlo_news",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "ketep_legacy_bid",
+      "institution": "한국에너지기술평가원",
+      "name": "입찰공고 기존 경로",
+      "source_urls": [
+        {
+          "url": "https://www.ketep.re.kr/brdartcl/boardarticleView.do?srch_menu_nix=616nZhv3&brd_id=BDIDX_Zgq9d8l5n51206Rzap0658",
+          "references": [
+            "Sheet2!R23C1"
+          ],
+          "original_institution_labels": []
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "TOOL_ERROR",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "목록인지 상세인지도 원본 이름만으로 확정 불가. 공식 현재 입찰 경로 재확인 필요."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "목록인지 상세인지도 원본 이름만으로 확정 불가. 공식 현재 입찰 경로 재확인 필요.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.ketep.re.kr/brdartcl/boardarticleView.do?srch_menu_nix=616nZhv3&brd_id=BDIDX_Zgq9d8l5n51206Rzap0658",
+          "method": "web.open",
+          "result": "Sheet2 /brdartcl/boardarticleView.do 경로는 웹 도구 접근 불가."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "목록인지 상세인지도 원본 이름만으로 확정 불가. 공식 현재 입찰 경로 재확인 필요.",
+        "url": "https://www.ketep.re.kr/brdartcl/boardarticleView.do?srch_menu_nix=616nZhv3&brd_id=BDIDX_Zgq9d8l5n51206Rzap0658",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "khidi_bioagora",
+      "institution": "한국보건산업진흥원",
+      "name": "바이오 아고라",
+      "source_urls": [
+        {
+          "url": "https://www.khidi.or.kr/bioagora",
+          "references": [
+            "Sheet2!R24C1"
+          ],
+          "original_institution_labels": []
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "EMPTY_HTML",
+      "content_type": "SPECIAL",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "현재 상태/실제 공고 기능/iframe/JS/API 여부 미확인. 캐시만으로 운영 상태 판단 불가."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "현재 상태/실제 공고 기능/iframe/JS/API 여부 미확인. 캐시만으로 운영 상태 판단 불가.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "https://www.khidi.or.kr/bioagora",
+          "method": "web.open",
+          "result": "text/html 응답이나 읽을 수 있는 본문 0줄. 도구는 수개월 전 수집본으로 표시."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "현재 상태/실제 공고 기능/iframe/JS/API 여부 미확인. 캐시만으로 운영 상태 판단 불가.",
+        "url": "https://www.khidi.or.kr/bioagora",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      }
+    },
+    {
+      "source_id": "technopark_legacy_domain",
+      "institution": "한국테크노파크진흥회",
+      "name": "과거 technopark.kr 도메인",
+      "source_urls": [
+        {
+          "url": "http://www.technopark.kr/",
+          "references": [
+            "Sheet2!R27C1"
+          ],
+          "original_institution_labels": []
+        }
+      ],
+      "list_url": null,
+      "detail_url_pattern": null,
+      "enabled": false,
+      "access_status": "LEGACY_404",
+      "content_type": "UNSUPPORTED",
+      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "pagination": {
+        "type": "UNVERIFIED",
+        "parameter": null,
+        "example_url": null,
+        "second_page_verified": false,
+        "notes": "목록/페이지 이동을 검증하지 못함"
+      },
+      "detail": {
+        "example_url": null,
+        "reachable_without_login": null,
+        "body_available_in_html": null,
+        "notes": "미확인"
+      },
+      "html": {
+        "list_visible_in_web_html": null,
+        "local_http_verified": false,
+        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+      },
+      "json_api": {
+        "verified": null,
+        "endpoint": null,
+        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+      },
+      "javascript": {
+        "required": null,
+        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+      },
+      "auth": {
+        "required": null,
+        "method": null,
+        "notes": "미확인"
+      },
+      "anti_bot": {
+        "detected": null,
+        "notes": "미확인"
+      },
+      "recommended_strategy": "MANUAL_ONLY",
+      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "risk": {
+        "level": "HIGH",
+        "notes": "과거 루트는 현재 조사 경로로 지원 불가. technopark.or.kr과 자동 리다이렉트/동등성 미확인."
+      },
+      "audit_status": "LIMITED",
+      "checked_on": "2026-10-30",
+      "blocker": "과거 루트는 현재 조사 경로로 지원 불가. technopark.or.kr과 자동 리다이렉트/동등성 미확인.",
+      "mvp_priority": null,
+      "mvp_notes": null,
+      "evidence": [
+        {
+          "url": "http://www.technopark.kr/",
+          "method": "web.open",
+          "result": "원본 HTTP의 HTTPS 조회에서 웹 도구가 404 Not Found 보고."
+        },
+        {
+          "url": "https://www.technopark.or.kr/www/main.do",
+          "method": "web.open/click",
+          "result": "원본의 다른 도메인 technopark.or.kr은 열림. 별도 기관 사이트 항목 참조."
+        }
+      ],
+      "mvp_status": "NOT_SELECTED",
+      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "fallback": {
+        "strategy": "MANUAL_ONLY",
+        "trigger": "과거 루트는 현재 조사 경로로 지원 불가. technopark.or.kr과 자동 리다이렉트/동등성 미확인.",
+        "url": "http://www.technopark.kr/",
+        "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다. 원본 목록의 별도 technopark.or.kr 수집원을 참고하되 과거 도메인 동등성을 가정하지 않는다.",
+        "related_source_id": "technopark_main"
+      }
+    }
+  ]
+}

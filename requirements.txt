@@ -1,0 +1,2 @@
+# M00 uses only the Python standard library, including unittest.
+# No external packages are required.

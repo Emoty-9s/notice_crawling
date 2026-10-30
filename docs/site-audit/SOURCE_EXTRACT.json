@@ -1,0 +1,861 @@
+{
+  "source_file": "사업공고모니터링리스트_2024 (version 1).xlsb",
+  "sha256": "08bdd298d4219349cbf9b5a0ae0ef23dd39d93e8c865687f2f4a11e05e24ee3a",
+  "sheets": [
+    {
+      "name": "Sheet1",
+      "string_cells": 403,
+      "hyperlinks": 37,
+      "merges": 106
+    },
+    {
+      "name": "Sheet2",
+      "string_cells": 27,
+      "hyperlinks": 27,
+      "merges": 0
+    }
+  ],
+  "url_occurrences": [
+    {
+      "sheet": "Sheet1",
+      "row": 6,
+      "column": 3,
+      "institution_cell": "보건산업진흥원",
+      "label": "https://www.khidi.or.kr/board?menuId=MENU01108",
+      "source_url": "https://www.khidi.or.kr/board?menuId=MENU01108",
+      "normalized_url": "https://www.khidi.or.kr/board?menuId=MENU01108",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 11,
+      "column": 3,
+      "institution_cell": "한국농업기술진흥원",
+      "label": "https://www.koat.or.kr/board/bid/list.do",
+      "source_url": "https://www.koat.or.kr/board/bid/list.do",
+      "normalized_url": "https://www.koat.or.kr/board/bid/list.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 12,
+      "column": 3,
+      "institution_cell": "한국지식재산보호원",
+      "label": "https://www.ip-navi.or.kr/ipnavi/board/boardList.navi?boardCode=B00013",
+      "source_url": "https://www.ip-navi.or.kr/ipnavi/board/boardList.navi?boardCode=B00013",
+      "normalized_url": "https://www.ip-navi.or.kr/ipnavi/board/boardList.navi?boardCode=B00013",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 21,
+      "column": 3,
+      "institution_cell": "한국발명진흥회",
+      "label": "https://pms.ripc.org/",
+      "source_url": "https://pms.ripc.org/",
+      "normalized_url": "https://pms.ripc.org/",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 24,
+      "column": 3,
+      "institution_cell": "한국발명진흥회",
+      "label": "https://www.kipa.org/kipa/notice/kw_0402.jsp",
+      "source_url": "https://www.kipa.org/kipa/notice/kw_0402.jsp",
+      "normalized_url": "https://www.kipa.org/kipa/notice/kw_0402.jsp",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 25,
+      "column": 3,
+      "institution_cell": "-",
+      "label": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp",
+      "source_url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp",
+      "normalized_url": "https://www.kipa.org/kipa/ip001/kw_business_1602.jsp",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 27,
+      "column": 3,
+      "institution_cell": "수출바우처",
+      "label": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
+      "source_url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
+      "normalized_url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 29,
+      "column": 3,
+      "institution_cell": "제조중소기업혁신바우처",
+      "label": "https://www.mssmiv.com/portal/board/BoardList?bbsId=1",
+      "source_url": "https://www.mssmiv.com/portal/board/BoardList?bbsId=1",
+      "normalized_url": "https://www.mssmiv.com/portal/board/BoardList?bbsId=1",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 31,
+      "column": 3,
+      "institution_cell": "한국특허전략개발원",
+      "label": "https://biz.kista.re.kr/main.do\nhttps://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442\nhttps://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000382",
+      "source_url": "https://biz.kista.re.kr/main.do",
+      "normalized_url": "https://biz.kista.re.kr/main.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 31,
+      "column": 3,
+      "institution_cell": "한국특허전략개발원",
+      "label": "https://biz.kista.re.kr/main.do\nhttps://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442\nhttps://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000382",
+      "source_url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000382",
+      "normalized_url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000382",
+      "kinds": [
+        "cell_text"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 31,
+      "column": 3,
+      "institution_cell": "한국특허전략개발원",
+      "label": "https://biz.kista.re.kr/main.do\nhttps://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442\nhttps://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000382",
+      "source_url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442",
+      "normalized_url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442",
+      "kinds": [
+        "cell_text"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 33,
+      "column": 3,
+      "institution_cell": "한국특허전략개발원",
+      "label": "https://biz.kista.re.kr/ipams/",
+      "source_url": "https://biz.kista.re.kr/ipams/",
+      "normalized_url": "https://biz.kista.re.kr/ipams/",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 34,
+      "column": 3,
+      "institution_cell": "한국특허전략개발원",
+      "label": "https://biz.kista.re.kr/ippro/uat/uia/egovLoginUsr.do",
+      "source_url": "https://biz.kista.re.kr/ippro/uat/uia/egovLoginUsr.do",
+      "normalized_url": "https://biz.kista.re.kr/ippro/uat/uia/egovLoginUsr.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 37,
+      "column": 3,
+      "institution_cell": "한국특허전략개발원",
+      "label": "https://biz.kista.re.kr/ipas/uat/uia/egovLoginUsr.do",
+      "source_url": "https://biz.kista.re.kr/ipas/uat/uia/egovLoginUsr.do",
+      "normalized_url": "https://biz.kista.re.kr/ipas/uat/uia/egovLoginUsr.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 42,
+      "column": 3,
+      "institution_cell": "한국BI기술사업화협회",
+      "label": "http://www.kabit.or.kr/",
+      "source_url": "http://www.kabit.or.kr/",
+      "normalized_url": "http://www.kabit.or.kr/",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 43,
+      "column": 3,
+      "institution_cell": "한국대학기술이전협회",
+      "label": "http://www.kautm.net/",
+      "source_url": "http://www.kautm.net/",
+      "normalized_url": "http://www.kautm.net/",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 45,
+      "column": 3,
+      "institution_cell": "한국에너지기술평가원",
+      "label": "https://www.ketep.re.kr/",
+      "source_url": "https://www.ketep.re.kr/",
+      "normalized_url": "https://www.ketep.re.kr/",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 46,
+      "column": 3,
+      "institution_cell": "경기도경제과학진흥원",
+      "label": "https://www.gbsa.or.kr/board/bid_info.do",
+      "source_url": "https://www.gbsa.or.kr/board/bid_info.do",
+      "normalized_url": "https://www.gbsa.or.kr/board/bid_info.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 47,
+      "column": 3,
+      "institution_cell": "한국과학기술연구원",
+      "label": "https://www.kist.re.kr/ko/notice/general-notice.do",
+      "source_url": "https://www.kist.re.kr/ko/notice/general-notice.do",
+      "normalized_url": "https://www.kist.re.kr/ko/notice/general-notice.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 48,
+      "column": 3,
+      "institution_cell": "범부처재생의료기술개발사업단",
+      "label": "http://www.kfrm.org/doc/html/main/main.asp",
+      "source_url": "http://www.kfrm.org/doc/html/main/main.asp",
+      "normalized_url": "http://www.kfrm.org/doc/html/main/main.asp",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 49,
+      "column": 3,
+      "institution_cell": "용인기업지원시스템",
+      "label": "https://ybs.ypa.or.kr/portal.do",
+      "source_url": "https://ybs.ypa.or.kr/portal.do",
+      "normalized_url": "https://ybs.ypa.or.kr/portal.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 50,
+      "column": 3,
+      "institution_cell": "한국지식재산서비스협회",
+      "label": "http://www.kaips.or.kr/bbs/kaips_12",
+      "source_url": "http://www.kaips.or.kr/bbs/kaips_12",
+      "normalized_url": "http://www.kaips.or.kr/bbs/kaips_12",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 51,
+      "column": 3,
+      "institution_cell": "중소기업기술개발사업 종합관리시스템",
+      "label": "https://www.smtech.go.kr/front/ifg/no/notice02_intro.do",
+      "source_url": "https://www.smtech.go.kr/front/ifg/no/notice02_intro.do",
+      "normalized_url": "https://www.smtech.go.kr/front/ifg/no/notice02_intro.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 52,
+      "column": 3,
+      "institution_cell": "범부처통합연구지원시스템",
+      "label": "https://www.iris.go.kr/main.do",
+      "source_url": "https://www.iris.go.kr/main.do",
+      "normalized_url": "https://www.iris.go.kr/main.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 53,
+      "column": 3,
+      "institution_cell": "나라장터",
+      "label": "https://www.g2b.go.kr/index.jsp",
+      "source_url": "https://www.g2b.go.kr/index.jsp",
+      "normalized_url": "https://www.g2b.go.kr/index.jsp",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 63,
+      "column": 3,
+      "institution_cell": "화성산업진흥원",
+      "label": "https://www.hsbiz.or.kr/",
+      "source_url": "https://www.hsbiz.or.kr/",
+      "normalized_url": "https://www.hsbiz.or.kr/",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 64,
+      "column": 3,
+      "institution_cell": "농촌진흥청",
+      "label": "https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry",
+      "source_url": "https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry",
+      "normalized_url": "https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 65,
+      "column": 3,
+      "institution_cell": "서울경제진흥원",
+      "label": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp",
+      "source_url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp",
+      "normalized_url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 66,
+      "column": 3,
+      "institution_cell": "중소기업기술정보진흥원",
+      "label": "https://www.tipa.or.kr/s040305",
+      "source_url": "https://www.tipa.or.kr/s040305",
+      "normalized_url": "https://www.tipa.or.kr/s040305",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 67,
+      "column": 3,
+      "institution_cell": "성남산업진흥원",
+      "label": "https://www.snip.or.kr/SNIP/contents/notice12.do",
+      "source_url": "https://www.snip.or.kr/SNIP/contents/notice12.do",
+      "normalized_url": "https://www.snip.or.kr/SNIP/contents/notice12.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 68,
+      "column": 3,
+      "institution_cell": "창업진흥원",
+      "label": "https://www.kised.or.kr/",
+      "source_url": "https://www.kised.or.kr/",
+      "normalized_url": "https://www.kised.or.kr/",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 69,
+      "column": 3,
+      "institution_cell": "창업진흥원",
+      "label": "https://ebid.kised.or.kr:8443/opro/main/emgncLoginForm.do",
+      "source_url": "https://ebid.kised.or.kr:8443/opro/main/emgncLoginForm.do",
+      "normalized_url": "https://ebid.kised.or.kr:8443/opro/main/emgncLoginForm.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 70,
+      "column": 3,
+      "institution_cell": "국토교통과학기술진흥원",
+      "label": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do",
+      "source_url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do",
+      "normalized_url": "https://www.kaia.re.kr/KAIA/contents/K30101000000.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 71,
+      "column": 3,
+      "institution_cell": "한국산업기술진흥원",
+      "label": "https://kiat.or.kr/front/user/main.do#none",
+      "source_url": "https://kiat.or.kr/front/user/main.do",
+      "normalized_url": "https://kiat.or.kr/front/user/main.do",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 71,
+      "column": 3,
+      "institution_cell": "한국산업기술진흥원",
+      "label": "https://kiat.or.kr/front/user/main.do#none",
+      "source_url": "https://kiat.or.kr/front/user/main.do#none",
+      "normalized_url": "https://kiat.or.kr/front/user/main.do",
+      "kinds": [
+        "cell_text"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 72,
+      "column": 3,
+      "institution_cell": "한국보건산업진흥원",
+      "label": "https://www.khidi.or.kr/board?menuId=MENU01108&siteId=null",
+      "source_url": "https://www.khidi.or.kr/board?menuId=MENU01108&siteId=null",
+      "normalized_url": "https://www.khidi.or.kr/board?menuId=MENU01108&siteId=null",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 73,
+      "column": 3,
+      "institution_cell": "중소벤처기업부",
+      "label": "https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310&searchRltnYn=A",
+      "source_url": "https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310&searchRltnYn=A",
+      "normalized_url": "https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310&searchRltnYn=A",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 74,
+      "column": 3,
+      "institution_cell": "한국테크노파크진흥회",
+      "label": "https://www.technopark.or.kr/www/main.do",
+      "source_url": "https://www.technopark.or.kr/www/main.do",
+      "normalized_url": "https://www.technopark.or.kr/www/main.do",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 75,
+      "column": 3,
+      "institution_cell": "한국에너지기술연구원",
+      "label": "https://ebid.kier.re.kr/noticeList.do?boardGbn=3",
+      "source_url": "https://ebid.kier.re.kr/noticeList.do?boardGbn=3",
+      "normalized_url": "https://ebid.kier.re.kr/noticeList.do?boardGbn=3",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet1",
+      "row": 76,
+      "column": 3,
+      "institution_cell": "한국화학연구원",
+      "label": "https://www.krict.re.kr/prog/bidAnncm/kor/sub04_02/list.do?pageIndex=1&bidStatus=A&searchStartDate=&searchEndDate=",
+      "source_url": "https://www.krict.re.kr/prog/bidAnncm/kor/sub04_02/list.do?pageIndex=1&bidStatus=A&searchStartDate=&searchEndDate=",
+      "normalized_url": "https://www.krict.re.kr/prog/bidAnncm/kor/sub04_02/list.do?pageIndex=1&bidStatus=A&searchStartDate=&searchEndDate=",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 1,
+      "column": 1,
+      "institution_cell": "",
+      "label": "공고·공시-화성산업진흥원",
+      "source_url": "https://hipa.hscity.go.kr/support/notice/list",
+      "normalized_url": "https://hipa.hscity.go.kr/support/notice/list",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 2,
+      "column": 1,
+      "institution_cell": "",
+      "label": "목록 < 입찰공고< 입찰정보 < 행정/정보 < 농촌진흥청",
+      "source_url": "https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry",
+      "normalized_url": "https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 3,
+      "column": 1,
+      "institution_cell": "",
+      "label": "공지사항",
+      "source_url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp",
+      "normalized_url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 4,
+      "column": 1,
+      "institution_cell": "",
+      "label": "입찰구매정보 | 중소기업기술정보진흥원",
+      "source_url": "https://www.tipa.or.kr/s040305",
+      "normalized_url": "https://www.tipa.or.kr/s040305",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 5,
+      "column": 1,
+      "institution_cell": "",
+      "label": "성남산업진흥원>열린경영>기관 공지사항>입찰공고",
+      "source_url": "https://www.snip.or.kr/SNIP/contents/notice12.do",
+      "normalized_url": "https://www.snip.or.kr/SNIP/contents/notice12.do",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 6,
+      "column": 1,
+      "institution_cell": "",
+      "label": "창업진흥원 계약관리시스템",
+      "source_url": "https://ebid.kised.or.kr:8443/opro/main/emgncLoginForm.do",
+      "normalized_url": "https://ebid.kised.or.kr:8443/opro/main/emgncLoginForm.do",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 7,
+      "column": 1,
+      "institution_cell": "",
+      "label": "입찰공고 | 알림마당 : 창업진흥원",
+      "source_url": "https://www.kised.or.kr/menu.es?mid=a10313000000",
+      "normalized_url": "https://www.kised.or.kr/menu.es?mid=a10313000000",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 8,
+      "column": 1,
+      "institution_cell": "",
+      "label": "입찰공고 - 입찰공고(목록)<사업공고>알림> KAIA국토교통과학기술진흥원LandGlobe",
+      "source_url": "https://www.kaia.re.kr/portal/bbs/list/B0000054.do?menuNo=200786",
+      "normalized_url": "https://www.kaia.re.kr/portal/bbs/list/B0000054.do?menuNo=200786",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 9,
+      "column": 1,
+      "institution_cell": "",
+      "label": "KIAT(Korea Institute for Advancement of Technology)",
+      "source_url": "https://kiat.or.kr/front/user/main.do",
+      "normalized_url": "https://kiat.or.kr/front/user/main.do",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 10,
+      "column": 1,
+      "institution_cell": "",
+      "label": "용인기업지원시스템",
+      "source_url": "https://ybs.ypa.or.kr/portal.do",
+      "normalized_url": "https://ybs.ypa.or.kr/portal.do",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 11,
+      "column": 1,
+      "institution_cell": "",
+      "label": "범부처재생의료기술개발사업단",
+      "source_url": "http://www.kfrm.org/doc/html/main/main.asp",
+      "normalized_url": "http://www.kfrm.org/doc/html/main/main.asp",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 12,
+      "column": 1,
+      "institution_cell": "",
+      "label": "한국지식재산서비스협회 IP사업",
+      "source_url": "http://www.kaips.or.kr/bbs_shop/list.htm?board_code=kaips_4",
+      "normalized_url": "http://www.kaips.or.kr/bbs_shop/list.htm?board_code=kaips_4",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 13,
+      "column": 1,
+      "institution_cell": "",
+      "label": "사업공고<알림마당-KHIDI 대표사이트",
+      "source_url": "https://www.khidi.or.kr/board?menuId=MENU01108&siteId=null",
+      "normalized_url": "https://www.khidi.or.kr/board?menuId=MENU01108&siteId=null",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 14,
+      "column": 1,
+      "institution_cell": "",
+      "label": "나라장터: 국가종합전자조달",
+      "source_url": "https://www.g2b.go.kr/index.jsp",
+      "normalized_url": "https://www.g2b.go.kr/index.jsp",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 15,
+      "column": 1,
+      "institution_cell": "",
+      "label": "사업공고 - 새소식 - 알림소식 - 중소벤처기업부",
+      "source_url": "https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310&searchRltnYn=A",
+      "normalized_url": "https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310&searchRltnYn=A",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 16,
+      "column": 1,
+      "institution_cell": "",
+      "label": "범부처통합연구지원시스템(IRIS)",
+      "source_url": "https://www.iris.go.kr/main.do",
+      "normalized_url": "https://www.iris.go.kr/main.do",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 17,
+      "column": 1,
+      "institution_cell": "",
+      "label": "입찰공고 목록 | 한국발명진흥회",
+      "source_url": "https://www.kipa.org/kipa/notice/kw_0402.jsp",
+      "normalized_url": "https://www.kipa.org/kipa/notice/kw_0402.jsp",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 18,
+      "column": 1,
+      "institution_cell": "",
+      "label": "지역지식재산센터",
+      "source_url": "https://pms.ripc.org/",
+      "normalized_url": "https://pms.ripc.org/",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 19,
+      "column": 1,
+      "institution_cell": "",
+      "label": "IP-R&D 사업 관리 시스템",
+      "source_url": "https://biz.kista.re.kr/ippro/uat/uia/egovLoginUsr.do",
+      "normalized_url": "https://biz.kista.re.kr/ippro/uat/uia/egovLoginUsr.do",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 20,
+      "column": 1,
+      "institution_cell": "",
+      "label": "IPDS 전문기관 수행관리 서비스",
+      "source_url": "https://www.ip-navi.or.kr/cooperationLogin/loginForm.navi",
+      "normalized_url": "https://www.ip-navi.or.kr/cooperationLogin/loginForm.navi",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 21,
+      "column": 1,
+      "institution_cell": "",
+      "label": "커뮤니티 > 공지사항",
+      "source_url": "https://www.mssmiv.com/portal/board/BoardList?bbsId=1",
+      "normalized_url": "https://www.mssmiv.com/portal/board/BoardList?bbsId=1",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 22,
+      "column": 1,
+      "institution_cell": "",
+      "label": "kautm.net/bbs/?so_table=tlo_news&PHPSESSID=[REDACTED]",
+      "source_url": "http://www.kautm.net/bbs/?so_table=tlo_news&PHPSESSID=[REDACTED]",
+      "normalized_url": "http://www.kautm.net/bbs/?so_table=tlo_news",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 23,
+      "column": 1,
+      "institution_cell": "",
+      "label": "입찰공고 - KETEP",
+      "source_url": "https://www.ketep.re.kr/brdartcl/boardarticleView.do?srch_menu_nix=616nZhv3&brd_id=BDIDX_Zgq9d8l5n51206Rzap0658",
+      "normalized_url": "https://www.ketep.re.kr/brdartcl/boardarticleView.do?srch_menu_nix=616nZhv3&brd_id=BDIDX_Zgq9d8l5n51206Rzap0658",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 24,
+      "column": 1,
+      "institution_cell": "",
+      "label": "바이오 아고라",
+      "source_url": "https://www.khidi.or.kr/bioagora",
+      "normalized_url": "https://www.khidi.or.kr/bioagora",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 25,
+      "column": 1,
+      "institution_cell": "",
+      "label": "입찰공고 | 한국특허전략개발원",
+      "source_url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442",
+      "normalized_url": "https://www.kista.re.kr/user/board.do?bbsId=BBSMSTR_000000000442",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 26,
+      "column": 1,
+      "institution_cell": "",
+      "label": "수출지원기반활용사업 > 커뮤니티 > 공지사항",
+      "source_url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1&active_menu_cd=EZ005004000",
+      "normalized_url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1&active_menu_cd=EZ005004000",
+      "kinds": [
+        "hyperlink"
+      ]
+    },
+    {
+      "sheet": "Sheet2",
+      "row": 27,
+      "column": 1,
+      "institution_cell": "",
+      "label": "http://www.technopark.kr/",
+      "source_url": "http://www.technopark.kr/",
+      "normalized_url": "http://www.technopark.kr/",
+      "kinds": [
+        "cell_text",
+        "hyperlink"
+      ]
+    }
+  ]
+}

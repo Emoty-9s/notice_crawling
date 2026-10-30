@@ -1,0 +1,37 @@
+{
+  "status": "PARTIAL",
+  "checked_on": "2026-10-30",
+  "source_file": "사업공고모니터링리스트_2024 (version 1).xlsb",
+  "source_sha256": "08bdd298d4219349cbf9b5a0ae0ef23dd39d93e8c865687f2f4a11e05e24ee3a",
+  "source_url_occurrences": 67,
+  "unique_normalized_source_urls": 49,
+  "inventory_sources": 47,
+  "distinct_hostnames": 35,
+  "institution_groups": 30,
+  "source_urls_attempted": 49,
+  "list_detail_pagination_verified": 6,
+  "classifications": {
+    "STATIC_HTML": 23,
+    "JSON_API": 0,
+    "DYNAMIC": 0,
+    "LOGIN": 1,
+    "SPECIAL": 21,
+    "UNSUPPORTED": 2
+  },
+  "mvp_candidates": [
+    "khidi_business",
+    "kised_bid_public",
+    "rda_bid",
+    "seoul_rnd_notice",
+    "kipa_ip_didimdol",
+    "smtech_announcements"
+  ],
+  "method_notes": [
+    "Source extraction: stdlib ZIP/XML/BIFF12 record parsing; original workbook not modified.",
+    "Site evidence: web open/click HTML text and tool error observations; some pages are cached.",
+    "Local urllib HTTP failed with DNS getaddrinfo; browser host unavailable; native UI stopped because current URL could not be verified.",
+    "No browser network/XHR inspection; JSON API and mandatory JavaScript remain unknown, not absent.",
+    "SPECIAL includes inaccessible/unverified endpoints, not proof of a special runtime.",
+    "All enabled=false: inventory decisions only, no scraper or production activation."
+  ]
+}

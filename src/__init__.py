@@ -1,0 +1,1 @@
+"""Notice monitoring application package."""

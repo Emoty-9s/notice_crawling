@@ -6,10 +6,22 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from tools.windows_entry import launch_arguments
+from tools.windows_entry import launch_arguments, entry
 
 
 class WindowsPackagingTests(unittest.TestCase):
+    def test_normal_launch_keeps_offline_ui_entry(self):
+        with patch('tools.windows_entry.main', return_value=0) as main, patch('tools.windows_entry.smoke_check') as smoke:
+            self.assertEqual(entry(['--cache', 'existing.json']), 0)
+        main.assert_called_once_with(['--cache', 'existing.json'])
+        smoke.assert_not_called()
+
+    def test_smoke_mode_requires_explicit_feed_and_report(self):
+        with patch('tools.windows_entry.smoke_check', return_value=0) as smoke, patch('tools.windows_entry.main') as main:
+            self.assertEqual(entry(['--smoke-report', 'report.json', '--feed-url', 'https://example.test/']), 0)
+        smoke.assert_called_once_with('report.json', 'https://example.test/')
+        main.assert_not_called()
+
     def test_development_arguments_unchanged(self):
         args = ['--cache', 'relative.json', '--top-n', '1']
         with patch('sys.frozen', False, create=True):

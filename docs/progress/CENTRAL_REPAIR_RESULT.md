@@ -75,3 +75,15 @@ Historical provider rejection status cannot be retroactively identified;
 these tests establish queue progression when the provider accepts requests.
 
 Stage 1 regression: 450 tests, OK (original 446 plus four image-body cases).
+
+## Final local verification
+
+Full command: `.venv/Scripts/python.exe -m unittest discover -s tests`.
+**459 tests / OK / 43.045 seconds / exit 0**. This includes all original 446
+tests, four image-body tests, seven backlog tests and two packaging entry tests.
+Packaging-specific suite: six tests PASS. Both actual first-page scraper live
+runs and packaged public-feed sync/Tk runtime verification passed. See
+M16_1_RESULT.md for the independently rebuilt executable and exact evidence.
+`config/sites.yaml`, the workflow, existing central state and checked-in public
+feed were not changed. Secrets, private workbook and generated artifacts are
+ignored and excluded from staging.

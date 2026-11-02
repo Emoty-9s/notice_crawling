@@ -19,3 +19,8 @@ exe와 _internal 폴더를 함께 보관하세요. exe만 복사하면 실행되
 
 개인 DB/cache/개발용 테스트 데이터는 배포본에 포함되지 않습니다.
 사용자 파일을 _internal 폴더 안에 저장하지 마세요.
+
+명시적 배포본 점검 (일반 실행에는 네트워크 요청 없음):
+  notice_crawling.exe --smoke-report C:\원하는경로\smoke.json --feed-url https://emoty-9s.github.io/notice_crawling/
+임시 캐시에서 UPDATED/UNCHANGED 동기화와 Tk 화면 생성·종료를 확인합니다.
+개인 DB는 읽거나 만들지 않습니다. 결과 JSON의 status=SUCCESS와 종료 코드 0을 확인하세요.

@@ -1,7 +1,11 @@
 {
   "name": "Central notice daily and Pages",
   "on": {
-    "schedule": [{"cron": "17 22 * * *"}],
+    "schedule": [
+      {
+        "cron": "17 22 * * *"
+      }
+    ],
     "workflow_dispatch": {
       "inputs": {
         "bootstrap_state": {
@@ -13,29 +17,65 @@
       }
     }
   },
-  "permissions": {"contents": "read"},
-  "concurrency": {"group": "central-notice-pages", "cancel-in-progress": false},
-  "env": {"PYTHONUNBUFFERED": "1", "PYTHONUTF8": "1"},
+  "permissions": {
+    "contents": "read"
+  },
+  "concurrency": {
+    "group": "central-notice-pages",
+    "cancel-in-progress": false
+  },
+  "env": {
+    "PYTHONUNBUFFERED": "1",
+    "PYTHONUTF8": "1"
+  },
   "jobs": {
     "build": {
       "if": "${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}",
       "runs-on": "ubuntu-latest",
       "timeout-minutes": 45,
-      "permissions": {"contents": "read", "actions": "read"},
+      "permissions": {
+        "contents": "read",
+        "actions": "read"
+      },
       "steps": [
-        {"name": "Checkout", "uses": "actions/checkout@v6", "with": {"persist-credentials": false}},
-        {"name": "Python 3.13 (stdlib only; no pip packages)", "uses": "actions/setup-python@v6", "with": {"python-version": "3.13"}},
-        {"name": "Offline unittest regression", "run": "python -m unittest discover -s tests -v"},
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v6",
+          "with": {
+            "persist-credentials": false
+          }
+        },
+        {
+          "name": "Python 3.13 (stdlib only; no pip packages)",
+          "uses": "actions/setup-python@v6",
+          "with": {
+            "python-version": "3.13"
+          }
+        },
+        {
+          "name": "Offline unittest regression",
+          "run": "python -m unittest discover -s tests -v"
+        },
+        {
+          "name": "Create runtime enabled-site config",
+          "shell": "bash",
+          "run": "mkdir -p .run\npython - <<'PY'\nimport json\nfrom pathlib import Path\n\nsrc = Path('config/sites.yaml')\ndst = Path('.run/sites.yaml')\ndata = json.loads(src.read_text(encoding='utf-8'))\n\nenabled = {\n    'khidi_business',\n    'kised_bid_public',\n    'rda_bid',\n    'seoul_rnd_notice',\n    'kipa_bid',\n    'kista_ippro',\n    'ripc_pms',\n}\n\nfor site in data['sites']:\n    site['enabled'] = site['source_id'] in enabled\n\ndst.write_text(\n    json.dumps(data, ensure_ascii=False, indent=2) + '\n',\n    encoding='utf-8'\n)\n\nprint('runtime enabled sites:', sum(s['enabled'] for s in data['sites']))\nPY"
+        },
         {
           "name": "Check enabled sites and Gemini configuration (no values printed)",
-          "run": "python -m tools.actions_support preflight",
-          "env": {"GEMINI_API_KEY": "${{ secrets.GEMINI_API_KEY }}", "GEMINI_MODEL": "${{ vars.GEMINI_MODEL }}"}
+          "run": "python -m tools.actions_support preflight --config .run/sites.yaml",
+          "env": {
+            "GEMINI_API_KEY": "${{ secrets.GEMINI_API_KEY }}",
+            "GEMINI_MODEL": "${{ vars.GEMINI_MODEL }}"
+          }
         },
         {
           "name": "Find previous state on default branch",
           "id": "state",
           "uses": "actions/github-script@v9",
-          "env": {"ALLOW_BOOTSTRAP": "${{ inputs.bootstrap_state == true }}"},
+          "env": {
+            "ALLOW_BOOTSTRAP": "${{ inputs.bootstrap_state == true }}"
+          },
           "with": {
             "script": "const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {...context.repo, name: 'central-state-v1', per_page: 100});\nconst candidates = artifacts.filter(a => a.workflow_run && a.workflow_run.head_branch === context.payload.repository.default_branch && a.workflow_run.head_repository_id === context.payload.repository.id).sort((a,b) => b.id-a.id);\nif (!candidates.length) {\n  if (process.env.ALLOW_BOOTSTRAP !== 'true') throw new Error('STATE_MISSING: restore a backup or manually bootstrap the first run; refusing silent cache reset');\n  core.warning('BOOTSTRAP: no earlier state exists; this run starts empty');\n  return;\n}\nconst artifact = candidates[0];\nif (artifact.expired) throw new Error('STATE_EXPIRED: restore a backup before running; refusing silent cache reset');\ncore.setOutput('artifact_id', String(artifact.id));\ncore.setOutput('run_id', String(artifact.workflow_run.id));\ncore.info('Previous default-branch state artifact selected');"
           }
@@ -44,7 +84,12 @@
           "name": "Restore previous Notice and scraper state",
           "if": "${{ steps.state.outputs.artifact_id != '' }}",
           "uses": "actions/download-artifact@v8",
-          "with": {"artifact-ids": "${{ steps.state.outputs.artifact_id }}", "run-id": "${{ steps.state.outputs.run_id }}", "github-token": "${{ github.token }}", "path": ".run/data"}
+          "with": {
+            "artifact-ids": "${{ steps.state.outputs.artifact_id }}",
+            "run-id": "${{ steps.state.outputs.run_id }}",
+            "github-token": "${{ github.token }}",
+            "path": ".run/data"
+          }
         },
         {
           "name": "Validate restored state before any external request",
@@ -55,16 +100,35 @@
           "name": "Run central pipeline (M10 exit 1 is a publishable partial result)",
           "id": "pipeline",
           "shell": "bash",
-          "env": {"GEMINI_API_KEY": "${{ secrets.GEMINI_API_KEY }}", "GEMINI_MODEL": "${{ vars.GEMINI_MODEL }}"},
-          "run": "set +e\npython -m src.main --data-dir .run/data --public-dir .run/public\ncode=$?\nset -e\necho \"exit_code=$code\" >> \"$GITHUB_OUTPUT\"\necho \"Pipeline exit code: $code (0=PASS, 1=PARTIAL, 2=fatal/configuration)\" >> \"$GITHUB_STEP_SUMMARY\"\nif [ \"$code\" -gt 1 ]; then\n  echo \"::error::Central pipeline failed (exit $code); check the named step and safe diagnostics\"\n  exit \"$code\"\nfi\nif [ \"$code\" -eq 1 ]; then\n  echo \"::warning::Partial collection/analysis; validated feed and state will still be published\"\nfi"
+          "env": {
+            "GEMINI_API_KEY": "${{ secrets.GEMINI_API_KEY }}",
+            "GEMINI_MODEL": "${{ vars.GEMINI_MODEL }}"
+          },
+          "run": "set +e\npython -m src.main --config .run/sites.yaml --data-dir .run/data --public-dir .run/public\ncode=$?\nset -e\necho \"exit_code=$code\" >> \"$GITHUB_OUTPUT\"\necho \"Pipeline exit code: $code (0=PASS, 1=PARTIAL, 2=fatal/configuration)\" >> \"$GITHUB_STEP_SUMMARY\"\nif [ \"$code\" -gt 1 ]; then\n  echo \"::error::Central pipeline failed (exit $code); check the named step and safe diagnostics\"\n  exit \"$code\"\nfi\nif [ \"$code\" -eq 1 ]; then\n  echo \"::warning::Partial collection/analysis; validated feed and state will still be published\"\nfi"
         },
-        {"name": "Validate and stage ONLY public JSON pair", "run": "python -m tools.actions_support stage"},
+        {
+          "name": "Validate and stage ONLY public JSON pair",
+          "run": "python -m tools.actions_support stage"
+        },
         {
           "name": "Persist central state for the next run (not Pages)",
           "uses": "actions/upload-artifact@v7",
-          "with": {"name": "central-state-v1", "path": ".run/data/notices.json\n.run/data/scraper_status.json", "if-no-files-found": "error", "retention-days": 90, "overwrite": true, "include-hidden-files": true}
+          "with": {
+            "name": "central-state-v1",
+            "path": ".run/data/notices.json\n.run/data/scraper_status.json",
+            "if-no-files-found": "error",
+            "retention-days": 90,
+            "overwrite": true,
+            "include-hidden-files": true
+          }
         },
-        {"name": "Upload validated Pages artifact", "uses": "actions/upload-pages-artifact@v4", "with": {"path": ".run/pages"}},
+        {
+          "name": "Upload validated Pages artifact",
+          "uses": "actions/upload-pages-artifact@v4",
+          "with": {
+            "path": ".run/pages"
+          }
+        },
         {
           "name": "Safe state diagnostics (always)",
           "if": "${{ always() }}",
@@ -75,7 +139,13 @@
           "name": "Retain safe diagnostics (always)",
           "if": "${{ always() }}",
           "uses": "actions/upload-artifact@v7",
-          "with": {"name": "central-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}", "path": ".actions-diagnostics.json", "if-no-files-found": "warn", "retention-days": 14, "include-hidden-files": true}
+          "with": {
+            "name": "central-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}",
+            "path": ".actions-diagnostics.json",
+            "if-no-files-found": "warn",
+            "retention-days": 14,
+            "include-hidden-files": true
+          }
         }
       ]
     },
@@ -83,15 +153,31 @@
       "needs": "build",
       "runs-on": "ubuntu-latest",
       "timeout-minutes": 10,
-      "permissions": {"contents": "read", "pages": "write", "id-token": "write"},
-      "environment": {"name": "github-pages", "url": "${{ steps.deployment.outputs.page_url }}"},
+      "permissions": {
+        "contents": "read",
+        "pages": "write",
+        "id-token": "write"
+      },
+      "environment": {
+        "name": "github-pages",
+        "url": "${{ steps.deployment.outputs.page_url }}"
+      },
       "steps": [
-        {"name": "Configure Pages (repository must enable Actions source)", "uses": "actions/configure-pages@v5"},
-        {"name": "Deploy JSON pair to GitHub Pages", "id": "deployment", "uses": "actions/deploy-pages@v4"},
+        {
+          "name": "Configure Pages (repository must enable Actions source)",
+          "uses": "actions/configure-pages@v5"
+        },
+        {
+          "name": "Deploy JSON pair to GitHub Pages",
+          "id": "deployment",
+          "uses": "actions/deploy-pages@v4"
+        },
         {
           "name": "Record deployed feed URLs",
           "shell": "bash",
-          "env": {"PAGE_URL": "${{ steps.deployment.outputs.page_url }}"},
+          "env": {
+            "PAGE_URL": "${{ steps.deployment.outputs.page_url }}"
+          },
           "run": "base=\"${PAGE_URL%/}\"\nfor file in notices.json metadata.json; do\n  printf '%s/%s\\n' \"$base\" \"$file\"\n  printf -- '- [%s](%s/%s)\\n' \"$file\" \"$base\" \"$file\" >> \"$GITHUB_STEP_SUMMARY\"\ndone"
         }
       ]

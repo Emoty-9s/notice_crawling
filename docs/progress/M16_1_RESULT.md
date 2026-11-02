@@ -1,5 +1,8 @@
 # M16.1 — Windows executable packaging
 
+> Historical packaging evidence below. The current Dark Night executable,
+> startup synchronization and verification are documented in DARK_NIGHT_UI_RESULT.md.
+
 ## Status and correction
 
 **PASS — independently rebuilt and executed on 2026-11-02.**

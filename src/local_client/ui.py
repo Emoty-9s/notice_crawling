@@ -1,237 +1,593 @@
-"""M15 offline Tk desktop UI. Launch: python -m src.local_client.ui."""
-
+"""Dark Night desktop monitor. Network I/O stays off the Tk thread."""
 import argparse
+import math
+import queue
+import threading
+import time
+import webbrowser
+from pathlib import Path
 
-from .dashboard import (DashboardError, load_dashboard, notice_details, notice_rows,
-                        recommendation_details, recommendation_rows)
+from .dashboard import DashboardError, notice_rows, recommendation_rows, recommendation_details
+from .monitor import (DEFAULT_FEED_URL, MonitorResult, notice_badge, ordered_notices,
+                      read_local, read_sources, safe_original_url, sync_monitor)
 from .performance import DEFAULT_DB_PATH
 from .sync import DEFAULT_CACHE_DIR
+from src.renderer.source_status import SOURCES
+
+BG = '#0c0f14'
+CARD = '#15191f'
+INNER = '#11151b'
+LINE = '#292f38'
+TEXT = '#e8ebef'
+MUTED = '#8993a3'
+ORANGE = '#c88350'
+BLUE = '#69a9e8'
+YELLOW = '#d3b66c'
+RED = '#ce777b'
+GREEN = '#76b69a'
+FONT = '맑은 고딕'
 
 
-ERROR_MESSAGES = {
-    'INVALID_OR_MISSING_CACHE': '정상 M12 cache 파일을 읽을 수 없습니다. 파일 위치와 JSON을 확인하세요.',
-    'INVALID_OR_MISSING_DATABASE': '정상 M13 DB를 읽을 수 없습니다. 기존 DB 파일 위치와 schema를 확인하세요.',
-    'INVALID_REFERENCE_YEAR': '기준 연도를 1~9999의 정수로 직접 입력하세요.',
-    'INVALID_TOP_N': 'TOP N은 0 이상의 정수로 입력하세요.',
-    'SELECT_NOTICE': '목록에서 공고를 선택하세요.',
-    'MATCH_INPUT_ERROR': '공고 또는 실적의 매칭 입력을 확인하세요.',
-}
+def blend(first, second, amount):
+    a, b = [tuple(int(c[i:i+2], 16) for i in (1, 3, 5)) for c in (first, second)]
+    return '#' + ''.join(f'{round(x+(y-x)*amount):02x}' for x, y in zip(a, b))
+
+
+def display_stamp(value):
+    if not value:
+        return '확인 이력 없음'
+    from datetime import datetime
+    try:
+        return datetime.fromisoformat(value).astimezone().strftime('%Y-%m-%d %H:%M')
+    except (TypeError, ValueError):
+        return '확인 이력 없음'
 
 
 class DashboardWindow:
     def __init__(self, root, *, cache_path=DEFAULT_CACHE_DIR/'snapshot.json', database_path=DEFAULT_DB_PATH,
-                 reference_year='', top_n=5):
+                 reference_year='', top_n=5, base_url=DEFAULT_FEED_URL, auto_sync=True):
         import tkinter as tk
         from tkinter import ttk
-        from tkinter.scrolledtext import ScrolledText
-
-        self.root = root
+        self.tk, self.ttk, self.root = tk, ttk, root
         self.data = None
         self.visible_notices = []
+        self.notice_cards = {}
+        self.expanded = set()
+        self.matches = {}
         self.results = []
         self.selected_notice_id = None
-        root.title('공고 · 로컬 실적 매칭')
-        root.geometry('1250x850')
-        root.minsize(900, 650)
-        root.columnconfigure(0, weight=1)
-        root.rowconfigure(3, weight=1)
-
+        self.detail_notice = None
+        self._baseline = None
+        self._closed = False
+        self._busy = False
+        self._generation = 0
+        self._events = queue.Queue()
+        self._jobs = set()
+        self._dots = []
+        self._source_widgets = {}
+        self._source_document = None
+        self._source_cached = False
+        self.database_error = True
+        self.connection_state = 'CHECKING'
+        self._last_sync = None
         self.cache_path = tk.StringVar(root, str(cache_path))
         self.database_path = tk.StringVar(root, str(database_path))
+        self.base_url = tk.StringVar(root, base_url)
         self.reference_year = tk.StringVar(root, str(reference_year))
         self.top_n = tk.StringVar(root, str(top_n))
         self.query = tk.StringVar(root)
-        self.institution = tk.StringVar(root)
-        self.category = tk.StringVar(root)
-        self.status = tk.StringVar(root, '로컬 파일만 읽습니다. 기준 연도는 직접 입력하세요.')
-        self.cache_status = tk.StringVar(root, 'cache 미로드')
-        self.result_status = tk.StringVar(root, '공고를 선택하고 매칭 실행을 누르세요.')
+        self.status = tk.StringVar(root, '중앙 공고를 확인하고 있습니다.')
+        self.github_text = tk.StringVar(root, '확인 중')
+        self.github_detail = tk.StringVar(root, '앱을 준비했습니다. GitHub 중앙 feed 확인을 시작합니다.')
+        self.count_text = tk.StringVar(root, '공고를 불러오는 중')
+        self.db_text = tk.StringVar(root, '실적 DB 확인 중')
+        root.title('Notice · 업무 모니터링 대시보드')
+        root.geometry('1380x940')
+        root.minsize(1040, 760)
+        root.configure(bg=BG)
+        self._theme()
+        self.background = tk.Canvas(root, bg=BG, highlightthickness=0)
+        self.background.place(x=0, y=0, relwidth=1, relheight=1)
+        self.background.bind('<Configure>', self._gradient)
+        self.shell = tk.Frame(root, bg=BG)
+        self.shell.place(x=28, y=22, relwidth=1, width=-56, relheight=1, height=-42)
+        self.shell.columnconfigure(0, weight=1)
+        self.shell.rowconfigure(4, weight=1)
 
-        files = ttk.LabelFrame(root, text='로컬 데이터 (읽기 전용)', padding=8)
-        files.grid(row=0, column=0, sticky='ew', padx=10, pady=8)
-        files.columnconfigure(1, weight=1)
-        for index, (label, variable) in enumerate((('M12 snapshot 파일', self.cache_path), ('M13 실적 DB', self.database_path))):
-            ttk.Label(files, text=label).grid(row=index, column=0, sticky='w', padx=4)
-            ttk.Entry(files, textvariable=variable).grid(row=index, column=1, sticky='ew', padx=5, pady=3)
-        ttk.Button(files, text='파일 다시 읽기', command=self.reload).grid(row=0, column=2, rowspan=2, padx=6)
-        ttk.Label(files, textvariable=self.cache_status).grid(row=2, column=0, columnspan=3, sticky='w', pady=4)
+        masthead = tk.Frame(self.shell, bg=BG)
+        masthead.grid(row=0, column=0, sticky='ew', pady=(0, 17))
+        self.label(masthead, 'NOTICE  /  INTELLIGENCE', bg=BG, size=11, color=MUTED, bold=True).pack(side='left')
+        self.button(masthead, '설정 · 정보', self.open_settings).pack(side='right')
+        self.label(masthead, 'CENTRAL MONITOR', bg=BG, size=9, color='#596575').pack(side='right', padx=20)
 
-        filters = ttk.Frame(root, padding=(10, 0))
-        filters.grid(row=1, column=0, sticky='ew')
-        ttk.Label(filters, text='기관 (빈 값=전체)').pack(side='left')
-        self.institution_box = ttk.Combobox(filters, textvariable=self.institution, state='readonly', width=18)
-        self.institution_box.pack(side='left', padx=5)
-        ttk.Label(filters, text='category').pack(side='left')
-        self.category_box = ttk.Combobox(filters, textvariable=self.category, state='readonly', width=16)
-        self.category_box.pack(side='left', padx=5)
-        ttk.Label(filters, text='검색').pack(side='left')
-        search_entry = ttk.Entry(filters, textvariable=self.query, width=24)
-        search_entry.pack(side='left', padx=5)
-        ttk.Button(filters, text='필터 적용', command=self.filter_notices).pack(side='left')
-        search_entry.bind('<Return>', lambda event: self.filter_notices())
+        github = self.card(self.shell)
+        github.grid(row=1, column=0, sticky='ew', pady=(0, 14))
+        line = tk.Frame(github, bg=CARD)
+        line.pack(fill='x', padx=22, pady=(16, 6))
+        self.label(line, 'GitHub Central Feed', size=15, bold=True).pack(side='left')
+        self.sync_button = self.button(line, '지금 동기화 ↻', self.start_sync)
+        self.sync_button.pack(side='right', padx=(18, 0))
+        self.github_status_label = self.label(line, variable=self.github_text, size=11, color=YELLOW)
+        self.github_status_label.pack(side='right', padx=(8, 0))
+        self.github_dot = self.dot(line, YELLOW)
+        self.github_dot.pack(side='right')
+        self.label(github, variable=self.github_detail, color=MUTED, size=10).pack(anchor='w', padx=22, pady=(0, 16))
 
-        controls = ttk.Frame(root, padding=10)
-        controls.grid(row=2, column=0, sticky='ew')
-        ttk.Label(controls, text='기준 연도 (직접 입력)').pack(side='left')
-        ttk.Entry(controls, textvariable=self.reference_year, width=8).pack(side='left', padx=6)
-        ttk.Label(controls, text='TOP N').pack(side='left')
-        ttk.Spinbox(controls, textvariable=self.top_n, from_=0, to=10000, width=7).pack(side='left', padx=6)
-        ttk.Button(controls, text='매칭 실행', command=self.run_match).pack(side='left', padx=6)
-        ttk.Label(controls, textvariable=self.result_status).pack(side='left', padx=8)
+        sources = tk.Frame(self.shell, bg=BG)
+        sources.grid(row=2, column=0, sticky='ew', pady=(0, 22))
+        for index, (source, name) in enumerate(SOURCES.items()):
+            sources.columnconfigure(index, weight=1, uniform='sources')
+            card = self.card(sources)
+            card.grid(row=0, column=index, sticky='nsew', padx=(0 if index == 0 else 5, 0 if index == 6 else 5))
+            name_label = self.label(card, name, size=10, bold=True, wrap=145)
+            name_label.pack(anchor='w', padx=12, pady=(13, 3))
+            card.bind('<Configure>', lambda event, label=name_label: label.configure(wraplength=max(80, event.width-26)))
+            self.label(card, source, size=8, color='#687586').pack(anchor='w', padx=12)
+            state = tk.Frame(card, bg=CARD)
+            state.pack(fill='x', padx=12, pady=(11, 2))
+            dot = self.dot(state, MUTED)
+            dot.pack(side='left')
+            label = self.label(state, '상태 정보 없음', size=9, color=MUTED)
+            label.pack(side='left', padx=(4, 0))
+            stamp = self.label(card, '마지막 중앙 수집', size=8, color='#687586')
+            stamp.pack(anchor='w', padx=12, pady=(0, 13))
+            self._source_widgets[source] = (dot, label, stamp)
 
-        panes = ttk.Panedwindow(root, orient='horizontal')
-        panes.grid(row=3, column=0, sticky='nsew', padx=10)
-        left, right = ttk.Frame(panes), ttk.Frame(panes)
-        panes.add(left, weight=1)
-        panes.add(right, weight=1)
-        for frame in (left, right):
-            frame.columnconfigure(0, weight=1)
-            frame.rowconfigure(1, weight=1)
-            frame.rowconfigure(3, weight=2)
+        heading = tk.Frame(self.shell, bg=BG)
+        heading.grid(row=3, column=0, sticky='ew', pady=(0, 12))
+        self.label(heading, '신규 공고', bg=BG, size=22, bold=True).pack(side='left')
+        self.label(heading, variable=self.count_text, bg=BG, size=10, color=MUTED).pack(side='left', padx=16)
+        self.label(heading, '이번 실행에서 확인한 신규 · 변경 우선', bg=BG, size=9, color='#687586').pack(side='right')
 
-        def tree(parent, columns, labels):
-            container = ttk.Frame(parent)
-            container.grid(row=1, column=0, sticky='nsew')
-            container.columnconfigure(0, weight=1)
-            container.rowconfigure(0, weight=1)
-            widget = ttk.Treeview(container, columns=columns, show='headings', selectmode='browse', height=10)
-            widget.grid(row=0, column=0, sticky='nsew')
-            for name, label in zip(columns, labels):
-                widget.heading(name, text=label)
-                widget.column(name, width=90 if name != 'title' else 260, minwidth=60)
-            scrollbar = ttk.Scrollbar(container, orient='vertical', command=widget.yview)
-            scrollbar.grid(row=0, column=1, sticky='ns')
-            horizontal = ttk.Scrollbar(container, orient='horizontal', command=widget.xview)
-            horizontal.grid(row=1, column=0, sticky='ew')
-            widget.configure(yscrollcommand=scrollbar.set, xscrollcommand=horizontal.set)
-            return widget
-
-        ttk.Label(left, text='공고 목록').grid(row=0, column=0, sticky='w')
-        self.notice_tree = tree(left, ('id', 'title', 'category'), ('공고 ID', '제목', 'category'))
-        ttk.Label(left, text='선택 공고 상세').grid(row=2, column=0, sticky='w', pady=4)
-        self.notice_text = ScrolledText(left, wrap='word', height=15, state='disabled', font=('맑은 고딕', 10))
-        self.notice_text.grid(row=3, column=0, sticky='nsew')
-        ttk.Label(right, text='추천 실적 (총점 내림차순 · 동점 ID 순)').grid(row=0, column=0, sticky='w')
-        self.result_tree = tree(right, ('ranking', 'id', 'title', 'score'), ('순위', '실적 ID', '과제명', '총점'))
-        ttk.Label(right, text='추천 선택 → 규칙별 점수와 근거').grid(row=2, column=0, sticky='w', pady=4)
-        self.reason_text = ScrolledText(right, wrap='word', height=15, state='disabled', font=('맑은 고딕', 10))
-        self.reason_text.grid(row=3, column=0, sticky='nsew')
-        ttk.Label(root, textvariable=self.status, wraplength=1200, padding=10).grid(row=4, column=0, sticky='ew')
-
-        self.notice_tree.bind('<<TreeviewSelect>>', self.select_notice)
-        self.result_tree.bind('<<TreeviewSelect>>', self.select_result)
+        self.content = tk.Frame(self.shell, bg=BG)
+        self.content.grid(row=4, column=0, sticky='nsew')
+        self.content.columnconfigure(0, weight=1)
+        self.content.rowconfigure(1, weight=1)
+        toolbar = tk.Frame(self.content, bg=BG)
+        toolbar.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 12))
+        search = self.entry(toolbar, self.query, width=26)
+        search.pack(side='left', ipady=5)
+        search.bind('<Return>', lambda event: self.filter_notices())
+        self.button(toolbar, '검색', self.filter_notices).pack(side='left', padx=(6, 18))
+        self.label(toolbar, '매칭 기준 연도', bg=BG, size=9, color=MUTED).pack(side='left')
+        self.entry(toolbar, self.reference_year, width=6).pack(side='left', padx=(8, 14), ipady=5)
+        self.label(toolbar, 'TOP N', bg=BG, size=9, color=MUTED).pack(side='left')
+        self.entry(toolbar, self.top_n, width=4).pack(side='left', padx=8, ipady=5)
+        self.label(toolbar, variable=self.db_text, bg=BG, size=9, color=MUTED).pack(side='right')
+        self.canvas = tk.Canvas(self.content, bg=BG, highlightthickness=0, bd=0)
+        self.canvas.grid(row=1, column=0, sticky='nsew')
+        scrollbar = ttk.Scrollbar(self.content, orient='vertical', command=self.canvas.yview)
+        scrollbar.grid(row=1, column=1, sticky='ns', padx=(8, 0))
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        self.body = tk.Frame(self.canvas, bg=BG)
+        self._body_id = self.canvas.create_window((0, 0), window=self.body, anchor='nw')
+        self.body.bind('<Configure>', lambda event: self.canvas.configure(scrollregion=self.canvas.bbox('all')))
+        self.canvas.bind('<Configure>', lambda event: self.canvas.itemconfigure(self._body_id, width=event.width))
+        root.bind('<MouseWheel>', self._wheel, add='+')
+        self.label(self.shell, variable=self.status, bg=BG, color='#748092', size=9).grid(row=5, column=0, sticky='w', pady=(13, 0))
         for variable in (self.reference_year, self.top_n):
-            variable.trace_add('write', lambda *args: self.clear_results())
-        for variable in (self.cache_path, self.database_path):
-            variable.trace_add('write', lambda *args: self.invalidate_data())
-        self.reload()
+            variable.trace_add('write', self._invalidate_matches)
+        root.bind('<Destroy>', self._destroyed, add='+')
+        self._render_list()
+        self._schedule(80, self._pulse)
+        self._schedule(100, self._poll)
+        if auto_sync:
+            self._schedule(60, self.start_sync)
+        else:
+            self._apply_local(read_local(self.cache_path.get(), self.database_path.get(), self.base_url.get()))
 
-    @staticmethod
-    def _text(widget, value):
-        widget.configure(state='normal')
-        widget.delete('1.0', 'end')
-        widget.insert('1.0', value)
-        widget.configure(state='disabled')
+    def _theme(self):
+        style = self.ttk.Style(self.root)
+        style.theme_use('clam')
+        style.configure('Vertical.TScrollbar', background=LINE, troughcolor=BG, bordercolor=BG,
+                        arrowcolor=MUTED, lightcolor=LINE, darkcolor=LINE)
+        self.root.option_add('*Font', (FONT, 10))
 
-    def clear_results(self):
-        self.results = []
-        self.result_tree.delete(*self.result_tree.get_children())
-        self._text(self.reason_text, '')
-        self.result_status.set('공고를 선택하고 매칭 실행을 누르세요.')
+    def label(self, parent, text=None, *, variable=None, size=10, color=TEXT, bg=CARD, bold=False, wrap=None):
+        options = dict(bg=bg, fg=color, font=(FONT, size, 'bold' if bold else 'normal'),
+                       anchor='w', justify='left', bd=0)
+        if variable is not None:
+            options['textvariable'] = variable
+        else:
+            options['text'] = text
+        if wrap:
+            options['wraplength'] = wrap
+        label = self.tk.Label(parent, **options)
+        if wrap:
+            parent.bind('<Configure>', lambda event, target=label: target.configure(wraplength=max(80, event.width-48)), add='+')
+        return label
 
-    def invalidate_data(self):
-        self.data = None
-        self.clear_results()
-        self.selected_notice_id = None
-        self.visible_notices = []
-        self.notice_tree.delete(*self.notice_tree.get_children())
-        self._text(self.notice_text, '')
-        self.cache_status.set('cache 미로드')
-        self.status.set('로컬 파일 경로를 확인하고 파일 다시 읽기를 누르세요.')
+    def button(self, parent, text, command):
+        return self.tk.Button(parent, text=text, command=command, bg='#20262f', fg=TEXT,
+                              activebackground='#2a3039', activeforeground=TEXT, relief='flat',
+                              bd=0, padx=13, pady=7, cursor='hand2', font=(FONT, 9),
+                              highlightthickness=1, highlightbackground=LINE, highlightcolor=ORANGE)
 
-    def reload(self):
-        self.invalidate_data()
-        try:
-            self.data = load_dashboard(self.cache_path.get(), self.database_path.get())
-        except DashboardError as error:
-            self.status.set(ERROR_MESSAGES.get(str(error), '로컬 데이터 오류') + f' [{error}]')
+    def entry(self, parent, variable, width=24):
+        return self.tk.Entry(parent, textvariable=variable, width=width, bg=INNER, fg=TEXT,
+                             insertbackground=TEXT, relief='flat', highlightthickness=1,
+                             highlightbackground=LINE, highlightcolor=ORANGE, font=(FONT, 10))
+
+    def card(self, parent):
+        frame = self.tk.Frame(parent, bg=CARD, highlightthickness=1, highlightbackground=LINE)
+        # Four restrained bands imitate light falling underneath the card.
+        glow = self.tk.Frame(frame, bg=CARD, height=4)
+        glow.pack(side='bottom', fill='x')
+        for color in ('#211e1d', '#2a221e', '#30241e', '#251f1d'):
+            self.tk.Frame(glow, height=1, bg=color).pack(fill='x')
+        return frame
+
+    def dot(self, parent, color):
+        canvas = self.tk.Canvas(parent, width=14, height=16, bg=CARD, highlightthickness=0)
+        canvas.create_oval(3, 4, 11, 12, fill=color, outline='', tags='light')
+        canvas.light_color = color
+        self._dots.append(canvas)
+        return canvas
+
+    def _gradient(self, event):
+        self.background.delete('gradient')
+        for i in range(80):
+            t = i / 79
+            color = blend('#0b0d10', '#111419', t*2) if t <= .5 else blend('#111419', '#08090b', (t-.5)*2)
+            self.background.create_rectangle(0, i*event.height/80, event.width, (i+1)*event.height/80+1,
+                                             fill=color, outline='', tags='gradient')
+
+    def _schedule(self, delay, callback):
+        if self._closed:
             return
-        notices = self.data.snapshot['feed']['notices']
-        self.institution.set('')
-        self.category.set('')
-        self.institution_box.configure(values=[''] + sorted({row['institution'] for row in notices}))
-        self.category_box.configure(values=[''] + sorted({row['category'] for row in notices}))
-        stamp = self.data.snapshot['metadata']['generated_at']
-        self.cache_status.set(f'검증된 로컬 cache | 생성 시각: {stamp} | 공고 {len(notices)}건 | 실적 {len(self.data.performances)}건')
+        holder = []
+        def run():
+            self._jobs.discard(holder[0])
+            if not self._closed:
+                callback()
+        holder.append(self.root.after(delay, run))
+        self._jobs.add(holder[0])
+
+    def _pulse(self):
+        # Two-second rise/fall; never turns a light off.
+        brightness = .78 + .22 * (math.sin(time.monotonic()*math.pi/2)+1)/2
+        for dot in self._dots:
+            dot.itemconfigure('light', fill=blend(CARD, dot.light_color, brightness))
+        self._schedule(80, self._pulse)
+
+    def _destroyed(self, event):
+        if event.widget is self.root:
+            self.close()
+
+    def close(self):
+        self._closed = True
+        self._generation += 1
+        for job in tuple(self._jobs):
+            self.root.after_cancel(job)
+        self._jobs.clear()
+
+    def _wheel(self, event):
+        if event.widget.winfo_toplevel() is self.root:
+            self.canvas.yview_scroll(-int(event.delta / 120), 'units')
+
+    def start_sync(self):
+        if self._closed or self._busy:
+            return
+        self._busy = True
+        self.sync_button.configure(state='disabled')
+        self.set_connection('CHECKING')
+        token = self._generation
+        base, cache, database = self.base_url.get(), self.cache_path.get(), self.database_path.get()
+        # Capture Tk variables here. Worker threads never access Tk objects.
+        def work():
+            try:
+                local = read_local(cache, database, base)
+                self._events.put((token, 'local', local))
+                result = sync_monitor(base, cache, database)
+                self._events.put((token, 'feed', result))
+                if result.data is not None:
+                    self._events.put((token, 'sources', read_sources(base, cache)))
+            except Exception:
+                self._events.put((token, 'feed', MonitorResult('ERROR', None, error_code='SYNC_ERROR')))
+            finally:
+                self._events.put((token, 'done', None))
+        threading.Thread(target=work, name='notice-feed-sync', daemon=True).start()
+
+    def _poll(self):
+        try:
+            while True:
+                token, kind, result = self._events.get_nowait()
+                if token != self._generation:
+                    continue
+                if kind == 'local':
+                    self._apply_local(result)
+                elif kind == 'feed':
+                    self._apply_feed(result)
+                elif kind == 'sources':
+                    self._source_document, self._source_cached = result
+                    self._render_sources()
+                elif kind == 'done':
+                    self._busy = False
+                    self.sync_button.configure(state='normal')
+        except queue.Empty:
+            pass
+        self._schedule(100, self._poll)
+
+    def _apply_local(self, result):
+        if self._baseline is None:
+            self._baseline = {n['notice_id']: n['updated_at'] for n in result.data.snapshot['feed']['notices']} if result else {}
+        if result:
+            self._apply_data(result)
+            if not self._busy:
+                self.set_connection('FALLBACK')
+
+    def _apply_feed(self, result):
+        if result.data is not None:
+            self._apply_data(result)
+        elif self.data is not None:
+            # Unexpected optional worker failures must not erase valid rows.
+            result = MonitorResult('FALLBACK', self.data, database_error=self.database_error)
+        self._last_sync = result.checked_at or self._last_sync
+        self.set_connection(result.connection)
+        if result.data is None:
+            self.status.set('GitHub 연결 실패 · 사용 가능한 저장 데이터가 없습니다. 네트워크와 설정을 확인해 주세요.')
+            self._render_list()
+
+    def _apply_data(self, result):
+        self.data = result.data
+        self.database_error = result.database_error
+        self.matches.clear()
+        self.db_text.set('실적 DB 미연결 · 설정에서 연결' if self.database_error else f'로컬 실적 {len(self.data.performances):,}건 연결')
         self.filter_notices()
 
+    def set_connection(self, state):
+        self.connection_state = state
+        color, text = {
+            'CHECKING': (YELLOW, '확인 중'),
+            'FALLBACK': (YELLOW, '마지막 저장 데이터 사용 중'),
+            'ERROR': (RED, 'GitHub 연결 실패'),
+        }.get(state, (BLUE, 'GitHub 연결 정상'))
+        self.github_text.set(text)
+        self.github_status_label.configure(fg=color)
+        self.github_dot.light_color = color
+        if state == 'CHECKING':
+            detail = '동기화 중 · 저장된 공고가 있으면 먼저 표시합니다.'
+        elif state == 'FALLBACK':
+            detail = '마지막 저장 데이터 사용 중 · 중앙 최신 상태는 확인하지 못했습니다.'
+        elif state == 'ERROR':
+            detail = '연결 실패 · 사용할 수 있는 캐시가 없습니다. 잠시 후 다시 동기화해 주세요.'
+        else:
+            detail = f'마지막 동기화 {display_stamp(self._last_sync)}  ·  최신 공고 확인 완료'
+        if self.data and state != 'CHECKING':
+            detail += f"  /  중앙 feed 생성 {display_stamp(self.data.snapshot['metadata']['generated_at'])}"
+        self.github_detail.set(detail)
+
+    def _render_sources(self):
+        records = {r['source_id']: r for r in self._source_document['sources']} if self._source_document else {}
+        for source, (dot, label, stamp) in self._source_widgets.items():
+            row = records.get(source)
+            state = row['status'] if row else 'UNKNOWN'
+            color, text = {'SUCCESS': (GREEN, '정상'), 'ERROR': (RED, '수집 오류')}.get(state, (MUTED, '상태 정보 없음'))
+            dot.light_color = color
+            count = f" · {row['notices_found']}건" if row and row['notices_found'] is not None and state == 'SUCCESS' else ''
+            label.configure(text=text + (' · 저장 상태' if self._source_cached else count), fg=color)
+            stamp.configure(text=display_stamp(row['checked_at']) if row else '마지막 중앙 수집 미제공')
+
+    def _invalidate_matches(self, *args):
+        self.matches.clear()
+        self.results = []
+        if self.detail_notice:
+            self.show_detail(self.detail_notice)
+        else:
+            self._render_list()
+
     def filter_notices(self):
-        self.clear_results()
-        self.selected_notice_id = None
-        self._text(self.notice_text, '')
-        self.notice_tree.delete(*self.notice_tree.get_children())
-        if self.data is None:
-            return
-        self.visible_notices = notice_rows(self.data, query=self.query.get(), institution=self.institution.get(), category=self.category.get())
-        for index, row in enumerate(self.visible_notices):
-            self.notice_tree.insert('', 'end', iid=str(index), values=(row['notice_id'], row['title'], row['category']))
-        self.status.set(f'표시 공고 {len(self.visible_notices)}건. 공고 선택 → 기준 연도 입력 → 매칭 실행. 네트워크 호출 없음.')
+        if self.data:
+            self.visible_notices = ordered_notices(notice_rows(self.data, query=self.query.get()), self._baseline or {})
+        else:
+            self.visible_notices = []
+        if self.detail_notice:
+            notice = next((n for n in self.data.snapshot['feed']['notices'] if n['notice_id'] == self.detail_notice['notice_id']), None) if self.data else None
+            if notice:
+                self.show_detail(notice)
+            else:
+                self.show_list()
+        else:
+            self._render_list()
 
-    def select_notice(self, event=None):
-        self.clear_results()
-        selection = self.notice_tree.selection()
-        if not selection:
-            return
-        notice = self.visible_notices[int(selection[0])]
-        self.selected_notice_id = notice['notice_id']
-        self._text(self.notice_text, notice_details(notice))
+    def _clear_body(self):
+        for child in self.body.winfo_children():
+            child.destroy()
+        self.notice_cards = {}
 
-    def run_match(self):
-        self.clear_results()
-        if self.data is None:
-            self.status.set('먼저 정상 cache와 실적 DB를 파일 다시 읽기로 불러오세요.')
+    def _render_list(self):
+        self._clear_body()
+        new = sum(notice_badge(n, self._baseline or {}) == 'NEW' for n in self.visible_notices)
+        self.count_text.set(f'{len(self.visible_notices):,}건  /  NEW {new:,}')
+        if not self.visible_notices:
+            card = self.card(self.body)
+            card.pack(fill='x', pady=(0, 10))
+            text = ('GitHub 연결 실패 · 저장된 공고가 없습니다.' if self.connection_state == 'ERROR' else
+                    ('검색 조건에 맞는 공고가 없습니다.' if self.query.get().strip() else '현재 공개된 공고가 없습니다.')
+                    if self.data else '중앙 공고를 확인하고 있습니다.')
+            self.label(card, text, size=13).pack(anchor='w', padx=24, pady=(26, 8))
+            self.label(card, '지금 동기화 또는 설정에서 연결 정보를 확인할 수 있습니다.', color=MUTED).pack(anchor='w', padx=24, pady=(0, 26))
+        for notice in self.visible_notices:
+            self._notice_card(notice)
+        self.status.set('공고 제목을 눌러 상세 보기  ·  실적 매칭은 로컬 PC에서만 계산합니다.')
+
+    def _notice_card(self, notice):
+        card = self.card(self.body)
+        card.pack(fill='x', pady=(0, 12))
+        badge = notice_badge(notice, self._baseline or {})
+        top = self.tk.Frame(card, bg=CARD)
+        top.pack(fill='x', padx=22, pady=(16, 8))
+        self.label(top, {'EXISTING': 'SAVED'}.get(badge, badge), size=8,
+                   color=ORANGE if badge == 'NEW' else MUTED, bold=True).pack(side='left', padx=(0, 12))
+        self.label(top, notice['institution'], size=10, color=MUTED).pack(side='left')
+        self.label(top, notice.get('participation_type') or '참여 형태 미제공', size=9, color=MUTED).pack(side='right')
+        title = self.label(card, notice['title'], size=14, bold=True, wrap=1100)
+        title.pack(anchor='w', fill='x', padx=22, pady=(0, 10))
+        title.configure(cursor='hand2')
+        title.bind('<Button-1>', lambda event, n=notice: self.show_detail(n))
+        card.bind('<Button-1>', lambda event, n=notice: self.show_detail(n))
+        footer = self.tk.Frame(card, bg=CARD)
+        footer.pack(fill='x', padx=22, pady=(0, 15))
+        self.label(footer, self.period(notice) + '    ·    ' + notice['category'], size=10, color=MUTED).pack(side='left')
+        button = self.button(footer, '실적 매칭 펼쳐보기  ▾', lambda n=notice: self.toggle_match(n['notice_id']))
+        button.pack(side='right')
+        panel = self.tk.Frame(card, bg=INNER)
+        self.notice_cards[notice['notice_id']] = dict(card=card, panel=panel, button=button, notice=notice)
+        if notice['notice_id'] in self.expanded:
+            card.configure(highlightbackground='#634b38')
+            panel.pack(fill='x', padx=1, pady=(0, 1))
+            button.configure(text='실적 매칭 접기  ▴')
+            self._render_matches(panel, notice)
+
+    @staticmethod
+    def period(notice):
+        return f"접수  {notice.get('apply_start') or '시작일 미제공'}  —  {notice.get('apply_end') or '마감일 미제공'}"
+
+    def toggle_match(self, notice_id):
+        row = self.notice_cards[notice_id]
+        if notice_id in self.expanded:
+            self.expanded.remove(notice_id)
+            row['panel'].pack_forget()
+            row['button'].configure(text='실적 매칭 펼쳐보기  ▾')
+            row['card'].configure(highlightbackground=LINE)
+        else:
+            self.expanded.add(notice_id)
+            row['panel'].pack(fill='x', padx=1, pady=(0, 1))
+            row['button'].configure(text='실적 매칭 접기  ▴')
+            row['card'].configure(highlightbackground='#634b38')
+            self._render_matches(row['panel'], row['notice'])
+
+    def _render_matches(self, parent, notice):
+        self.results = []
+        for child in parent.winfo_children():
+            child.destroy()
+        self.label(parent, '우리 실적 매칭', bg=INNER, size=11, bold=True).pack(anchor='w', padx=22, pady=(17, 5))
+        if self.database_error:
+            self.label(parent, '실적 DB를 연결하면 이 공고의 추천 순위와 점수 근거가 여기에 표시됩니다.',
+                       bg=INNER, color=MUTED).pack(anchor='w', padx=22, pady=(3, 20))
             return
         try:
-            self.results = recommendation_rows(self.data, self.selected_notice_id, reference_year=self.reference_year.get(), top_n=self.top_n.get())
+            key = (notice['notice_id'], self.reference_year.get(), self.top_n.get())
+            if key not in self.matches:
+                self.matches[key] = recommendation_rows(self.data, notice['notice_id'], reference_year=key[1], top_n=key[2])
+            rows = self.matches[key]
         except DashboardError as error:
-            self.status.set(ERROR_MESSAGES.get(str(error), '매칭 표시 오류') + f' [{error}]')
+            message = '매칭 기준 연도를 1~9999의 정수로 입력해 주세요.' if str(error) == 'INVALID_REFERENCE_YEAR' else 'TOP N을 0 이상의 정수로 입력해 주세요.'
+            self.label(parent, message, bg=INNER, color=YELLOW).pack(anchor='w', padx=22, pady=(3, 20))
             return
-        for index, row in enumerate(self.results):
-            self.result_tree.insert('', 'end', iid=str(index), values=(row['ranking'], row['performance_id'], row['project_name'], row['total_score']))
-        self.result_status.set(f'기준 연도 {self.reference_year.get()} | TOP {self.top_n.get()} | 결과 {len(self.results)}건')
-        self.status.set('추천 결과를 선택하면 규칙별 점수와 합계를 확인할 수 있습니다.' if self.results else '추천 결과 없음 (빈 실적 DB 또는 TOP N=0).')
-        if self.results:
-            self.result_tree.selection_set('0')
-            self.select_result()
+        self.results = rows
+        if notice['notice_id'] in self.notice_cards:
+            self.notice_cards[notice['notice_id']]['button'].configure(text=f'실적 매칭 접기 · {len(rows)}건  ▴')
+        if not rows:
+            self.label(parent, '매칭 결과 없음 · 실적 DB가 비어 있거나 TOP N이 0입니다.', bg=INNER, color=MUTED).pack(anchor='w', padx=22, pady=(3, 20))
+        for row in rows:
+            block = self.tk.Frame(parent, bg=INNER)
+            block.pack(fill='x', padx=22, pady=(8, 12))
+            headline = self.tk.Frame(block, bg=INNER)
+            headline.pack(fill='x', pady=(0, 7))
+            headline.columnconfigure(0, weight=1)
+            self.label(headline, f"{row['ranking']:02d}   {row['project_name']}", bg=INNER, size=11, bold=True, wrap=950).grid(row=0, column=0, sticky='w')
+            self.label(headline, f"{row['total_score']}점", bg=INNER, size=13, bold=True).grid(row=0, column=1, sticky='ne', padx=(15, 0))
+            # Public matcher output only: no client, notes, attorney or private SQL fields.
+            explanation = recommendation_details(row).split('\n')[2:]
+            self.label(block, '\n'.join(explanation), bg=INNER, size=9, color=MUTED, wrap=1080).pack(anchor='w')
+        self.status.set(f"이 공고의 매칭 {len(rows)}건  ·  기준 연도 {self.reference_year.get()}  ·  계산 방식은 기존 matcher와 동일합니다.")
 
-    def select_result(self, event=None):
-        selection = self.result_tree.selection()
-        if selection:
-            self._text(self.reason_text, recommendation_details(self.results[int(selection[0])]))
+    def show_detail(self, notice):
+        self.detail_notice = notice
+        self.selected_notice_id = notice['notice_id']
+        self._clear_body()
+        top = self.tk.Frame(self.body, bg=BG)
+        top.pack(fill='x', pady=(0, 12))
+        self.button(top, '← 공고 목록으로', self.show_list).pack(side='left')
+        self.button(top, '원문 보기 ↗', lambda: self.open_original(notice)).pack(side='right')
+        card = self.card(self.body)
+        card.pack(fill='x', pady=(0, 14))
+        self.label(card, notice['institution'], color=MUTED, size=11).pack(anchor='w', padx=24, pady=(23, 8))
+        self.label(card, notice['title'], size=19, bold=True, wrap=1120).pack(anchor='w', padx=24, pady=(0, 12))
+        self.label(card, self.period(notice), color=MUTED).pack(anchor='w', padx=24, pady=(0, 25))
+        for label, value in (('공고 요약', notice['summary']), ('분류 · 참여 형태', f"{notice['category']}  /  {notice['participation_type']}"),
+                             ('키워드', '   ·   '.join(notice['keywords'])), ('참여 관련성', notice['relevance_reason'])):
+            self.label(card, label, size=10, color=MUTED, bold=True).pack(anchor='w', padx=24, pady=(10, 7))
+            self.label(card, value or '공개 feed에 제공된 내용이 없습니다.', size=11, wrap=1120).pack(anchor='w', padx=24, pady=(0, 15))
+        self.label(card, '공개 중앙 feed의 정보만 표시합니다. 첨부파일과 원문 전체는 원문 보기에서 확인하세요.',
+                   size=9, color='#687586', wrap=1100).pack(anchor='w', padx=24, pady=(5, 23))
+        matches = self.tk.Frame(self.body, bg=INNER, highlightbackground=LINE, highlightthickness=1)
+        matches.pack(fill='x', pady=(0, 12))
+        self._render_matches(matches, notice)
+        self.canvas.yview_moveto(0)
+
+    def show_list(self):
+        self.detail_notice = None
+        self.selected_notice_id = None
+        self._render_list()
+        self.canvas.yview_moveto(0)
+
+    def open_original(self, notice):
+        if safe_original_url(notice['url']):
+            webbrowser.open(notice['url'], new=2)
+
+    def open_settings(self):
+        dialog = self.tk.Toplevel(self.root)
+        dialog.title('연결 · 로컬 데이터 설정')
+        dialog.configure(bg=CARD)
+        dialog.geometry('760x360')
+        dialog.transient(self.root)
+        fields = []
+        for title, current in (('GitHub 공개 feed 주소', self.base_url), ('공고 캐시 파일', self.cache_path), ('로컬 실적 DB (읽기 전용)', self.database_path)):
+            self.label(dialog, title, color=MUTED).pack(anchor='w', padx=22, pady=(16, 6))
+            value = self.tk.StringVar(dialog, current.get())
+            self.entry(dialog, value, width=85).pack(fill='x', padx=22, ipady=5)
+            fields.append(value)
+        self.label(dialog, '기관 사이트에는 직접 접속하지 않습니다. 개인 실적은 로컬에서만 읽습니다.', size=9, color=MUTED).pack(anchor='w', padx=22, pady=16)
+        def apply():
+            if self._busy:
+                self.status.set('동기화가 끝난 후 설정을 적용해 주세요.')
+                return
+            self._generation += 1
+            for current, value in zip((self.base_url, self.cache_path, self.database_path), fields):
+                current.set(value.get().strip())
+            self.data = None
+            self._baseline = None
+            self.expanded.clear()
+            self.matches.clear()
+            self._source_document = None
+            self._source_cached = False
+            self._render_sources()
+            self.detail_notice = None
+            self.visible_notices = []
+            self._render_list()
+            dialog.destroy()
+            self.start_sync()
+        self.button(dialog, '적용 후 동기화', apply).pack(anchor='e', padx=22)
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description='M15 offline read-only local matching desktop UI.')
+    parser = argparse.ArgumentParser(description='Dark Night 업무용 공고 모니터링 대시보드')
     parser.add_argument('--cache', default=DEFAULT_CACHE_DIR/'snapshot.json')
     parser.add_argument('--db', default=DEFAULT_DB_PATH)
-    parser.add_argument('--reference-year', default='', help='Explicit year; otherwise input in the UI (no clock default)')
+    parser.add_argument('--base-url', default=DEFAULT_FEED_URL)
+    parser.add_argument('--reference-year', default='', help='매칭 기준 연도를 직접 지정')
     parser.add_argument('--top-n', default=5)
+    parser.add_argument('--offline', action='store_true', help='네트워크 없이 기존 캐시만 표시')
     args = parser.parse_args(argv)
     try:
         import tkinter as tk
     except ImportError:
-        print('UI ERROR: TK_UNAVAILABLE; use a Python installation with Tk support')
         return 2
     try:
         root = tk.Tk()
     except tk.TclError:
-        print('UI ERROR: DISPLAY_UNAVAILABLE; a local desktop session is required')
         return 2
+    window = None
     try:
-        DashboardWindow(root, cache_path=args.cache, database_path=args.db, reference_year=args.reference_year, top_n=args.top_n)
+        window = DashboardWindow(root, cache_path=args.cache, database_path=args.db, reference_year=args.reference_year,
+                                 top_n=args.top_n, base_url=args.base_url, auto_sync=not args.offline)
         root.protocol('WM_DELETE_WINDOW', root.quit)
         root.mainloop()
     finally:
+        if window:
+            window.close()
         root.destroy()
     return 0
 

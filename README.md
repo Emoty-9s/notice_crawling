@@ -120,7 +120,7 @@ custom_weights = MatchWeights(keyword=3, title=0)
 동점은 ID 오름차순이며 중복 키워드는 중복 가산하지 않습니다. DB/cache를 변경하거나 실적을 외부로 보내지 않습니다.
 자세한 규칙과 가중치 수정 방법은 [M14 결과](docs/progress/M14_RESULT.md)를 참고합니다.
 
-## 로컬 매칭 UI (M15)
+## Dark Night 업무용 대시보드
 
 Tk를 포함한 Python의 표준 Tkinter로 실행합니다. 웹 서버/추가 프레임워크/패키지 설치는 필요 없습니다.
 
@@ -130,24 +130,34 @@ Tk를 포함한 Python의 표준 Tkinter로 실행합니다. 웹 서버/추가 �
 .\.venv\Scripts\python.exe -m src.local_client.ui --help
 ```
 
-기존 정상 M12 snapshot과 M13 DB를 지정하고 **파일 다시 읽기 → 공고 선택 → 기준 연도 입력 → 매칭 실행 → 추천 선택** 순으로 사용합니다.
+앱이 먼저 표시된 뒤 GitHub 공개 feed를 백그라운드에서 동기화합니다.
+**GitHub 상태 → 7개 기관의 마지막 중앙 수집 상태 → 신규 공고 → 카드별 실적 매칭 펼치기** 순서입니다.
+제목을 누르면 앱 내부 상세 페이지로 이동하고, 원문 보기 버튼을 눌렀을 때만 기본 브라우저를 엽니다.
+추천 선택용 별도 패널은 제거했습니다. DB 경로와 feed/cache 경로는 상단 설정·정보에서 지정합니다.
 기준 연도는 자동으로 현재 연도를 사용하지 않습니다. 명령에서 생략하면 화면에서 직접 입력해야 합니다.
 TOP N은 기본 5이며 0 이상으로 조정할 수 있습니다. 예시의 2026은 사용자가 지정한 기준 연도입니다.
-공고 상세/기관·category 필터/검색, 실적 순위·과제명·총점, 규칙별 점수·근거·합계 일치 여부를 표시합니다.
+제목·기관·분류·키워드 검색, 실적 순위·과제명·총점, 규칙별 점수·근거·합계 일치 여부를 표시합니다.
 
-UI는 기존 matcher를 그대로 호출하고 DB를 SQLite mode=ro로 읽습니다. cache/DB 생성·수정, 다운로드, 원문 브라우저 실행은 하지 않습니다.
-파일이 없거나 손상됐다면 상태 메시지를 표시하며 빈 정상 데이터로 초기화하지 않습니다. 원문 URL은 텍스트로만 표시합니다.
-정상 데이터가 없으면 이번 UI가 대신 내려받거나 DB를 만들지 않으므로 기존 M12/M13 절차로 준비한 파일을 사용해야 합니다.
-경로/기준 연도/TOP N 변경 후 이전 결과는 지워져 다른 조건의 결과가 섞이지 않습니다.
+UI는 기존 matcher를 그대로 호출하고 DB를 SQLite mode=ro로 읽습니다. 실적 DB를 생성·수정하거나 업로드하지 않습니다.
+DB가 없어도 공고는 볼 수 있습니다. 매칭에 사용할 DB는 기존 M13 절차로 준비합니다.
+동기화 실패 시 같은 feed 주소의 마지막 정상 cache를 사용하고 노란색 상태를 표시합니다. cache도 없으면 빨간색 오류입니다.
+`--offline`은 기존 cache만 표시하고 네트워크를 사용하지 않습니다. `--base-url`로 공개 feed 디렉터리를 지정할 수 있습니다.
+NEW/UPDATED는 이번 앱 실행 전 cache와 비교한 표시이며 중앙 분석 상태를 변경하지 않습니다.
+기준 연도/TOP N 변경 후 이전 매칭은 무효화됩니다.
+
+기관 상태는 `source_status.json`의 마지막 중앙 수집 결과만 표시합니다. 로컬에서 기관 사이트를 검사하지 않습니다.
+이 선택적 문서가 미배포/누락되면 회색, 저장된 상태를 사용하면 저장 상태와 확인 시각을 표시합니다.
+공개 projection은 7개 허용 source의 `source_id/status/checked_at/notices_found`만 포함하며 private state나 오류 메시지는 공개하지 않습니다.
+기존 notices.json/metadata.json 및 state artifact 계약은 유지합니다.
 
 실사용 관찰은 [이슈](docs/usage/ISSUES.md)와 [개선 후보](docs/usage/IMPROVEMENTS.md)에 비식별 내용으로 기록할 수 있습니다.
-M11 배포 URL 확인과 이후 M12 실제 GitHub HTTP 검증은 이번 UI와 별도 잔여 작업입니다.
+현재 UI·exe 검증은 [Dark Night 결과](docs/progress/DARK_NIGHT_UI_RESULT.md)를 확인합니다.
 
 ## 인계
 
 ### Windows 실행파일 (M16.1 PASS)
 
-일반 PowerShell에서 PyInstaller 설치와 빌드, 실제 exe 실행 및 Tk UI 정상 표시를 확인했습니다(사용자 제공 외부 실측). M16.1은 PASS입니다.
+일반 PowerShell에서 PyInstaller 빌드와 실제 exe 실행·GitHub 동기화·Tk UI를 직접 검증했습니다.
 dist/notice_crawling/notice_crawling.exe를 더블클릭하면 실행됩니다. 실행하는 PC에는 Python/가상환경이 필요 없습니다.
 
 개발자가 다시 빌드하려면 프로젝트의 가상환경이 준비된 일반 PowerShell에서 다음을 실행합니다.
@@ -158,10 +168,10 @@ dist/notice_crawling/notice_crawling.exe를 더블클릭하면 실행됩니다. 
 
 빌드 스크립트는 requirements-build.txt의 PyInstaller를 프로젝트 .venv에만 설치하고 해당 앱의 기존 build/dist 산출물만 정리합니다.
 배포 시 dist/notice_crawling의 README.txt와 _internal을 포함한 폴더 전체를 복사해야 합니다. exe만 따로 복사하지 마세요.
-GUI는 기존 읽기 전용 UI이며 onedir/windowed로 구성했습니다. 검증 근거와 추가 관찰 범위는 [M16.1 결과](docs/progress/M16_1_RESULT.md)를 확인하세요.
+GUI는 Dark Night 모니터링 대시보드이며 onedir/windowed로 구성했습니다. 검증 근거는 [최신 UI 결과](docs/progress/DARK_NIGHT_UI_RESULT.md)를 확인하세요.
 
 기본 외부 데이터 경로는 %LOCALAPPDATA%/NoticeCrawling/cache/snapshot.json 및 %LOCALAPPDATA%/NoticeCrawling/performance.db입니다.
-기존 정상 파일은 UI의 두 경로 입력란에서 지정할 수 있고 --cache/--db 옵션도 유지합니다. UI가 cache/DB를 생성하거나 다운로드하지 않습니다.
+기존 정상 파일은 설정에서 지정할 수 있고 --cache/--db 옵션도 유지합니다. 공개 공고 cache만 동기화하며 실적 DB는 생성·수정하지 않습니다.
 UI가 config/sites.yaml을 읽지 않으므로 해당 config/중앙 scraper/개발 fixture/개인 DB/cache는 번들하지 않습니다. Tk/Python/SQLite runtime은 PyInstaller가 수집합니다.
 
 ### M16 RIPC / KISTA — PARTIAL

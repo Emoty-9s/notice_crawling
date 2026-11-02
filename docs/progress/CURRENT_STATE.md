@@ -1,5 +1,10 @@
 # Current State
 
+Latest UI work: Dark Night 업무 모니터링 대시보드. 상태 카드 / 비동기 GitHub 동기화 /
+공고별 매칭 accordion / 앱 내부 상세 페이지로 전면 개편. 최신 검증과 배포 상태는
+[DARK_NIGHT_UI_RESULT.md](DARK_NIGHT_UI_RESULT.md)를 확인한다. 아래 milestone 이력과 당시
+미검증 표시는 과거 기록이며 현재 UI 동작 설명보다 우선하지 않는다.
+
 ## Last Completed Milestone
 M16.1 — Windows executable packaging. PASS (2026-11-02, 사용자 제공 일반 PowerShell 설치/빌드/exe 실제 실행/Tk 정상 표시 근거). 기존 442개 + packaging 4개 = 446 unittest OK.
 M16 — RIPC/KISTA 수집원 추가. PASS (2026-11-02, 사용자 제공 일반 PowerShell 실제 HTTP/전체 회귀 결과 근거).

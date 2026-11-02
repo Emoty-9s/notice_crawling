@@ -14,6 +14,7 @@ from src.core.diff import compare_batch
 from src.core.storage import JsonStorage, _atomic_json, _read_json
 from src.pipeline import CONFIG_PATH, load_site_configs
 from src.renderer.feed import build_feed
+from src.renderer.source_status import public_source_status
 
 
 class ActionsCheckError(ValueError):
@@ -45,8 +46,8 @@ def validate_state(data_dir):
 
 
 def stage_public(data_dir, public_dir, stage_dir):
-    """Validate feed against the saved snapshot; copy only the two public files."""
-    notices, _ = validate_state(data_dir)
+    """Publish the unchanged feed pair plus an explicit minimal health projection."""
+    notices, statuses = validate_state(data_dir)
     public = Path(public_dir)
     for name in ('notices.json', 'metadata.json'):
         if not (public/name).is_file() or (public/name).is_symlink():
@@ -64,12 +65,14 @@ def stage_public(data_dir, public_dir, stage_dir):
         or type(metadata.get('schema_version')) is not int
         or type(metadata.get('notice_count')) is not int):
         raise ActionsCheckError('FEED_SNAPSHOT_MISMATCH: refuse stale or inconsistent publication')
+    health = public_source_status(statuses, expected['generated_at'])
     target = Path(stage_dir)
     if target.exists():
         raise ActionsCheckError('STAGE_EXISTS: use a fresh empty publication path')
     target.mkdir(parents=True)
     _atomic_json(target/'notices.json', expected)
     _atomic_json(target/'metadata.json', expected_metadata)
+    _atomic_json(target/'source_status.json', health)
     return expected_metadata
 
 

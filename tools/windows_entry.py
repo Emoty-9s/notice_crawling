@@ -25,7 +25,7 @@ def launch_arguments(argv=None):
     return defaults + args
 
 
-def smoke_check(report_path, feed_url):
+def smoke_check(report_path, feed_url, *, database_path=None):
     """Explicit packaged-runtime check; isolated cache, no personal database.
 
     Run with --smoke-report PATH --feed-url PUBLIC_BASE_URL. Normal launch
@@ -48,9 +48,29 @@ def smoke_check(report_path, feed_url):
                 raise RuntimeError('unexpected sync result')
             root = tk.Tk()
             root.withdraw()
+            from src.local_client.monitor import MonitorResult, read_sources
             window = DashboardWindow(root, cache_path=client.cache_path,
-                                     database_path=folder / 'absent.db')
+                                     database_path=database_path or folder / 'absent.db',
+                                     base_url=feed_url, reference_year='2026', auto_sync=False)
+            window._apply_feed(MonitorResult(second.status, window.data, database_error=window.database_error,
+                                            checked_at=second.metadata['generated_at']))
+            window._source_document, window._source_cached = read_sources(feed_url, client.cache_path)
+            window._render_sources()
             root.update()
+            report['github_state'] = window.github_text.get()
+            report['source_cards'] = len(window._source_widgets)
+            report['source_status_available'] = window._source_document is not None
+            report['notice_cards'] = len(window.notice_cards)
+            if window.visible_notices:
+                notice = window.visible_notices[0]
+                window.toggle_match(notice['notice_id'])
+                report['accordion'] = notice['notice_id'] in window.expanded
+                report['matching_count'] = len(window.results)
+                window.show_detail(notice)
+                report['detail'] = window.detail_notice['notice_id'] == notice['notice_id']
+                window.show_list()
+                report['back'] = window.detail_notice is None
+            report['removed_recommendation_selection'] = not hasattr(window, 'result_tree')
             report['tk_patchlevel'] = root.tk.call('info', 'patchlevel')
             report['ui_title'] = root.title()
             report['cache_path_correct'] = window.cache_path.get() == str(client.cache_path)
@@ -58,6 +78,7 @@ def smoke_check(report_path, feed_url):
             if report['database_created'] or not report['cache_path_correct']:
                 raise RuntimeError('unexpected path behavior')
             report['status'] = 'SUCCESS'
+            window.close()
     except Exception as error:
         report['error_type'] = type(error).__name__
     finally:
@@ -73,7 +94,10 @@ def entry(argv=None):
         parser = argparse.ArgumentParser(description='Opt-in isolated packaged UI/feed check')
         parser.add_argument('--smoke-report', required=True)
         parser.add_argument('--feed-url', required=True)
+        parser.add_argument('--smoke-db', help='Optional existing read-only database for match verification')
         options = parser.parse_args(args)
+        if options.smoke_db:
+            return smoke_check(options.smoke_report, options.feed_url, database_path=options.smoke_db)
         return smoke_check(options.smoke_report, options.feed_url)
     return main(launch_arguments(args))
 

@@ -107,7 +107,7 @@
           "run": "set +e\npython -m src.main --config .run/sites.yaml --data-dir .run/data --public-dir .run/public\ncode=$?\nset -e\necho \"exit_code=$code\" >> \"$GITHUB_OUTPUT\"\necho \"Pipeline exit code: $code (0=PASS, 1=PARTIAL, 2=fatal/configuration)\" >> \"$GITHUB_STEP_SUMMARY\"\nif [ \"$code\" -gt 1 ]; then\n  echo \"::error::Central pipeline failed (exit $code); check the named step and safe diagnostics\"\n  exit \"$code\"\nfi\nif [ \"$code\" -eq 1 ]; then\n  echo \"::warning::Partial collection/analysis; validated feed and state will still be published\"\nfi"
         },
         {
-          "name": "Validate and stage ONLY public JSON pair",
+          "name": "Validate and stage allowlisted public feed and minimal source health",
           "run": "python -m tools.actions_support stage"
         },
         {

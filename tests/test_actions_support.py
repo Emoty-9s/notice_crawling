@@ -12,6 +12,7 @@ from src.core.models import GeminiResult, Notice
 from src.core.diff import DiffConflictError
 from src.core.storage import JsonStorage, StorageFormatError
 from src.renderer.feed import write_feed
+from src.renderer.source_status import validate_source_status
 from tools.actions_support import ActionsCheckError, diagnostics, main, preflight, stage_public, validate_state
 
 
@@ -70,13 +71,13 @@ class ActionsSupportTests(unittest.TestCase):
                     preflight(self.config, environ=env)
                 self.assertNotIn(SECRET, str(error.exception))
 
-    def test_stage_only_allowlisted_pair_matching_saved_snapshot(self):
+    def test_stage_only_allowlisted_pair_and_minimal_health_matching_saved_snapshot(self):
         self.save()
         (self.public/'.env').write_text(SECRET, encoding='utf-8')
         (self.public/'private-state.json').write_text(SECRET, encoding='utf-8')
         metadata = stage_public(self.store.data_dir, self.public, self.stage)
         self.assertEqual(metadata['notice_count'], 1)
-        self.assertEqual({p.name for p in self.stage.iterdir()}, {'notices.json', 'metadata.json'})
+        self.assertEqual({p.name for p in self.stage.iterdir()}, {'notices.json', 'metadata.json', 'source_status.json'})
         text = (self.stage/'notices.json').read_text(encoding='utf-8')
         self.assertNotIn(SECRET, text)
         self.assertNotIn('content_text', text)
@@ -84,6 +85,21 @@ class ActionsSupportTests(unittest.TestCase):
     def test_empty_snapshot_is_valid_publication(self):
         self.save([])
         self.assertEqual(stage_public(self.store.data_dir, self.public, self.stage)['notice_count'], 0)
+
+    def test_public_health_does_not_copy_private_state_errors_or_unknown_sources(self):
+        self.save()
+        self.store.save_scraper_status({
+            'kipa_bid': dict(status='ERROR', last_attempt_at=STAMP, notices_found=0,
+                             error_type=SECRET, error_message=SECRET),
+            'not-public': dict(status='ERROR', error_message=SECRET),
+        })
+        stage_public(self.store.data_dir, self.public, self.stage)
+        text = (self.stage/'source_status.json').read_text(encoding='utf-8')
+        self.assertNotIn(SECRET, text)
+        self.assertNotIn('not-public', text)
+        doc = validate_source_status(json.loads(text))
+        row = next(r for r in doc['sources'] if r['source_id'] == 'kipa_bid')
+        self.assertEqual(row, dict(source_id='kipa_bid', status='ERROR', checked_at=STAMP, notices_found=0))
 
     def test_inconsistent_count_timestamp_or_schema_blocks_publication(self):
         self.save()

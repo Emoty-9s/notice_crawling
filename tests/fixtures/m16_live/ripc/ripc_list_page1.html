@@ -1,0 +1,626 @@
+
+ 
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>RIPC PMS - 협력회원</title>
+<link rel="icon" href="/resources/images/layout/favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="/resources/images/layout/favicon.ico" type="image/x-icon" />
+<!-- stylesheets -->
+
+	<link rel="stylesheet" type="text/css" href='https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css'>
+
+	<link rel="stylesheet" type="text/css" href='/resources/css/bootstrap.min.css'>
+
+	<link rel="stylesheet" type="text/css" href='/resources/lib/tui.pagination-3.3.2/dist/tui-pagination.css'>
+
+	<link rel="stylesheet" type="text/css" href='https://fonts.googleapis.com/icon?family=Material+Icons+Round'>
+
+	<link rel="stylesheet" type="text/css" href='/resources/lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css'>
+
+	<link rel="stylesheet" type="text/css" href='//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css'>
+
+	<link rel="stylesheet" type="text/css" href='/resources/lib/tui.pagination-3.3.2/dist/tui-pagination.css'>
+
+	<link rel="stylesheet" type="text/css" href='//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css'>
+
+	<link rel="stylesheet" type="text/css" href='/resources/css/swiper.min.css'>
+
+	<link rel="stylesheet" type="text/css" href='https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css'>
+
+	<link rel="stylesheet" type="text/css" href='/resources/css/pms/main.css'>
+
+	<link rel="stylesheet" type="text/css" href='/resources/css/pms/layout.css'>
+
+<!-- scripts -->
+
+	<script type="text/javascript" src='/resources/lib/jquery/jquery-1.12.4.min.js'></script>
+
+	<script type="text/javascript" src='/resources/js/jquery/jquery-ui-1.9.2.custom.min.js'></script>
+
+	<script type="text/javascript" src='/resources/lib/jquery/jquery-ui.min.js'></script>
+
+	<script type="text/javascript" src='/resources/js/popper.js'></script>
+
+	<script type="text/javascript" src='/resources/js/bootstrap.min.js'></script>
+
+	<script type="text/javascript" src='https://use.fontawesome.com/releases/v5.2.0/js/all.js'></script>
+
+	<script type="text/javascript" src='/resources/js/all.js'></script>
+
+	<script type="text/javascript" src='/resources/js/jsRender/jsrender.min.js'></script>
+
+	<script type="text/javascript" src='/resources/lib/tui.code-snippet-1.4.0/dist/tui-code-snippet.js'></script>
+
+	<script type="text/javascript" src='/resources/lib/tui.pagination-3.3.2/dist/tui-pagination.js'></script>
+
+	<script type="text/javascript" src='/resources/lib/jquery/jquery.blockui.min.js'></script>
+
+	<script type="text/javascript" src='/resources/js/utils/common.js'></script>
+
+	<script type="text/javascript" src='/resources/js/utils/fileDownload.js'></script>
+
+	<script type="text/javascript" src='/resources/js/common.js'></script>
+
+	<script type="text/javascript" src='/resources/lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js'></script>
+
+	<script type="text/javascript" src='/resources/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.ko.js'></script>
+
+	<script type="text/javascript" src='/resources/js/common_main.js'></script>
+
+	<script type="text/javascript" src='/resources/js/swiper.min.js'></script>
+
+	
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7LDF4TTHB4"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-7LDF4TTHB4');
+</script>
+
+
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<style>
+	.report_center_btn { margin: 24px 0; display: block; border: 1px solid #e0e0e0; border-radius: 4px; text-align: center; }
+	.report_center_btn img { width: 210px; height: auto; }
+    #left .menu_box .logo_wrapper.hide,
+    #left .menu_box ul.menu.hide { display: none !important; }
+</style>
+<script type="text/javascript">
+    $(function() {
+        $("#toggle").off("click").on("click", function () {
+            $(".menu_box .logo_wrapper, .menu_box ul.menu, #left .btn_group").toggleClass("hide");
+            $("#left,#wrap").toggleClass("show");
+            $(".icon_set, .header .logo_wrapper").toggle();
+            $(this).toggleClass('right_toggle');
+        });
+    });
+</script>
+<body>
+	<div id="left" class="collapse width type02">
+		<div class="icon_set">
+			<span class="material-icons-round">grid_view</span>
+			<span class="material-icons-round">task</span>
+			<span class="material-icons-round">menu_book</span>
+			<span class="material-icons-round">format_list_bulleted</span>
+		</div>
+		<div class="menu_box">
+            <button id="toggle" class="btn left_toggle"></button>
+            <div class="logo_wrapper">
+				<a href="/pms/cmn/partnerMain.do"><img class="logo" src="/resources/css/img/ripc_logo_s.png" alt="ripc_logo">
+				<span class="title">협력기관</span>
+				</a>
+				<img src="/resources/css/img/ripc_sub_logo_main_Landing.png" alt="사업관리시스템" class="sub_logo">
+			</div>
+			<ul class="menu">
+			<li><a class="first_menu" data-bs-toggle="collapse" href="#menu01">
+						<span class="material-icons-round">grid_view</span><label>기본 정보</label></a>
+					<ul class="second_menu collapse" id="menu01">
+                        
+                        
+                            <li id="liTenderNotice"><a href="/pms/biz/partner/tenderNotice/list.do">입찰사업 공고</a></li>
+                            <li id="liTenderApply"><a href="/pms/biz/partner/apply/list.do">입찰사업 신청현황</a></li>
+                        
+						<li id="liPoolInfo"><a href="/pms/biz/partner/pool/info.do">협력기관 Pool 현황</a></li>
+						<li id="liPoolApply"><a href="/pms/biz/partner/pool/apply.do">협력기관 Pool 신청</a></li>
+						<li id="liStaffInfo"><a href="/pms/biz/partner/staff/info.do">소속연구원 관리</a></li>
+						<li id="liStaffInput"><a href="javascript:moveStaffInput();">소속연구원 투입률</a></li>
+					</ul>
+				</li>
+			
+				<li>
+					<a class="first_menu" data-bs-toggle="collapse" href="#menu03">
+						<span class="material-icons-round">menu_book</span><label>사업수행 관리</label>
+					</a>
+					<ul class="second_menu collapse" id="menu03">
+						<li id="liCompanyInfo"><a href="/pms/biz/partner/info/viewInfo.do">기업정보 관리</a></li>
+						<li id="liAgreeInfo"><a href="/pms/biz/partner/agree/info.do">협약/계약 사업관리</a></li>
+						<li id="liSurvey"><a href="/pms/biz/partner/agree/viewSurveyList.do">만족도 관리</a></li>
+<!-- 						<li id="liContractInfo"><a href="/pms/biz/partner/contract/list.do">계약 사업관리</a></li> -->
+						<li id="lioverseasEnt"><a href="/pms/biz/partner/overseasEnt/listView.do">해외권리화 실적 추적</a></li>
+
+						
+						
+ 						 
+					</ul>
+				</li>
+				
+				<li><a class="first_menu" data-bs-toggle="collapse" href="#menu04"><span
+							class="material-icons-round">format_list_bulleted</span><label>게시판</label></a>
+					<ul class="second_menu collapse" id="menu04">
+						<li id="liBoardNotice"><a href="/pms/biz/partner/board/viewBoardList.do?boardCategoryCode=BD50000">공지사항</a></li>
+					
+                        <li id="liBoardCenterOneOnOne"><a href="/pms/biz/partner/board/viewBoardList.do?boardCategoryCode=BD50002">1:1 상담(지역센터)</a></li>
+						<li id="liBoardOneOnOne"><a href="/pms/biz/partner/board/viewBoardList.do?boardCategoryCode=BD50001">1:1 상담(발명진흥회)</a></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="h20"></div>
+		<div class="btn_group">
+			<img onclick="javascript:center_contact()" src="/resources/css/img/260313help_centerTel.png" alt="기술지원 전화" style="cursor: pointer; margin-top: 10px;">
+            <a href="/pms/biz/partner/board/viewBoardList.do?boardCategoryCode=BD50002"><img src="/resources/css/img/260313help_partner.png" alt="협력기관 문의(지역센터)" style="margin-top: 15px; cursor: pointer;"></a>
+            <a href="/pms/biz/partner/board/viewBoardList.do?boardCategoryCode=BD50001"><img src="/resources/css/img/260313help_staff.png" alt="협력기관 문의(발명진흥회)" style="margin-top: 10px; cursor: pointer;"></a>
+			<a class="report_center_btn" href="/pms/biz/main/viewBenefitFraudBoard.do?pageType=partner">
+				<img src="/resources/css/img/report_center.png" alt="부정수급 신고센터">
+			</a>
+            <a href="/manual/pms/partner/manual.html" class="contact_popup_btn"
+               target="_blank">
+                온라인매뉴얼 &nbsp; <span class="material-icons-round" style="font-size: 15px; vertical-align: middle;">open_in_new</span>
+            </a>
+		</div>
+	</div>
+</body>
+
+<input type="hidden" id="bizYearA" name="bizYear" value="" />
+
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	setBizYearA();
+});
+
+/* function viewSmallBusinessPartnerList(){
+	$("#goForm").attr.("actoin","/pms/biz/smallBusiness/supportListView.do").sbmit();
+} */
+
+function setBizYearA(){
+	var date = new Date();
+	var bizYear = date.getFullYear();
+
+	$("#bizYearA").val(bizYear);
+
+}
+
+	function moveStaffInput(){
+	 var bizYear = $("#bizYearA").val();
+
+		location.href="/pms/biz/partner/staff/input.do?bizYear=" + bizYear;
+	}
+
+	function center_contact() {
+		window.open('/pop.do?cookieName=centerContactPopUp', 'centerContactPopUp', 'width=550, height=630, top=250, left=700, menubar=no, status=no, toolbar=no, titlebar=yes, location=no, scrollbars=no, resizable=yes');
+	}
+</script>
+</html>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+	<div class="header">
+		<div class="logo_wrapper">
+			<a href="#"><img class="logo" src="/resources/css/img/ripc_logo_s.png" alt="ripc_logo" width="78"></a>
+			<span class="title">협력기관</span>
+		</div>
+		
+		<span class="status">
+		
+			
+			
+				<a href="/loginMain.do?belongType=C0001&belongClick=partner" class="login user_id">로그인</a>
+			
+		
+			
+			<a href="https://pms.ripc.org/www/main.do" class="portal" target="_blank">포털</a>
+			<a href="/manual/pms/partner/manual.html" class="manual"
+			target="_blank" style="font-weight: bold; color: #e74c3c;">
+                <strong>온라인매뉴얼</strong>
+            </a>
+<!-- 			<a href="#" class="setting">정보관리</a> -->
+		</span>
+	</div>
+</body>
+</html>
+<div id="wrap">
+
+
+
+<div id="content">
+	<div class="title_area">
+		<span>입찰사업 관리</span><i class="fas fa-caret-right"></i><span>입찰사업 입찰공고</span><i class="bi bi-flower3"></i>
+	</div>
+	<input type="hidden" id="currentPageNo" name="currentPageNo" value="" />
+	<div class="table_option">
+		<select class="form-select" name="bizYear" id="bizYear" onchange="getBizLev1List(); doSearch();">
+		
+		</select>
+		
+		<div class="srch-group">
+			<input type="text" placeholder="공고 제목" id="noticeTitle" value="" onkeydown="if(event.keyCode==13){doSearch();}">
+			<button class="btn search" type="button" onclick="doSearch();"></button>
+		</div>
+		<div class="srch-group-text">
+			<button class="btn search-text" type="button" onclick="doSearch();">검색</button>
+		</div>
+		<table class="table" style="border-color: #ffffff;">
+			<colgroup>
+				<col width="20px">
+			</colgroup>
+			<tr>
+				<th width="80" style="font-size: 13px; vertical-align: middle;">지역센터</th>
+				<td>
+					<div class="checkbox_grp" id="divCenter">
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th width="80" style="font-size: 13px; vertical-align: middle;">사업형태</th>
+				<td>
+					<div class="checkbox_grp" id="divBizCategory">
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div class="table_area">
+		
+		<div class="count_area right">
+			<select class="form-select count" id="recordCountPerPage" name="recordCountPerPage">
+				<option value="10" selected>10건</option>
+				<option value="20">20건</option>
+				<option value="50">50건</option>
+			</select>
+			<div class="result_count" id="divTotCnt"></div>
+		</div>
+		<table class="table table-bordered table_detail list">
+			<tr header>
+				<th>공고번호</th>
+				<th>센터</th>
+				<th>사업형태</th>
+				<th>공고제목</th>
+				<th>공고기간</th>
+				<th>배정예산</th>
+				<th>공고상태</th>
+			</tr>
+		</table>
+		<nav aria-label="Page navigation">
+			<ul class="pagination justify-content-center">
+				<div id="divPagination" class="tui-pagination"></div>
+			</ul>
+		</nav>
+	</div>
+<!-- 	</form> -->
+</div>
+
+<script type="text/javascript">
+	
+	var act = {
+			getNoticeList:{
+				action : "/pms/biz/partner/tenderNotice/getNoticeList.do",
+				method : "POST",
+				target : "_self"
+			},
+			getCenterList:{
+				action : "/pms/biz/partner/notice/getCodeList.do",
+				method : "POST",
+				target : "_self"
+			},
+			getTenderBizLev2List:{
+				action : "/pms/biz/partner/notice/getBizList.do",
+				method : "POST",
+				target : "_self"
+			}
+			
+	}
+	
+	$(document).ready(function() {
+		
+		$("#recordCountPerPage").change(function(){
+			doSearch();
+		});
+		
+		initPage();
+		menuActive();
+		getCenterList();
+		
+		
+		
+	});
+	
+	function menuActive(){
+		$("#liTenderNotice").addClass("active");
+	}
+	
+	function setBizYear(){
+		var date = new Date();
+		var start_year = 2021;
+		var now_year = date.getFullYear();
+		var tag = "";
+		var sub_year = now_year - start_year;
+		
+		for(var i=0 ; i<=sub_year ; i++){
+			
+			tag = '<option value="'+(start_year+i)+'">'+(start_year+i)+'년</option>';
+			$("#bizYear").append(tag);
+			
+		}
+		$("#bizYear").val(date.getFullYear());
+	}
+	
+	function initPage(){
+		
+		if(isNull($("#currentPageNo").val())) {
+			$("#currentPageNo").val("1");
+		}
+		if(isNull($("#recordCountPerPage").val())){
+			$("#recordCountPerPage").val("10");
+		}
+		setBizYear();
+		getBizLev1List();
+		doSearch();
+		
+	}
+	
+	function doSearch(){
+		var chkCenter = document.querySelectorAll("input[name=chkCenter]:checked");
+		var chkBizCategory = document.querySelectorAll("input[name=chkBizCategory]:checked");
+		var chkCenterArr = new Array();
+		var chkBizCategoryArr = new Array();
+		
+		for(var i=0 ; i<chkCenter.length ; i++){
+			chkCenterArr.push(chkCenter[i].value);
+		}
+
+		for(var i=0 ; i<chkBizCategory.length ; i++){
+			chkBizCategoryArr.push(chkBizCategory[i].value);
+		}
+		console.log(chkBizCategoryArr);
+		console.log(chkCenterArr);
+		
+		var paramData = {
+				 "searchKeyword" : $("#noticeTitle").val()
+				,"bizYear" : $("#bizYear").val()
+				,"recordCountPerPage" : $("#recordCountPerPage").val()
+				,"currentPageNo" : $("#currentPageNo").val()
+				,"noticeGroupCode" : "NGR002"
+				,"noticeCode" : "NST000"
+				,"chkCenter" : chkCenterArr
+				,"chkBizCategory" : chkBizCategoryArr
+				
+		}
+		console.log(paramData);
+		
+		$.ajax({
+			type : act.getNoticeList.method,
+			url : act.getNoticeList.action,
+			//async : false,
+			dataType : "json",
+			data : paramData,
+			success : function(data, textStatus, XMLHttpRequest) {
+				if (!isNull(data.result)) {
+					setNoticeList(data.result);
+				}
+			},error : function(xhr, status, error) {
+				ajaxError(xhr, status, error);
+	        }
+		});
+		
+	}
+	
+	function setNoticeList(result){
+		$("tr[dataRow]").remove();
+		if(0 < result.noticeList.length) {
+			$("tr[header]").after($("#tmpl_noticeListRow").render(result.noticeList));
+			$("#divPagination").show();
+		} else {
+			$("tr[header]").after($("#tmpl_noticeListNoRow").render(null));
+			$("#divPagination").hide();
+		}
+		setPaging(result);
+	}
+	
+	function setPaging(result){
+		pagination = new tui.Pagination(document.getElementById('divPagination'), {
+			totalItems : result.totalRecordCount,
+			itemsPerPage : result.recordCountPerPage,
+			visiblePages : DEFALUT_PAGE_SIZE,
+			centerAlign : true,
+			page: result.currentPageNo
+		});
+		pagination.on('afterMove', function(eventData) {
+			$("#currentPageNo").val(eventData.page);
+			doSearch();
+		});
+		$("#divTotCnt").html(result.totalRecordCount);
+		$("#currentPageNo").val(result.currentPageNo);
+	}
+	
+	function getCenterList(){
+		var paramData = {
+				"code" : "CENTER"
+		}
+		$.ajax({
+			type : act.getCenterList.method,
+			url : act.getCenterList.action,
+			//async : false,
+			dataType : "json",
+			data : paramData,
+			success : function(data, textStatus, XMLHttpRequest) {
+				if (!isNull(data.result)) {
+					setCenterList(data.result);
+				}
+			},error : function(xhr, status, error) {
+				ajaxError(xhr, status, error);
+	        }
+		});
+	}
+	
+	function setCenterList(result){
+		
+		for(var i = 0; i < result.length; i++){
+			if(result[i].detailCode == 'CNT033'){
+				 result.splice(i, 1); 
+				 break;
+			}
+		}
+		
+		if(0 < result.length) {
+			$("#divCenter").append($("#tmpl_centerListOption").render(result));
+		} 
+	}
+	
+	function getBizLev1List(){
+		
+		var paramData = {
+				"bizCode2" : "SYS102",
+				"bizYear" : $("#bizYear").val()
+		}
+		$.ajax({
+			type : act.getTenderBizLev2List.method,
+			url : act.getTenderBizLev2List.action,
+			//async : false,
+			dataType : "json",
+			data : paramData,
+			success : function(data, textStatus, XMLHttpRequest) {
+				if (!isNull(data.result)) {
+					setBizLev1List(data.result);
+				}
+			},error : function(xhr, status, error) {
+				ajaxError(xhr, status, error);
+	        }
+		});
+	}
+	
+	function setBizLev1List(result){
+		
+		$("#divBizCategory").empty();
+		
+		if(0 < result.length) {
+			$("#divBizCategory").append($("#tmpl_biz1ListOption").render(result));
+		} 
+	}
+	
+	
+</script>
+<script id="tmpl_noticeListRow" type="text/x-jsrender" >
+	{{if noticeCode != 'NST002'}}
+		<tr dataRow style="overflow: hidden; cursor: pointer;" onclick="window.open('/pms/biz/partner/tenderNotice/info.do?noticeSeq={{:noticeSeq}}&bizYear={{:bizYear}}', '_blank')">
+			<td>{{:noticeNo}}</td>
+			<td>{{:centerName}}</td>
+			<td>{{:bizCategory1Name}}</td>
+			<td title="{{:noticeTitle}}">{{:noticeTitle}}</td>
+			<td>{{:startDateStr}} ~ {{:endDateStr}} </td>
+			<td>{{:assignBudgetFom}}</td>
+			{{if noticeCode == 'NST001'}}
+				<td class="status1">공고중</td>
+			{{else noticeCode == 'NST002'}}
+				<td class="status2">작성중</td>
+			{{else noticeCode == 'NST003'}}
+				<td class="status3">공고종료</td>
+			{{/if}}
+		</tr>
+	{{/if}}
+</script>
+<script id="tmpl_noticeListNoRow" type="text/x-jsrender" >
+	<tr dataRow>
+		<td colspan="5">데이터가 없습니다</td>
+	</tr>
+</script>
+
+<script id="tmpl_centerListOption" type="text/x-jsrender" >
+	<div class="checkbox_item">
+		<input type="checkbox" id="{{:detailCode}}" name="chkCenter" value="{{:detailCode}}">
+		<label for="{{:detailCode}}">{{:detailName}}</label>
+	</div>
+</script>
+
+<script id="tmpl_biz1ListOption" type="text/x-jsrender" >
+	<div class="checkbox_item">
+		<input type="checkbox" id="{{:bizCode1}}" name="chkBizCategory" value="{{:bizCode1}}">
+		<label for="{{:bizCode1}}">{{:codeName}}</label>
+	</div>
+</script>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+	<hr>
+	<div class="footer wide">
+		<div class="footer-info">
+			<a href="https://www.kipa.org/kipa/service/kw_0703_01.jsp" style="font-weight: bold;">개인정보 처리방침</a> <!-- |<a href="/kms/signup/loginView.do">컨설턴트 KMS</a>-->
+			<address>한국발명진흥회 : 06133 서울특별시 강남구 테헤란로 131 한국지식재산센터 </address>  
+			<p>관련문의 : Q&A게시판</p>
+			<div class="copy">COPYRIGHT ⓒ 2022 KIPA ALL RIGHTS RESERVED.</div>
+		</div>
+		
+		<div class="footer-logos">
+			<a href="https://www.moip.go.kr/" target="_blank"><img src="/resources/css/img/IPA_logo.png" alt="지식재산처" height="30"></a>
+			<a href="https://www.kipa.org/" target="_blank"><img src="/resources/css/img/kipa_footer.gif" alt="한국발명진흥회" height="30"></a>
+		</div>
+	</div>
+</body>
+</html>
+</div>
+</body>
+<script type="text/javascript">
+$(document).ready(function () {
+	$('li.active').parents('ul.second_menu').prev('.first_menu').addClass('active');
+	$('li.active').parents('ul.second_menu').addClass('show');
+
+});
+
+// $("#left_btn").click(function () {
+// 	$(".menu").toggleClass("hide");
+// 	$("#left").toggleClass("show");
+// 	$("#wrap").toggleClass("show");
+// 	$(".icon_set").toggle();
+// });
+</script>
+</html>

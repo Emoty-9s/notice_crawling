@@ -77,8 +77,15 @@ def diagnostics(data_dir):
     """No body/title/reason/raw error, environment values or secret in output."""
     try:
         notices, statuses = validate_state(data_dir)
-    except Exception:
-        return {'state': 'MISSING_OR_INVALID', 'hint': 'Inspect the first failed Actions step; state was not reset'}
+    except Exception as error:
+        # Class names from our validation boundary are useful without exposing
+        # file contents, arbitrary exception messages or environment values.
+        kind = type(error).__name__
+        known = {'ActionsCheckError', 'StorageFormatError', 'StorageSchemaError',
+                 'StorageIOError', 'DiffInputError', 'DiffConflictError'}
+        return {'state': 'MISSING_OR_INVALID',
+                'check': kind if kind in known else 'VALIDATION_ERROR',
+                'hint': 'Inspect the first failed Actions step; state was not reset'}
     return {
         'state': 'VALID', 'stored_notices': len(notices),
         'scrapers': {source: {'status': status['status'], 'notices_found': status.get('notices_found')}

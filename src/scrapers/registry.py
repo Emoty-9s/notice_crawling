@@ -94,3 +94,22 @@ def build_mvp_registry(site_configs, *, transport_factory=None, clock=None, logg
             kwargs['transport'] = transport_factory(adapter.source)
         registry.register(adapter(configs[adapter.source], **kwargs))
     return registry
+
+
+def build_registry(site_configs, *, transport_factory=None, clock=None, logger=None):
+    """Central registry: unchanged M05 builder plus explicitly enabled M16 sites."""
+    from src.scrapers.ripc_pms import RipcScraper
+    from src.scrapers.kista_ippro import KistaScraper
+
+    configs = list(site_configs)
+    registry = build_mvp_registry(configs, transport_factory=transport_factory, clock=clock, logger=logger)
+    by_source = {config['source_id']: config for config in configs}
+    for adapter in (RipcScraper, KistaScraper):
+        config = by_source.get(adapter.source)
+        if config is None or not config.get('enabled', False):
+            continue
+        kwargs = {'clock': clock, 'logger': logger}
+        if transport_factory is not None:
+            kwargs['transport'] = transport_factory(adapter.source)
+        registry.register(adapter(config, **kwargs))
+    return registry

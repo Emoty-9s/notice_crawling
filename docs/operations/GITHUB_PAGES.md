@@ -7,7 +7,8 @@ workflow는 JSON 문법으로 쓴 YAML 1.2다. Python 표준 json으로 구조�
 별도 YAML parser/pip package/Jekyll/npm 설치는 없다. runner는 ubuntu-latest, Python 3.13이다.
 로컬 Windows `.venv`나 절대 Python 경로를 GitHub에 올리지 않는다.
 
-현재는 저장소 주소/기본 브랜치/Pages 설정이 제공되지 않아 실제 GitHub 실행/URL 검증을 수행하지 않았다.
+현재 폴더에는 .git이 없다. 이전 문서의 대상은 Emoty-9s/notice_crawling(main/private)이지만,
+이번에는 원격 상태/권한/Pages 설정을 재확인하거나 실제 GitHub 실행/URL 검증을 수행하지 않았다.
 아래 설정을 완료해야 한다. M00~M10의 데이터/판정/CLI 계약은 그대로다.
 
 ## GitHub에서 설정할 순서
@@ -32,6 +33,7 @@ workflow는 JSON 문법으로 쓴 YAML 1.2다. Python 표준 json으로 구조�
    **최초 실행에만** `bootstrap_state=true`로 설정한다. 다음 수동 실행은 false(기본값)다.
    다른 브랜치를 선택하면 build/deploy가 실행되지 않는다. 스케줄도 기본 브랜치 기준이다.
 8. build/deploy 성공 후 deployment 환경에 표시되는 **실제 Pages URL**을 확인한다.
+   deploy의 Record deployed feed URLs step은 실제 두 JSON URL을 로그와 Actions Summary에 기록한다.
    그 URL 뒤의 `/notices.json`, `/metadata.json`을 각각 열어 generated_at/count가 같은 snapshot인지 확인한다.
    프로젝트 Pages는 보통 `https://<owner>.github.io/<repo>/...` 형태이지만 실제 표시 URL을 사용한다.
    JSON 전용 배포이므로 사이트 루트에 index.html/대시보드는 없다.
@@ -91,6 +93,7 @@ GitHub hosted runner의 디스크는 다음 실행에 유지되지 않는다. �
 1. Actions run의 첫 실패 step을 확인한다. unittest, config, restore, pipeline, staging, upload, deploy가 각각 분리되어 있다.
 2. pipeline step은 종료 코드(0/1/2)를 Summary에 남기고 안전한 단계/분석 코드 로그를 출력한다.
 3. 항상 실행하는 diagnostics step은 저장 건수, source별 상태/count, 분석 status별 count만 출력한다.
+   상태 검증 실패 시 StorageFormatError 등 허용된 고정 예외 분류를 check에 표시하고 임의 예외는 VALIDATION_ERROR로 숨긴다.
    raw body/title/AI reason/원문 오류/환경변수는 출력하지 않는다.
 4. `central-diagnostics-<run_id>-<attempt>` artifact(14일)에서 동일한 안전한 JSON을 내려받을 수 있다.
    checkout/Python setup 자체가 실패하면 helper/진단 artifact도 없을 수 있으므로 해당 step 로그를 먼저 본다.
@@ -103,11 +106,15 @@ GitHub hosted runner의 디스크는 다음 실행에 유지되지 않는다. �
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 .\.venv\Scripts\python.exe -m tools.actions_support --help
 .\.venv\Scripts\python.exe -m json.tool .github/workflows/central-notice-pages.yml > $null
+node --test tests/test_actions_state_selector.cjs
 ```
 
 전체 unittest 및 JSON-syntax YAML 구조/권한/실행 순서/허용 배포 경로를 검사한다.
 이는 GitHub expression/server-side workflow validator나 실제 Actions 실행을 대신하지 않는다.
 로컬에는 PyYAML/actionlint를 추가 설치하지 않았다.
+Node 명령은 Node가 이미 있는 환경에서 실행하는 별도 선택 검증이다. 실제 workflow의 selector 코드를 fake API로 실행하며 Python 테스트의 의존성으로 추가하지 않는다.
+2026-11-02 결과: 전체 249 unittest OK, 별도 selector 6 tests PASS, JSON 구조 파싱 성공.
+이전 .run 업로드 ZIP/manifest는 이번 보완 전 파일일 수 있으므로 현재 소스 파일을 기준으로 반영한다.
 
 구현 시 확인한 공식 문서:
 

@@ -12,11 +12,12 @@ from src.core.diff import compare_batch
 from src.core.models import Notice
 from src.core.storage import JsonStorage
 from src.renderer.feed import PUBLIC_DIR, build_feed, write_feed
-from src.scrapers.registry import build_mvp_registry
+from src.scrapers.registry import build_mvp_registry, build_registry
 
 
 CONFIG_PATH = Path(__file__).resolve().parents[1] / 'config' / 'sites.yaml'
 MVP_SOURCES = frozenset({'khidi_business', 'kised_bid_public', 'rda_bid', 'seoul_rnd_notice', 'kipa_bid'})
+SUPPORTED_SOURCES = MVP_SOURCES | {'ripc_pms', 'kista_ippro'}
 
 
 class PipelineConfigError(ValueError):
@@ -51,7 +52,7 @@ def load_site_configs(path: str | Path = CONFIG_PATH) -> list[dict]:
                 raise ValueError('invalid/duplicate source')
             if type(site.get('enabled', False)) is not bool:
                 raise ValueError('invalid enabled flag')
-            if site.get('enabled', False) and source not in MVP_SOURCES:
+            if site.get('enabled', False) and source not in SUPPORTED_SOURCES:
                 raise ValueError('enabled source has no implemented adapter')
             seen.add(source)
         if not MVP_SOURCES <= seen:
@@ -99,7 +100,9 @@ def run_pipeline(
     previous = store.load_notices()
     statuses = store.load_scraper_status()
     compare_batch([], previous, observed_at=stamp)
-    registry = build_mvp_registry(configs, transport_factory=transport_factory,
+    builder = build_registry if any(config.get('enabled', False) and config['source_id'] in
+                                   SUPPORTED_SOURCES - MVP_SOURCES for config in configs) else build_mvp_registry
+    registry = builder(configs, transport_factory=transport_factory,
                                   clock=lambda: now, logger=logger)
     collected = registry.run()  # fetch/parse/normalize, with source isolation
     compared = compare_batch(collected, previous, observed_at=stamp)

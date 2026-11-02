@@ -1,0 +1,1147 @@
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=7" />
+		<title>IP-R&amp;D 사업 관리 시스템</title>
+		<meta name="description" content="IP-R&amp;D 사업 관리 시스템 입니다."/>
+		
+		
+		
+		<script type="text/javascript" src="../../kista_ip/js/jquery-3.1.0.min.js"></script>
+		<script type="text/javascript" src="../../kista_ip/js/slick.js"></script>
+		<script type="text/javascript" src="../../kista_ip/js/common.js"></script> 
+		
+		
+		<link rel="stylesheet" href="/ippro/css/iprndMain/iprnd_manage.css" type="text/css" />
+		
+		
+		<!-- 
+		<script type="text/javascript" src="/ippro/js/changeNewMain/prototype.js"></script>
+		<script type="text/javascript" src="/ippro/js/changeNewMain/Field.js"></script>
+		<script type="text/javascript" src="/ippro/js/changeNewMain/EventMenu.js"></script>
+		<script type="text/javascript" src="/ippro/js/changeNewMain/movie.js"></script>
+	 	-->
+	 	<script>
+			(function(){function l(){window.WebAPMConfig={passiveServerURL:'http://webapm.ipic.or.kr:8089',
+			applicationKey:'98cbcd31-6091-42d4-896c-a5c86d22de10'};
+			var s=document.createElement('script');s.type='text/javascript';s.async=1;
+			s.src='http://webapm.ipic.or.kr:8089/passive/passive.min.js?'+new Date().getTime();
+			var x=document.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}
+			window.attachEvent?window.attachEvent('onload',l):window .addEventListener('load',l,false);
+			})();
+		</script>
+	 	
+	</head>
+	
+	
+	<style>
+		
+		.header_2023 h1.logo_2023::before { content:''; position:absolute; right:100%; top:0; width:200%; height:100%; background:#0078ff; }
+		.header_2023 .btn_open span::after { content:''; position:absolute; right:0; top:50%; transform:translateY(-50%); }
+		.header_2023 .btn_open_menu span::after { width:15px; height:12px; background:url(../../kista_ip/img/icon_menu.png) no-repeat right center; }
+		.header_2023 .btn_open_contact span::after { content:'';position:absolute;right:0;top:50%;transform:translateY(-50%); }
+		.header_2023 .btn_open_contact span::after { width:16px; height:16px; background:url(../../kista_ip/img/icon_contact.png) no-repeat right center; }
+		.header_2023 .pop.menu .cont_wrap:hover::before { transform:scale(1.1); -webkit-filter:blur(4px); filter:blur(4px); transition:.3s ease; }
+		.header_2023 .pop.menu .cont_wrap::before { content:''; position:absolute; left:0; bottom:82px; width:100%; height:92%; transform:scale(1); -webkit-filter:blur(0); filter:blur(0); background-size:cover !important; transition:.1s linear; z-index:0; }
+		.header_2023 .pop.menu .cont_wrap:nth-child(1)::before { background:url(../../kista_ip/img/menu_bg1.png) no-repeat center; }
+		.header_2023 .pop.menu .cont_wrap:nth-child(2)::before { background:url(../../kista_ip/img/menu_bg2.png) no-repeat center; }
+		.header_2023 .pop.menu .cont_wrap:hover .cont h3 { color:#0078ff; }
+		.header_2023 .pop.menu .cont_wrap .cont .list_2023 li a:hover::before { width:100%; transition:.15s linear; }
+		.btn_close::before,
+		.btn_close::after { content:''; position:absolute; left:0; top:50%; width:25px; height:2px; background:#000; } 
+		.btn_close::before { transform:rotate(45deg); } 
+		.btn_close::after { transform:rotate(-45deg); } 
+		.btn_close.w::before,
+		.btn_close.w::after { background:#fff; }
+		.header_2023 .pop.contact .title_2023 .tab_li li button::after { content:''; position:absolute; right:23px; top:50%; width:30px; height:30px; border-radius:50%; background:url(../../kista_ip/img/ar_w.png) no-repeat center; transform:translateY(-50%); }
+		.header_2023 .pop.contact .title_2023 .tab_li li.active button::after { border-radius:50%; background:url(../../kista_ip/img/ar_w.png) no-repeat center #000f4f; }
+		.header_2023 .pop.contact .title_2023 .tab_li li.active button { display:block; color:#1e1e1e; background:#fff; border:0; border-radius:15px; }
+		.header_2023 .pop.contact .title_2023 .tab_li li.active button span { color:#0078ff; background:#c4e0ff; }
+		.header_2023 .pop.contact .title_2023 .tab_li li.active button strong { font-weight:700; }
+		.button_2023 { margin:0; padding:0; -webkit-box-sizing:border-box; box-sizing:border-box; border:0 none; background-color:transparent; font-family:inherit; font-size:inherit; cursor:pointer; -webkit-appearance:none; -moz-appearance:none; -ms-appearance:none; appearance:none; -webkit-box-sizing:border-box; box-sizing:border-box; cursor:pointer; background:#fff; padding:0; border:0; cursor:pointer; vertical-align:middle; font-size:1em; }
+		.button_2023 { display:block; position:relative; padding:26px 70px 26px 26px; text-align:left; white-space:nowrap; color:#fff; background:transparent; }
+		
+		.tab_cont { display:none; width:72%; height:100vh; padding:1.5em 12em 1.5em 3.5em; background:#f1f3f8; overflow-y:auto; }
+		.tab_cont.active { display:block; }
+		.tab_cont .list_wrap { margin-top:4em; transform:translateX(-55px); opacity:0; }
+		.tab_cont .list_wrap h3 { margin-bottom:1em; font-weight:600; font-size:1.25em; letter-spacing:-0.03em; }
+		.tab_cont .list_wrap h3 span { font-weight:700; color:#0078ff; }
+		.tab_cont .list { display:-ms-grid; display:grid; grid-auto-flow:dense; grid-column-gap:1.5rem; grid-row-gap:1.5rem; }
+		.tab_cont .list.col2 { grid-template-columns:repeat(2,1fr); }
+		.tab_cont .list.col4 { grid-template-columns:repeat(4,1fr); }
+		.tab_cont .item { grid-column:auto/span 1; grid-row:auto/span 1; padding:30px 39px; background:#fff; }
+		.tab_cont .item .subject { margin-bottom:10px; letter-spacing:-0.01em; font-weight:600; line-height:1.4; }
+		.tab_cont .item ul.info li { margin-bottom:3px; }
+		.tab_cont .item ul.info li:last-child { margin:0; }
+		.tab_cont .item ul.info li.tel { line-height:1.3; }
+		.tab_cont .item ul.info li.tel span { display:inline-block; white-space:nowrap; }
+		.tab_cont .item ul.info li.tel span::after { content:'/'; display:inline-block; margin:0 3px 0 6px; color:#bbb; }
+		.tab_cont .item ul.info li.tel span:last-child::after { content:none; }
+		.tab_cont#tab1 .list_wrap:nth-child(1) h3 { padding:6px 0 6px 26px; background:url(../../kista_ip/img/contact_icon1.png) no-repeat left center; }
+		.tab_cont#tab1 .list_wrap:nth-child(2) h3 { padding:6px 0 6px 31px; background:url(../../kista_ip/img/contact_icon2.png) no-repeat left center; }
+		.tab_cont#tab2 .item { 
+		  display:-webkit-flex; display:-ms-flexbox; display:flex; 
+		  -webkit-box-align:center; -ms-flex-align:center; align-items:center; 
+		  -webkit-box-pack:justify; -ms-flex-pack:justify; justify-content:space-between; 
+		}
+		.tab_cont#tab2 .subject { margin:0; }
+		.tab_cont#tab2 .tel { font-size:1.125em; }
+		.tab_cont#tab2 .item:nth-child(1) .subject { padding:6px 0 6px 47px; background:url(../../kista_ip/img/contact_icon3.png) no-repeat left center; }
+		.tab_cont#tab2 .item:nth-child(2) .subject { padding:6px 0 6px 40px; background:url(../../kista_ip/img/contact_icon4.png) no-repeat left center; }
+		.tab_cont .list_wrap { -webkit-animation:menu_li .6s .15s linear forwards; animation:menu_li .6s .15s linear forwards; }
+		
+		a.representative { display:inline-block; position:relative; margin-top:25px; padding:18px 22px 18px 17px; line-height:1; color:#fff; font-size:.938em; white-space:nowrap; border:1px solid rgba(255,255,255,0.5); border-radius:30px; }
+		a.representative span { display:block; position:relative; padding:0 21px 0 70px; }
+		a.representative span::before { content:''; position:absolute; left:0; top:0; width:61px; height:22px; background:url(../../kista_ip/img/logo_white.png) no-repeat center; }
+		a.representative span::after { content:''; position:absolute; right:0; top:0; width:14px; height:14px; background:url(../../kista_ip/img/icon_home_w.png) no-repeat center; }
+		a.representative:hover,
+		a.representative:focus { border-color:#fff; transition:.15s linear; }
+		a.representative:hover span,
+		a.representative:focus span { font-weight:500; letter-spacing:0.005em; transition:.15s linear; }
+		.list_2023 li a:hover span { font-weight:400; /*color:#81bcff;*/ }
+		
+		.list_2023 li { margin-bottom:15px; transform:translateX(-55px); opacity:0; }
+		.list_2023 li a {display:block; position:relative; padding:20px 38px; border-bottom:1px solid rgba(255,255,255,0.3); transition:.1s linear; text-decoration:none; color:inherit; -webkit-text-size-adjust:100%;font-weight:400;vertical-align:baseline;}
+		.list_2023 li a::before { content:''; position:absolute; left:0; bottom:0; width:0; height:1px; background:rgba(255,255,255,0.7); transition:.1s linear; }
+		.list_2023 li a span { display:block; position:relative; font-weight:300; white-space:nowrap; }
+		.list_2023 li a span::after { content:''; position:absolute; right:0; top:50%; width:12px; height:12px; background:url(../../kista_ip/img/common.png) no-repeat -244px -72px; transform:translateY(-50%); }
+		.list_2023 li a span::before { content:''; position:absolute; right:-29px; top:50%; width:58px; height:58px; border-radius:50%; background:url(../../kista_ip/img/menu_external.png) no-repeat center #000; transform:translateY(-50%) scale(0); transition:.07s linear; z-index:1; }
+		.list_2023 li { margin-bottom:15px; transform:translateX(-55px); opacity:0; }
+		
+		.list_2023 li { -webkit-animation:menu_li .4s .2s linear forwards; animation:menu_li .4s .2s linear forwards; }
+		.list_2023 li:nth-child(1) { animation-delay:.2s; }
+		.list_2023 li:nth-child(2) { animation-delay:.3s; }
+		.list_2023 li:nth-child(3) { animation-delay:.4s; }
+		.list_2023 li:nth-child(4) { animation-delay:.5s; }
+		.list_2023 li:nth-child(5) { animation-delay:.6s; }
+		.list_2023 li:nth-child(6) { animation-delay:.8s; }
+		
+		.part_2023,.tel_2023,.email_2023 { position:relative; padding-left:23px; }
+		
+		.part_2023::before,.tel_2023::before,.email_2023::before { position:absolute; left:0; top:1px; font-size:.938em; font-weight:bold; color:#ccc; font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands'; }
+		.part_2023::before { content:'\f007'; }
+		.tel_2023::before { content:'☎'; }
+		.email_2023::before { content:'✉'; }
+		.list_2023 li a:hover span::before { transform:translateY(-50%) scale(1); transition:.125s linear; }
+		
+		.span_2023 { padding:4px 10px; margin-right:5px; font-size:.875em; font-weight:500; letter-spacing:-0.02em; color:#fff; background:rgba(255,255,255,0.2); border-radius:15px;padding:4px 10px;margin-right:5px;font-size:.875em;letter-spacing:-0.02em;border-radius:15px; }
+		.scroll_hidden { overflow:hidden; touch-action:none; }
+		
+		@font-face {
+		    font-family:'Pretendard';
+		    font-weight:200;
+			src:url('../../kista_ip/font/Pretendard-ExtraLight.woff');
+		    src:local('Pretendard ExtraLight'),
+				url('../../kista_ip/font/Pretendard-ExtraLight.woff2'),
+				url('../../kista_ip/font/Pretendard-ExtraLight.woff2') format('woff2'),
+				url('../../kista_ip/font/Pretendard-ExtraLight.woff') format('woff');
+		}
+		@font-face {
+		    font-family:'Pretendard';
+		    font-weight:400;
+			src:url('../../kista_ip/font/Pretendard-Regular.woff');
+		    src:local('Pretendard Regular'),
+				url('../../kista_ip/font/Pretendard-Regular.woff2'),
+				url('../../kista_ip/font/Pretendard-Regular.woff2') format('woff2'),
+				url('../../kista_ip/font/Pretendard-Regular.woff') format('woff');
+		}
+		@font-face {
+		  font-family:'Pretendard';
+		  font-weight:500;
+		  src:url('../../kista_ip/font/Pretendard-Medium.woff');
+		  src:local('Pretendard Medium'),
+			  url('../../kista_ip/font/Pretendard-Medium.woff2'),
+			  url('../../kista_ip/font/Pretendard-Medium.woff2') format('woff2'),
+			  url('../../kista_ip/font/Pretendard-Medium.woff') format('woff');
+		}
+		@font-face {
+		  font-family:'Pretendard';
+		  font-weight:600;
+		  src:url('../../kista_ip/font/Pretendard-SemiBold.woff');
+		  src:local('Pretendard SemiBold'),
+			  url('../../kista_ip/font/Pretendard-SemiBold.woff2'),
+			  url('../../kista_ip/font/Pretendard-SemiBold.woff2') format('woff2'),
+			  url('../../kista_ip/font/Pretendard-SemiBold.woff') format('woff');
+		}
+		@font-face {
+		  font-family:'Pretendard';
+		  font-weight:700;
+		  src:url('../../kista_ip/font/Pretendard-Bold.woff');
+		  src:local('Pretendard Bold'),
+			  url('../../kista_ip/font/Pretendard-Bold.woff2'),
+			  url('../../kista_ip/font/Pretendard-Bold.woff2') format('woff2'),
+			  url('../../kista_ip/font/Pretendard-Bold.woff') format('woff');
+		}
+		@font-face {
+		  font-family:'PlayfairDisplay';
+		  font-weight:800;
+		  src:url('../../kista_ip/font/PlayfairDisplay-SemiBold.woff');
+		  src:local('PlayfairDisplay-SemiBold'),
+			  url('../../kista_ip/font/PlayfairDisplay-SemiBold.woff2'),
+			  url('../../kista_ip/font/PlayfairDisplay-SemiBold.woff2') format('woff2'),
+			  url('../../kista_ip/font/PlayfairDisplay-SemiBold.woff') format('woff');
+		}
+		@-webkit-keyframes menu_li {
+		  0% { -webkit-transform:translateX(-55px); opacity:0; }
+		  100% { -webkit-transform:translateX(0); opacity:1; }
+		}
+		@keyframes menu_li {
+		  0% { transform:translateX(-55px); opacity:0; }
+		  100% { transform:translateX(0); opacity:1; }
+		}
+		
+		@-webkit-keyframes menu_tit {
+		  0% { -webkit-transform:translateY(20px); opacity:0; }
+		  100% { -webkit-transform:translateY(0); opacity:1; }
+		}
+		@keyframes menu_tit {
+		  0% { transform:translateY(20px); opacity:0; }
+		  100% { transform:translateY(0); opacity:1; }
+		}
+		@-webkit-keyframes menu_li {
+		  0% { -webkit-transform:translateX(-55px); opacity:0; }
+		  100% { -webkit-transform:translateX(0); opacity:1; }
+		}
+		@keyframes menu_li {
+		  0% { transform:translateX(-55px); opacity:0; }
+		  100% { transform:translateX(0); opacity:1; }
+		}
+		
+		
+	</style>
+	
+	<body class="back_style">
+<!-- new_main-layout.jsp -->
+	
+		
+		
+	
+		
+		<div class="sub_top_menu_pac" style="height:72px; background-image:url(../../kista_ip/img/main1_bg.png);" >
+		</div>
+	
+		<header class="header_2023" style="position:absolute;left:0;right:0;top:0;width:100%;min-width:320px;z-index:999999;display:block;margin:0;padding:0;border:0;font-weight:400;vertical-align:baseline;-webkit-text-size-adjust:100%;box-sizing:border-box;font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands';font-size:16px;color:#414245;line-height:1.7;letter-spacing:0em;-webkit-font-smoothing:antialiased;text-shadow:none;word-break:keep-all;box-sizing:border-box;">
+		   <div class="inner_2023" style="width:90%;max-width:1400px;min-width:320px;margin:0 auto;padding:0;border:0;font-weight:400;vertical-align:baseline;-webkit-text-size-adjust:100%;box-sizing:border-box;font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands';font-size:16px;color:#414245;line-height:1.7;letter-spacing:0em;-webkit-font-smoothing:antialiased;text-shadow:none;word-break:keep-all;box-sizing:border-box;content:'';display:block;clear:both;">
+		       <div class="left_2023" style="float:left;display:flex;margin:0;padding:0;border:0;font-weight:400;vertical-align:baseline;-webkit-text-size-adjust:100%;font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands';font-size:16px;color:#414245;line-height:1.7;letter-spacing:0em;-webkit-font-smoothing:antialiased;text-shadow:none;word-break:word-break;">
+		           <h1 class="logo_2023" style="position:relative;width:215px;height:80px;line-height:80px;background:#0078ff;white-space:nowrap;font-weight:normal;font-size:1em;margin:0;padding:0;border:0;vertical-align:baseline;-webkit-text-size-adjust:100%;">
+		           	<a class="logo_a_2023" style="display:block;position:relative;font-size:1.438em;font-weight:600;color:#fff;z-index:1;text-decoration:none;margin:0;padding:0;border:0;vertical-align:baseline;-webkit-text-size-adjust:100%;line-height:80px;white-space:nowrap;" href="https://biz.kista.re.kr/main.do">IP통합지원포털</a>
+		           </h1>
+		           <button type="button" class="btn_open btn_open_menu" onclick="openPop('menu')" style="width:140px;color:#1e1e1e;background:#fff;height:80px;line-height:80px;border:0;white-space:nowrap;margin:0;padding:0;cursor:pointer;vertical-align:middle;font-size:1em;font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands' !important;letter-spacing:0em;">
+		           	<span style="font-size:15px;position:relative;padding-right:29px;font-weight:500;margin:0;border:0;vertical-align:baseline;-webkit-text-size-adjust:100%;color:#1e1e1e;line-height:80px;white-space:nowrap;font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands' !important;letter-spacing:0em;">MENU</span>
+		           </button>
+		           <div class="menu pop" id="menu" style="display:none;width:100%;min-width:320px;position:fixed;left:0;top:0;right:0;max-width:100%;height:100vh;max-height:100vh;padding:0;background:#fff;overflow:hidden;transform:none;">
+		               <div class="menu_inner" style="height:100%;display:flex;align-items:start;-webkit-box-pack:justify;justify-content:space-between;margin:0;padding:0;border:0;font-weight:400;vertical-align:baseline;-webkit-text-size-adjust:100%;font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands';">
+		                   <div class="cont_wrap" style="position:relative;-webkit-box-flex:1;flex:1;height:100%;padding:7em 3em 0 3em;color:#fff;overflow:hidden;margin:0;border:0;font-weight:400;vertical-align:baseline;-webkit-text-size-adjust:100%;margin-top:-14px;">
+		                       <div class="cont" style="float:right;position:relative;width:60%;padding:0;z-index:1;">
+		                           <h3 style="margin-bottom:-27px;margin-top:14px;text-align:center;font-size:2em;letter-spacing:-0.02em;font-weight:600;transform:translateY(20px);animation:menu_tit .4s linear forwards;padding:0;border:0;vertical-align:baseline;-webkit-text-size-adjust:100%;font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands';">지원사업</h3>
+		                           <ul class="list_2023" style="font-size:1.125em;letter-spacing:0.01em;list-style:none;margin:0;padding:0;border:0;font-weight:400;">
+		                               <li style="margin-bottom:0px;transform:translateX(-55px);animation-delay:.2s;animation:menu_li .4s .2s linear forwards;font-size:1.125em;letter-spacing:0.01em;padding:3em 3em 0 3em;">
+		                                   <a href="https://biz.kista.re.kr/ippro/uat/uia/egovLoginUsr.do" target="_blank" title="새창열림" style="position:relative;padding:18px 38px;border-bottom:1px solid rgba(255,255,255,0.3);transition:.1s linear;color:inherit;text-decoration:none;width:111%;margin-left:-15%;">
+		                                       <span style="position:relative;font-weight:100;white-space:nowrap;display:inline-block;width:100.4%;font-size:18px;">IP-R&D 사업관리 시스템(IPPRO)</span>
+		                                   </a>
+		                               </li>
+		                               <li style="margin-bottom:0px;transform:translateX(-55px);animation-delay:.2s;animation:menu_li .4s .2s linear forwards;font-size:1.125em;letter-spacing:0.01em;padding:0em 3em 0 3em;">
+		                               		<a  href="https://biz.kista.re.kr/ipas/uat/uia/egovLoginUsr.do" target="_blank" title="새창열림" style="position:relative;padding:18px 38px;border-bottom:1px solid rgba(255,255,255,0.3);transition:.1s linear;color:inherit;text-decoration:none;width:111%;margin-left:-15%;">
+		                                       <span style="position:relative;font-weight:100;white-space:nowrap;display:inline-block;width:100.4%;font-size:18px;">국가 R&D 특허동향 심층분석 사업(IPAS)</span>
+		                                  	</a>
+		                               </li>
+		                               <li style="/*margin-bottom:0px;*/transform:translateX(-55px);animation-delay:.2s;animation:menu_li .4s .2s linear forwards;font-size:1.125em;letter-spacing:0.01em;padding:0em 3em 0 3em;">
+		                               		<a  href="https://biz.kista.re.kr/ipams/" target="_blank" title="새창열림" style="position:relative;padding:18px 38px;border-bottom:1px solid rgba(255,255,255,0.3);transition:.1s linear;color:inherit;text-decoration:none;width:111%;margin-left:-15%;">
+		                                       <span style="position:relative;font-weight:100;white-space:nowrap;display:inline-block;width:100.4%;font-size:18px;">산업재산진단기관 관리시스템(IEPMS)</span>
+		                                   	</a>
+		                               </li>
+		                           </ul>
+		                       </div>
+		                   </div>
+		                   <div class="cont_wrap" style="position:relative;-webkit-box-flex:1;flex:1;height:100%;padding:7em 3em 0 3em;color:#fff;overflow:hidden;margin:0;border:0;font-weight:400;vertical-align:baseline;-webkit-text-size-adjust:100%;margin-top:-14px;">
+		                       <div class="cont" style="float:left;position:relative;width:60%;padding:0;z-index:1;">
+		                           <h3 style="margin-bottom:-27px;margin-top:14px;text-align:center;font-size:2em;letter-spacing:-0.02em;font-weight:600;transform:translateY(20px);animation:menu_tit .4s linear forwards;padding:0;border:0;vertical-align:baseline;-webkit-text-size-adjust:100%;font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands';">IP정보서비스</h3>
+		                           <ul class="list_2023" style="font-size:1.125em;letter-spacing:0.01em;list-style:none;margin:0;padding:0;border:0;font-weight:400;">
+		                               <li style="margin-bottom:0px;transform:translateX(-55px);animation-delay:.2s;animation:menu_li .4s .2s linear forwards;font-size:1.125em;letter-spacing:0.01em;padding:3em 3em 0 3em;">
+		                               		<a  href="https://biz.kista.re.kr/pbcenter/portal/p/#!/" target="_blank" title="새창열림" style="position:relative;padding:18px 38px;border-bottom:1px solid rgba(255,255,255,0.3);transition:.1s linear;color:inherit;text-decoration:none;width:111%;margin-left:-15%;">
+		                                       <span style="position:relative;font-weight:100;white-space:nowrap;display:inline-block;width:100.4%;font-size:18px;">특허 빅데이터 분석</span>
+		                                   </a>
+		                               </li>
+		                               <li style="margin-bottom:0px;transform:translateX(-55px);animation-delay:.2s;animation:menu_li .4s .2s linear forwards;font-size:1.125em;letter-spacing:0.01em;padding:0em 3em 0 3em;">
+		                               		<a href="https://www.ripis.or.kr/index.do" target="_blank" title="새창열림" style="position:relative;padding:18px 38px;border-bottom:1px solid rgba(255,255,255,0.3);transition:.1s linear;color:inherit;text-decoration:none;width:111%;margin-left:-15%;">
+		                                       <span style="position:relative;font-weight:100;white-space:nowrap;display:inline-block;width:100.4%;font-size:18px;">정부 R&D 특허성과</span>
+		                                   </a>
+		                               </li>
+		                               <li style="margin-bottom:0px;transform:translateX(-55px);animation-delay:.2s;animation:menu_li .4s .2s linear forwards;font-size:1.125em;letter-spacing:0.01em;padding:0em 3em 0 3em;">
+		                               		<a href="https://biz.kista.re.kr/iprnd/front/main/main.do?method=main" target="_blank" title="새창열림" style="position:relative;padding:18px 38px;border-bottom:1px solid rgba(255,255,255,0.3);transition:.1s linear;color:inherit;text-decoration:none;width:111%;margin-left:-15%;">
+		                                       <span style="position:relative;font-weight:100;white-space:nowrap;display:inline-block;width:100.4%;font-size:18px;">IP R&D 확산포털</span>
+		                                   </a>
+		                               </li>
+		                               <li style="margin-bottom:0px;transform:translateX(-55px);animation-delay:.2s;animation:menu_li .4s .2s linear forwards;font-size:1.125em;letter-spacing:0.01em;padding:0em 3em 0 3em;">
+		                               		<a href="https://biz.kista.re.kr/epcenter/main.do" target="_blank" title="새창열림" style="position:relative;padding:18px 38px;border-bottom:1px solid rgba(255,255,255,0.3);transition:.1s linear;color:inherit;text-decoration:none;width:111%;margin-left:-15%;">
+		                                       <span style="position:relative;font-weight:100;white-space:nowrap;display:inline-block;width:100.4%;font-size:18px;">표준특허정보</span>
+		                                   </a>
+		                               </li>
+		                                <li style="margin-bottom:0px;transform:translateX(-55px);animation-delay:.2s;animation:menu_li .4s .2s linear forwards;font-size:1.125em;letter-spacing:0.01em;padding:0em 3em 0 3em;">
+		                               		<a href="https://biz.kista.re.kr/patentmap/front/common.do?method=main" target="_blank" title="새창열림" style="position:relative;padding:18px 38px;border-bottom:1px solid rgba(255,255,255,0.3);transition:.1s linear;color:inherit;text-decoration:none;width:111%;margin-left:-15%;">
+		                                       <span style="position:relative;font-weight:100;white-space:nowrap;display:inline-block;width:100.4%;font-size:18px;">특허동향보고서(e특허나라)</span>
+		                                   </a>
+		                               </li>
+		                               <li style="margin-bottom:0px;transform:translateX(-55px);animation-delay:.2s;animation:menu_li .4s .2s linear forwards;font-size:1.125em;letter-spacing:0.01em;padding:0em 3em 0 3em;">
+		                               		<a href="http://www.e-note.or.kr/main/home.do" target="_blank" title="새창열림" style="position:relative;padding:18px 38px;border-bottom:1px solid rgba(255,255,255,0.3);transition:.1s linear;color:inherit;text-decoration:none;width:111%;margin-left:-15%;">
+		                                       <span style="position:relative;font-weight:100;white-space:nowrap;display:inline-block;width:100.4%;font-size:18px;">연구노트(e-NOTE)</span>
+		                                   </a>
+		                               </li>
+		                              
+		                           </ul>
+		                       </div>
+		                   </div>
+		               </div>
+		               <button type="button" class="btn_close btn_close_menu w" onclick="closePop('menu')" style=" position:absolute; right:30px; top:30px; width:27px; height:27px; background:none; z-index:1; border:0;cursor:pointer;">
+		               		<span class="blind" style="overflow:hidden; position:absolute; border:0; padding:0; margin:0; width:1px; height:1px; clip:rect(1px, 1px, 1px, 1px); clip-path:inset(50%); white-space:nowrap; ">닫기</span></button>
+		           </div>
+		           
+		           <button type="button" class="btn_open btn_open_contact" onclick="openPop('contact')" style="width:180px;color:#fff;background:none;border-radius:0 0 15px 0;height:80px;line-height:80px;border:0;white-space:nowrap;font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands' !important;cursor:pointer;">
+						<span style="position:relative;padding-right:29px;font-weight:500;margin:0;vertical-align:baseline;-webkit-text-size-adjust:100%;font-size:16px;">사업별 문의처</span>
+		           </button>
+		           <div class="contact pop" id="contact" style="display:none; position:fixed; left:0; top:0; right:0; width:100%; max-width:100%; height:100vh; max-height:100vh; padding:0; background:#fff; overflow:hidden; transform:none;">
+		               <div class="inner_2023" style="display:-webkit-flex; display:-ms-flexbox; display:flex; align-items:start;">
+		                   <div class="title_2023" style="width:32%;height:100vh;padding:6em 1.5em 0 12em;color:#fff;background:url(../../kista_ip/img/contact_bg.png) no-repeat center;margin:0;border:0;font-weight:400;vertical-align:baseline;-webkit-text-size-adjust:100%;box-sizing:border-box;font-family:'Pretendard', '맑은고딕', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif, 'Font Awesome 6 Pro', 'Font Awesome 6 Brands';">
+		                       <h2 style="-webkit-animation:menu_li .4s linear forwards; animation:menu_li .4s linear forwards; margin-bottom:20px; font-size:2.1em; font-weight:700; letter-spacing:-0.015em; white-space:nowrap; transform:translateY(-55px); opacity:0;">사업별 문의처</h2>
+		                       <p style="animation:menu_li .4s .1s linear forwards;line-height:1.5;font-size:.938em;transform:translateX(-55px);opacity:0;margin:0;padding:0;border:0;font-weight:400;vertical-align:baseline;-webkit-text-size-adjust:100%;">사업별 담당부서가 상이하오니 <br>신청하려는 사업을 다시 확인하신 후 <br>해당 담당자에게 문의하시기 바랍니다.</p>
+		                       <ul class="tab_li" style="margin-top:6em;font-size:1.125em;list-style:none;">
+		                           <li class="active" data-tab="tab1" style="-webkit-animation:menu_li .4s .2s linear forwards; animation:menu_li .4s .2s linear forwards;margin:8px 0;transform:translateX(-55px);opacity:0;font-weight:400;">
+		                               <button type="button" class="button_2023">
+		                                   <span class="span_2023">IPPRO</span>
+		                                   <strong style="font-weight:700;">IP R&amp;D 사업관리</strong>
+		                               </button>
+		                           </li>
+		                           <li data-tab="tab2" style="-webkit-animation:menu_li .4s .2s linear forwards; animation:menu_li .4s .2s linear forwards;margin:8px 0;transform:translateX(-55px);opacity:0;font-weight:400;">
+		                               <button type="button" class="button_2023">
+		                               <div style="display: inline-block; transform: translate(0, -50%)"><span class="span_2023">IPAS</span></div>
+		                              	<strong style="font-weight:700;display: inline-block;">국가 R&D <br/>특허동향 심층분석</strong></button>
+		                           </li>
+		                       </ul>
+		                   </div>
+		                   <div class="tab_cont active" id="tab1">
+		                       <div class="list_wrap">
+		                           <h3>
+		                           		<span>사업 신청, 접수, 선정 평가</span> 등 문의
+		                           </h3>
+		                           <div class="list col2">
+		                               <div class="item">
+		                                   <p class="subject">지재권 연계 연구개발 전략지원 사업</p>
+		                                   <ul class="info">
+		                                       <li class="part_2023">특허전략사업실</li>
+		                                       <li class="tel_2023"><span>02-3287-4233, 4234, 4261</span></li>
+		                                   </ul>
+		                               </div>
+		                               <div class="item">
+		                                   <p class="subject">(특허·디자인 융합) 지재권 연계 연구개발 전략지원 사업</p>
+		                                   <ul class="info">
+		                                       <li class="part_2023">융복합전략지원실</li>
+		                                       <li class="tel_2023">
+		                                           <span> 042-251-1709, 1711</span>
+		                                           <span>/ 02-3287-4227, 4242</span>
+		                                           
+		                                       </li>
+		                                   </ul>
+		                               </div>
+		                               <div class="item">
+		                                   <p class="subject">표준특허 전략지원 사업</p>
+		                                   <ul class="info">
+		                                       <li class="part_2023">표준특허센터</li>
+		                                       <li class="tel_2023"><span>02-3287-4304, 4319, 4320, 4349</span></li>
+		                                   </ul>
+		                               </div>
+		                               <div class="item">
+		                                   <p class="subject">R&D 전주기 IP 솔루션지원 사업</p>
+		                                   <ul class="info">
+		                                       <li class="part_2023">(중기부 R&D) 성장전략지원실</li>
+		                                       <li class="tel_2023"><span>042-251-1850</span></li>
+		                                   </ul></br>
+		                                   <ul class="info">
+		                                       <li class="part_2023">(산업부 R&D) 산업전략지원실</li>
+		                                       <li class="tel_2023"><span>02-3287-4326, 042-251-1789</span></li>
+		                                   </ul>		                                   
+		                               </div>		                               
+		                           </div>
+		                       </div>
+		                       <div class="list_wrap">
+		                           <h3><span>시스템</span> 문의</h3>
+		                           <div class="list col4">
+		                               <div class="item">
+		                                   <ul class="info">
+		                                       <li class="part_2023">특허전략사업실</li>
+		                                       <li class="email_2023">ippro@kista.re.kr</li>
+		                                   </ul>
+		                               </div>
+		                               <div class="item">
+		                                   <ul class="info">
+		                                       <li class="part_2023">융복합전략지원실</li>
+		                                       <li class="email_2023">iprndinfo@kista.re.kr</li>
+		                                   </ul>
+		                               </div>
+		                               <div class="item">
+		                                   <ul class="info">
+		                                       <li class="part_2023">표준특허센터</li>
+		                                       <li class="email_2023">epcenter@kista.re.kr</li>
+		                                   </ul>
+		                               </div>
+		                               <div class="item">
+		                                   <ul class="info">
+		                                       <li class="part_2023">성장전략지원실</li>
+		                                       <li class="email_2023">ipcenter@kista.re.kr</li>
+		                                   </ul>
+		                               </div>
+		                               <div class="item">
+		                                   <ul class="info">
+		                                       <li class="part_2023">산업전략지원실</li>
+		                                       <li class="email_2023">industry@kista.re.kr</li>
+		                                   </ul>
+		                               </div>
+		                           </div>
+		                       </div>
+		                   </div>
+		                   <div class="tab_cont" id="tab2">
+		                       <div class="list_wrap">
+		                           <h3>
+		                           		<span>국가 R&D 특허동향 심층분석 사업</span>
+		                           </h3>		                       
+		                           <div class="list col2">
+<!-- 		                               <div class="item">
+		                                   <p class="subject">NNNNNNNNNNNNNNN협력기관 등록, 실적증명서 발급 및 시스템 문의</p>
+		                                   <span class="tel_2023">ipas@kista.re.kr</span>
+		                               </div> -->
+		                               	<div class="item">
+		                                   <ul class="info">
+		                                   		<li style="font-weight: bold;">사업 문의</li>
+		                                       <li class="tel_2023">042-251-1827, 1833 / 02-3287-4355</li>
+		                                   </ul>
+		                               </div>
+		                               	<div class="item">
+		                                   <ul class="info">
+		                                   		<li style="font-weight: bold;">공고 문의</li>
+		                                       <li class="tel_2023">042-251-1834, 1836</li>
+		                                   </ul>
+		                               </div>
+		                               	<div class="item">
+		                                   <ul class="info">
+		                                   		<li style="font-weight: bold;">사업비 문의 / 용역비 문의</li>
+		                                       <li class="tel_2023">042-251-1834, 1836 / 02-3287-4344</li>
+		                                   </ul>
+		                               </div>
+		                               	<div class="item">
+		                                   <ul class="info">
+		                                   		<li style="font-weight: bold;">선정 평가 문의</li>
+		                                       <li class="tel_2023">042-251-1835, 1829</li>
+		                                   </ul>
+		                               </div>
+		                               	<div class="item">
+		                                   <ul class="info">
+		                                   		<li style="font-weight: bold;">협력기관 협약 문의</li>
+		                                       <li class="tel_2023">042-251-1835</li>
+		                                   </ul>
+		                               </div>
+		                               	<div class="item">
+		                                   <ul class="info">
+		                                   		<li style="font-weight: bold;">의뢰기관 협약 문의</li>
+		                                       <li class="tel_2023">042-251-1834, 1836</li>
+		                                   </ul>
+		                               </div>
+		                               	<div class="item">
+		                                   <ul class="info">
+		                                   		<li style="font-weight: bold;">후보군 문의</li>
+		                                       <li class="tel_2023">042-251-1833, 1835, 1829</li>
+		                                   </ul>
+		                               </div>
+		                               	<div class="item">
+		                                   <ul class="info">
+		                                   		<li style="font-weight: bold;">시스템 문의</li>
+		                                       <li class="tel_2023">02-3287-4344</li>
+		                                   </ul>
+		                               </div>		                               		                               		                               		                               		                               		                               		                               		                               
+		                               
+		                           </div>
+		                       </div>
+		                   </div>
+		                   
+		                   <button type="button" class="btn_close btn_close_contact" onclick="closePop('contact')" style=" position:absolute; right:30px; top:30px; width:27px; height:27px; background:none; z-index:1; border:0; cursor:pointer;color:#fff;">
+		                   		<span class="blind" style="overflow:hidden; position:absolute; border:0; padding:0; margin:0; width:1px; height:1px; clip:rect(1px, 1px, 1px, 1px); clip-path:inset(50%); white-space:nowrap; ">닫기</span>
+		                   </button>
+		                </div>
+		            </div>
+		        </div>
+		        <div class="right" style="margin-top:-0.8%;float:right;">
+		            <a href="https://www.kista.re.kr" class="representative" target="_blank" title="한국특허전략개발원 대표 홈페이지 새창열림">
+		                <span style="color:#fff;">대표 홈페이지</span>
+		            </a>
+		        </div>
+		    </div>
+		</header>
+	
+	
+
+		<div class="header">
+			
+
+
+
+
+
+
+
+
+
+
+<script LANGUAGE="JavaScript" src="/ippro/js/rndip/movie.js"></script>
+<script type="text/javascript" src="/ippro/js/rndip/common.js" ></script>
+<script type="text/javaScript" language="javascript" defer="defer">
+	var msg='';
+	var errorCode = '';
+
+	if(msg!=""){
+		alert(msg);
+	}
+
+	if(errorCode == "0"){
+		alert("로그인 정보가 올바르지 않습니다.");
+		window.open('/ippro/uat/client/userIdPwCtl.do','idpw','width=1124px, height=900px, scrollbars=yes');
+	}else if(errorCode == "1"){
+		alert("비밀번호 재설정을 이용하여주세요.");
+		window.open('/ippro/uat/client/userIdPwCtl.do','idpw','width=1124px, height=900px, scrollbars=yes');
+	}else if(errorCode == "2"){
+		alert("로그인 정보가 올바르지 않습니다.");
+	}else if(errorCode == "3"){
+		alert("개인 회원은 로그인 할 수 없습니다.\n본 홈페이지는 협력기관,참여기관 권한만 이용하실 수 있습니다.\n권한변경 신청 후 이용해주시기 바랍니다.");
+		var myId = '';
+		var url = '/ippro/uat/client/myPagePwChk.do?usrId='+myId+'&individual=1';
+		window.open(url,'MyPage','width=1124px,height=900px, scrollbars=yes');
+		//myPagePopup();
+	}
+
+	function goTopMenu(url, code1, code2){
+		var frm = document.menuForm;
+		frm.DepthCode1.value = code1;
+		frm.DepthCode2.value = code2;
+
+		frm.action = "/ippro/"+url;
+		frm.submit();
+	}
+
+
+	function myPagePopup(){
+ 		var popupOpt ="width=1124px, height=900px, scrollbars=yes";
+		_searchTxtPopup = window.open('','MyPage',popupOpt);
+
+		var f = document.myForm;
+		f.action = "/ippro/uat/client/myPagePwChk.do";
+		f.method = "POST";
+		f.target = "MyPage";
+		f.submit();
+		_searchTxtPopup.focus();
+		
+		return;
+	}
+</script>
+	
+	<div class="logo"><a href="/ippro/uat/uia/egovLoginUsr.do"><img src="/ippro/images/2023_new_images/logo (3).png" alt="IP-R&D 사업관리시스템"></a></div>
+	<form name="menuForm" method="post">
+		<input type="hidden" name="DepthCode1" value="3">
+		<input type="hidden" name="DepthCode2" value="1">
+	    <div class="main_menu">
+	    	<div class="menu_unit">
+	    		<!-- <a href="javascript:goTopMenu('/com/iprndMain/businessIprndIntro1.do','1','1');">
+	    		 -->
+	    		<a href="javascript:goTopMenu('com/iprndMain/businessIprndIntro1.do','1','1');">
+	    			<img src="/ippro/images/iprndMain/menu_off_01.png" onMouseOver="this.src='/ippro/images/iprndMain/menu_on_01.png'" onMouseOut="this.src='/ippro/images/iprndMain/menu_off_01.png'" alt="사업안내">
+	    		</a>
+	    	</div>	    	
+	    	<div class="menu_unit2">
+	    		<img src="/ippro/images/iprndMain/menu_i.png">
+	    	</div>
+	        <div class="menu_unit">
+	        	<!-- <a href="javascript:goTopMenu('/com/iprndMain/selectBusinessAnnounceList.do?bbsType=bs','2','1');">
+	        	 -->
+	        	<a href="javascript:goTopMenu('com/iprndMain/selectBusinessAnnounceList.do?bbsType=bs','2','1');">
+	        		<img src="/ippro/images/iprndMain/menu_off_02.png" onMouseOver="this.src='/ippro/images/iprndMain/menu_on_02.png'" onMouseOut="this.src='/ippro/images/iprndMain/menu_off_02.png'" alt="사업공고">
+	        	</a>
+	        </div>
+	        <div class="menu_unit2">
+	    		<img src="/ippro/images/iprndMain/menu_i.png">
+	    	</div>
+	        <div class="menu_unit">
+	        	<!-- <a href="javascript:goTopMenu('/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac','3','1');">
+	        	 -->
+	        	<a href="javascript:goTopMenu('com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac','3','1');">
+	        		<img src="/ippro/images/iprndMain/menu_on_03.png" onMouseOver="this.src='/ippro/images/iprndMain/menu_on_03.png'" onMouseOut="this.src='/ippro/images/iprndMain/menu_on_03.png'" alt="협력기관 모집공고">
+	        	</a>
+	        </div>
+	        <div class="menu_unit2">
+	    		<img src="/ippro/images/iprndMain/menu_i.png">
+	    	</div>
+	        <div class="menu_unit">
+	        	<!-- <a href="javascript:goTopMenu('/com/iprndMain/selectBoardList.do?bbsId=BBSMSTR_000000000201','4','1');">
+	        	 -->
+	        	<a href="javascript:goTopMenu('com/iprndMain/selectBoardList.do?bbsId=BBSMSTR_000000000201','4','1');">
+	        		<img src="/ippro/images/iprndMain/menu_off_04.png" onMouseOver="this.src='/ippro/images/iprndMain/menu_on_04.png'" onMouseOut="this.src='/ippro/images/iprndMain/menu_off_04.png'" alt="공지사항">
+	        	</a>
+	        </div>
+	        <div class="menu_unit2">
+	    		<img src="/ippro/images/iprndMain/menu_i.png">
+	    	</div>
+	        <div class="menu_unit">
+	        	<!-- <a href="javascript:goTopMenu('/com/iprndMain/selectBoardList.do?bbsId=BBSMSTR_000000000101','5','1');">
+	        	 -->
+	        	<a href="javascript:goTopMenu('com/iprndMain/selectBoardList.do?bbsId=BBSMSTR_000000000101','5','1');">
+	        		<img src="/ippro/images/iprndMain/menu_off_05.png" onMouseOver="this.src='/ippro/images/iprndMain/menu_on_05.png'" onMouseOut="this.src='/ippro/images/iprndMain/menu_off_05.png'" alt="성공사례">
+	        	</a>
+	        </div>
+	        
+	    </div>
+	</form>
+	<form name="myForm" id="myForm" method="post">
+    	<input type="hidden" name="usrId" value="" />
+    </form>
+
+		</div>
+	
+		<div class="main_contents">
+			
+
+
+
+
+
+	
+	<script type="text/javascript" src="/ippro/js/rndip/jquery-1.5.2.js"></script>
+	<script type="text/javascript" src="/ippro/js/rndip/jquery-util.js"></script>
+	<script type="text/javascript" src="/ippro/dext5upload/js/dext5upload.js"></script>
+	<script type="text/javascript" src="/ippro/js/rndip/dext5upload.js"></script>
+	<script type="text/javascript">
+		function fn_updtView(pjMno){
+			var frm = document.addForm;
+			window.open('/ippro/Announce/ProjectSearchTech.do?pjMno='+pjMno,'Pop','width=780px, height=430px, scrollbars=yes');
+		}
+	
+	
+		function editorInit(){
+			var frm = document.frm;
+			var inStr = frm.contents.value;
+			inStr = inStr.replace("https://ippro.rndip.re.kr:441/", "https://ippro.kipsi.re.kr/");
+			inStr = inStr.replace("https://ippro.kipsi.re.kr/", "http://ippro.kista.re.kr/");
+			inStr = inStr.replace("http://ippro.kista.re.kr/", "https://biz.kista.re.kr/ippro/");
+			inStr = inStr.replace("https://ippro.kista.re.kr/", "https://biz.kista.re.kr/ippro/");
+			inStr = inStr.replace(/&quot;/gi, "\"");
+			contSpan.innerHTML = inStr;
+			ComFnReSizeCgImg(jQuery("#contSpan"), 700);
+		}
+		
+		String.prototype.replaceAll = function(src, repl){
+			 var str = this;
+			 if(src == repl){return str;}
+			 while(str.indexOf(src) != -1) {
+			 	str = str.replace(src, repl);
+			 }
+			 return str;
+		}
+		
+		function ComFnReSizeCgImg(node, size){
+			if(node.find("img").length >0){
+				node.find("img").each(function(i){
+					if(Number(jQuery(this).width()) > size){
+						if(i == '0'){
+							jQuery(this).width(size);	
+						}
+						jQuery(this).width(size);
+					}
+				});
+			}	
+		}
+		
+		function fn_egov_select_noticeList(pageNo){
+			document.frm.pageIndex.value = pageNo;
+			document.frm.action = "/ippro/com/iprndMain/selectBusinessAnnounceList.do";
+			document.frm.submit();
+		}
+	
+		function DEXT5UPLOAD_OnCreationComplete(){
+			
+				DEXT5UPLOAD.AddUploadedFile('2767', '[붙임3] 기술개요서_2026년 월클.pdf', '/iprnd_data/RND-IP2_DATA/AN'+'/'+'FILE_000000001295795', '1632327', '', G_UploadID);
+			
+				DEXT5UPLOAD.AddUploadedFile('2766', '[붙임2] 협력기관 과제 신청 안내_2026년 월클플러스 IP전략수립지원 사업.hwp', '/iprnd_data/RND-IP2_DATA/AN'+'/'+'FILE_000000001295794', '736256', '', G_UploadID);
+			
+				DEXT5UPLOAD.AddUploadedFile('2765', '[붙임1] 협력기관 모집 공고_2026년 월클플러스 IP전략수립지원 사업.hwp', '/iprnd_data/RND-IP2_DATA/AN'+'/'+'FILE_000000001295793', '275456', '', G_UploadID);
+			
+		}
+							
+		jQuery(document).ready(Event);
+		function Event(){
+			editorInit();
+		}
+		
+		jQuery(window).scroll(function(){
+		       var position = $(document).scrollTop();
+		       if(position > 133){
+		    	   $("#bedBenner").css('top',  position );   
+		       }else{
+		    	   $("#bedBenner").css('top',  133 );
+		       }
+		});
+		
+	</script>
+	
+	<style>
+	.contSpan.p.img{
+	width:700px;
+	}
+	p{width:700px;}
+	p img{max-width:700px;}
+	
+	</style>
+	
+	<div class="sns_box" id ="bedBenner" name = "bedBenner" style="top:133px;right:-8%;">
+		
+		<a href="/ippro/com/iprndMain/reportInsertForm.do" ><img src="/ippro/images/iprndMain/bedReport.jpg" alt="부정행위 신고센터" style="width:215%;"></a>
+	</div>
+	
+	<div class="aside">
+	
+		<div class="aside_vi"><img src="/ippro/images/iprndMain/partners_main.png"></div>
+        <div class="aside_menu aaa">
+        	<div class="aside_unit on"><a href="javascript:goTopMenu('/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac','3','1');">협력기관 모집공고</a></div>
+        </div>
+	
+    </div>
+    <div class="sub_contents">
+    	<div class="sub_title partners_color"><span>협력기관 모집공고</span></div>
+        <p class="sub_txt">
+        	<form name="frm" method="post" action="">
+				<input type="hidden" name="pageIndex" value="1">
+				<input type="hidden" name="bbsType" value="ac" />
+				<input type="hidden" name="searchGubunCd" value="" />
+				<input type="hidden" name="DepthCode1" value="3">
+				<input type="hidden" name="DepthCode2" value="1">
+				<div id = "test1" name ="test1" style="width:700px;">
+					<table border="0" cellspacing="0" cellpadding="0" class="infor-view" style="width:700px; table-layout:fixed;">
+					<colgroup>
+						<col width="15%" />
+						<col width="18%" />
+						<col width="15%" />
+						<col width="18%" />
+						<col width="15%" />
+						<col width="19%" />
+					</colgroup>
+					<tr>
+						<th>공고명</th>
+						<td colspan="5">2026년 월드클래스플러스 R&D전주기 IP전략수립지원 과제  특허 조사·분석 협력기관 모집 공고</td>
+					</tr>
+					
+						<tr>
+							<th>담당</th>
+							<td colspan="5">
+								산업전략지원실
+							</td>
+						</tr>
+					
+					
+						<tr>
+							<th>전화번호</th>
+							<td colspan="5">
+								02-3287-4326
+							</td>
+						</tr>
+					
+					<tr>
+						<th>연도</th>
+						<td>2026</td>
+						<th>사업구분</th>
+						<td>R&D전주기 IP솔루션지원 사업</td>
+						<th>반기구분</th>
+						<td>하반기</td>
+					</tr>
+					<tr>
+						<td colspan="6">
+							<input type="hidden" id="contents" name="contents" value="&lt;html lang=&amp;quot;ko&amp;quot; xml:lang=&amp;quot;ko&amp;quot;&gt;&lt;head&gt;
+&lt;title&gt;DEXT5 Editor&lt;/title&gt;
+&lt;style type=&amp;quot;text/css&amp;quot;&gt;
+body { cursor:text; line-height:150%; margin:0px; font-family:굴림; font-size:12pt; }
+p { line-height:150%; margin-top:0px; margin-bottom:0px; }
+li { line-height:150%; margin-top:0px; margin-bottom:0px; }
+&lt;/style&gt;
+&lt;meta http-equiv=&amp;quot;Content-Type&amp;quot; content=&amp;quot;text/html&amp;quot; charset=&amp;quot;utf-8&amp;quot;&gt;&lt;/head&gt;
+&lt;body spellcheck=&amp;quot;false&amp;quot; style=&amp;quot;&amp;quot;&gt;&lt;img src=&amp;quot;https://biz.kista.re.kr/ippro/INIMAGE/2026/09/23/20260923_132120525_97161.jpg&amp;quot; title=&amp;quot;&amp;quot; alt=&amp;quot;&amp;quot; hspace=&amp;quot;0&amp;quot; vspace=&amp;quot;0&amp;quot; border=&amp;quot;0&amp;quot; style=&amp;quot;border: 0px solid;&amp;quot;&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+
+&lt;/body&gt;&lt;/html&gt;" />
+							<span id="contSpan" class = "contSpan"></span>
+						</td>
+					</tr>
+					<tr>
+						<th>접수기간</th>
+						<td colspan="5">
+							2026-09-28 09시 00분
+				        	 ~
+				        	2026-10-02 11시 00분
+						</td>
+					</tr>
+					<tr>
+						<th>이의신청기간</th>
+						<td colspan="5">
+							
+				        		2026-10-20 09시 00분
+				        	 	~
+				        		2026-10-21 18시 00분
+			        		
+						</td>
+					</tr>
+					<tr>
+						<th>첨부파일</th>
+						<td colspan="5">
+							<script type="text/javascript">
+								DEXT5UPLOAD.config.Width = "550px";
+								DEXT5UPLOAD.config.Mode = "view";
+								var upload = new Dext5Upload("dext5upload");
+							</script>
+						</td>
+					</tr>
+					<tr>
+						<th colspan="6">대상과제</th>
+					</tr>
+					<tr>
+						<th>사업구분</th>
+						<th>과제분야</th>
+						<th>기술분야</th>
+						
+							
+							
+							
+								<th colspan="2">과제명</th>
+								<th>기술개요</th>
+							
+						
+					</tr>
+					
+					
+						 <tr>
+							<td style="text-align:center">R&D전주기 IP솔루션지원 사업</td>
+							<td style="text-align:center">월드클래스</td>
+							<td style="text-align:center">기계/금속/자동차</td>
+							
+								
+								
+									<td colspan="2">AI 기반 예지보전형 HVAC+Chiller 통합제어 하이브리드 ESS 냉각 시스템 개발</td>
+									<td style="text-align:center">
+										
+											
+												
+												
+													<a href='javascript:void(0)' onclick="fn_updtView('2026-06000004')"><img src="/ippro/images/rndip/download.gif" alt='기술개요'></a>	
+												
+											
+										
+									</td>
+								
+							
+						</tr>
+						
+						 <tr>
+							<td style="text-align:center">R&D전주기 IP솔루션지원 사업</td>
+							<td style="text-align:center">월드클래스</td>
+							<td style="text-align:center">기계/금속/자동차</td>
+							
+								
+								
+									<td colspan="2">AI 기반 인입 공정가스 예측 데이터를 활용한 에너지 절감형 스크러버 기술 개발</td>
+									<td style="text-align:center">
+										
+											
+												
+												
+													<a href='javascript:void(0)' onclick="fn_updtView('2026-06000010')"><img src="/ippro/images/rndip/download.gif" alt='기술개요'></a>	
+												
+											
+										
+									</td>
+								
+							
+						</tr>
+						
+						 <tr>
+							<td style="text-align:center">R&D전주기 IP솔루션지원 사업</td>
+							<td style="text-align:center">월드클래스</td>
+							<td style="text-align:center">기계/금속/자동차</td>
+							
+								
+								
+									<td colspan="2">AI 적용 다단성형 생산기술 개발을 통한 PBV용 내박리성 초고강도 경량 구조 프레임의 제품화 기술 개발</td>
+									<td style="text-align:center">
+										
+											
+												
+												
+													<a href='javascript:void(0)' onclick="fn_updtView('2026-06000009')"><img src="/ippro/images/rndip/download.gif" alt='기술개요'></a>	
+												
+											
+										
+									</td>
+								
+							
+						</tr>
+						
+						 <tr>
+							<td style="text-align:center">R&D전주기 IP솔루션지원 사업</td>
+							<td style="text-align:center">월드클래스</td>
+							<td style="text-align:center">기계/금속/자동차</td>
+							
+								
+								
+									<td colspan="2">글로벌 ESS 시장 대응을 위한 열전도도 110 W/mK 이상의 AI 자율 제어 기술 접목 대형·복잡형상 알루미늄 하우징 신제품 개발</td>
+									<td style="text-align:center">
+										
+											
+												
+												
+													<a href='javascript:void(0)' onclick="fn_updtView('2026-06000007')"><img src="/ippro/images/rndip/download.gif" alt='기술개요'></a>	
+												
+											
+										
+									</td>
+								
+							
+						</tr>
+						
+						 <tr>
+							<td style="text-align:center">R&D전주기 IP솔루션지원 사업</td>
+							<td style="text-align:center">월드클래스</td>
+							<td style="text-align:center">기계/금속/자동차</td>
+							
+								
+								
+									<td colspan="2">다목적 미래 모빌리티 대응 모듈러 기반 지능형 콘솔시스템 기술 개발</td>
+									<td style="text-align:center">
+										
+											
+												
+												
+													<a href='javascript:void(0)' onclick="fn_updtView('2026-06000002')"><img src="/ippro/images/rndip/download.gif" alt='기술개요'></a>	
+												
+											
+										
+									</td>
+								
+							
+						</tr>
+						
+						 <tr>
+							<td style="text-align:center">R&D전주기 IP솔루션지원 사업</td>
+							<td style="text-align:center">월드클래스</td>
+							<td style="text-align:center">기계/금속/자동차</td>
+							
+								
+								
+									<td colspan="2">시스템반도체 식각장비 핵심부품용 극한환경 대응 세라믹 복합코팅 초격차 기술 개발</td>
+									<td style="text-align:center">
+										
+											
+												
+												
+													<a href='javascript:void(0)' onclick="fn_updtView('2026-06000008')"><img src="/ippro/images/rndip/download.gif" alt='기술개요'></a>	
+												
+											
+										
+									</td>
+								
+							
+						</tr>
+						
+						 <tr>
+							<td style="text-align:center">R&D전주기 IP솔루션지원 사업</td>
+							<td style="text-align:center">월드클래스</td>
+							<td style="text-align:center">기계/금속/자동차</td>
+							
+								
+								
+									<td colspan="2">차세대 모빌리티 제동시스템 EMB(Electro Mechanical Brake)용 25kN급 축방향 고하중 비순환형 볼스크류 국산화 기술 개발</td>
+									<td style="text-align:center">
+										
+											
+												
+												
+													<a href='javascript:void(0)' onclick="fn_updtView('2026-06000001')"><img src="/ippro/images/rndip/download.gif" alt='기술개요'></a>	
+												
+											
+										
+									</td>
+								
+							
+						</tr>
+						
+						 <tr>
+							<td style="text-align:center">R&D전주기 IP솔루션지원 사업</td>
+							<td style="text-align:center">월드클래스</td>
+							<td style="text-align:center">바이오/제약</td>
+							
+								
+								
+									<td colspan="2">글로벌 K-뷰티 산업 활성화를 위한 생체적합 소재 및 기능성 펩타이드를 이용한 고품질 메디컬 제품 개발 및 상용화</td>
+									<td style="text-align:center">
+										
+											
+												
+												
+													<a href='javascript:void(0)' onclick="fn_updtView('2026-06000005')"><img src="/ippro/images/rndip/download.gif" alt='기술개요'></a>	
+												
+											
+										
+									</td>
+								
+							
+						</tr>
+						
+						 <tr>
+							<td style="text-align:center">R&D전주기 IP솔루션지원 사업</td>
+							<td style="text-align:center">월드클래스</td>
+							<td style="text-align:center">바이오/제약</td>
+							
+								
+								
+									<td colspan="2">기능적 노화 대응 핵심 바이오 소재 활용 글로벌 기능성 식품 상용화 기술 개발</td>
+									<td style="text-align:center">
+										
+											
+												
+												
+													<a href='javascript:void(0)' onclick="fn_updtView('2026-06000006')"><img src="/ippro/images/rndip/download.gif" alt='기술개요'></a>	
+												
+											
+										
+									</td>
+								
+							
+						</tr>
+						
+						 <tr>
+							<td style="text-align:center">R&D전주기 IP솔루션지원 사업</td>
+							<td style="text-align:center">월드클래스</td>
+							<td style="text-align:center">바이오/제약</td>
+							
+								
+								
+									<td colspan="2">신규 payload, linker-payload 및 dual-payload linker 플랫폼을 기반으로 기존 ADC의 효능, 내성 및 안전성 한계를 개선하는 차별화된 ADC 핵심 요소기술</td>
+									<td style="text-align:center">
+										
+											
+												
+												
+													<a href='javascript:void(0)' onclick="fn_updtView('2026-06000003')"><img src="/ippro/images/rndip/download.gif" alt='기술개요'></a>	
+												
+											
+										
+									</td>
+								
+							
+						</tr>
+						
+				</table>
+				</div>
+				
+			</form>
+        </p>
+        <p class="sub_btn">
+			<a href="javascript:fn_egov_select_noticeList('1');" class="btn_BList"><span>목록</span></a>
+		</p>
+		
+    </div>    
+		</div>
+		
+		<!-- <div class="footer"> -->
+		<div class="footer_2023">
+			
+
+	<!-- 
+	<script>
+	<!--
+		function fnCopyRight() {
+			var url="/ippro/uat/uia/copyRight.do";
+			window.open(url,"window","width=620,height=300,scrollbars=no");
+		}
+	
+		function fnInfoPolicy() {
+			//var url="/ippro/uat/uia/infoPolicy.do";
+			//window.open(url,"window","width=750,height=500,scrollbars=no");
+			var url="http://www.kista.re.kr/usr/com/prm/BBSList.do?bbsId=BBSMSTR_000000000211";
+			window.open(url,"window","scrollbars=yes");
+		}
+		
+		function fnEmailPolicy() {
+			var url="/ippro/uat/uia/emailPolicy.do";
+			window.open(url,"window","width=700,height=300,scrollbars=no");
+		}
+		
+		function fnComeMap(){
+			var url="/uat/uia/ComeMap.do";
+			window.open(url,"window","width=750,height=750,scrollbars=no");
+		}
+		
+		function fn_site_move(val){
+			if(val == "") return;
+			window.open(val, "_blank");
+		}
+		
+	//-->
+	</script>
+	
+	<!-- end # footer-infor -->
+	
+	<div class="footer_box">
+		<div class="center_box">
+	    	<div class="footer_menu_pac">
+	        	<div class="footer_m_unit"><a href="http://privacy.kisa.or.kr/main.do" target="_blank">개인정보침해신고센터</a></div>
+	            <div class="footer_m_unit footer_line point_color"><a href="https://www.kista.re.kr/user/content.do?pageId=PAGE_000000000000006" target="_blank"><strong>개인정보처리방침</strong></a></div>
+	            <div class="footer_m_unit footer_line"><a href="https://www.kista.re.kr/user/content.do?pageId=PAGE_000000000000012" target="_blank">영상정보처리기기 운영관리방침</a></div>
+	            <div class="goto_top"><a href="#">TOP ▲</a></div>
+	        </div>
+	        <div class="footer_info">
+        			[대전 본원]		  : (34831) 대전광역시 중구 대종로 540(선화동 83-11) 유안타증권빌딩 13, 14, 15층 
+	        		<br>[서울 분원] : (06133) 서울특별시 강남구 테헤란로 131(역삼동 647-9) 한국지식재산센터 8층
+	        		<br/>
+	        		<br/><br/>
+        	</div>
+	        <div class="footer_logo"><img src="../../images/iprndSub/footer_logo.png"></div>
+	    </div>
+	</div>
+	
+	
+	
+		</div>
+	</body>
+	<script type="text/javascript" src="/ippro/js/rndip/jquery/jquery-1.4.2.js"></script>
+	<script type="text/javascript" src="/ippro/js/rndip/jquery/ui/jquery-ui-1.8.13.custom.js"></script>
+	<script type="text/javascript" src="/ippro/js/rndip/jquery/loadmask/jquery.loadmask.min.js"></script>
+	<script type="text/javascript" src="/ippro/js/rndip/jquery/common.js"></script>
+	<script type="text/javascript" src="/ippro/js/rndip/jquery/ajaxform.js"></script>
+	<script type="text/javascript" >
+
+	jQuery('#sub_left').click(function(){ //pc menu
+		var sub = jQuery('#sub');
+		if(sub.is(":visible")){
+			jQuery('#sub').slideUp(500);
+			jQuery('.new_down_btn img').attr('src', '/ippro/images/bizkista/icon_down_new.png');
+		}else{
+			jQuery('#sub').slideDown(500);
+			jQuery('.new_down_btn img').attr('src', '/ippro/images/bizkista/icon_up_new.png');
+		}
+	});
+	
+	</script>
+
+</html>
+

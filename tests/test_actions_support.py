@@ -5,10 +5,12 @@ import io
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from src.core.models import GeminiResult, Notice
-from src.core.storage import JsonStorage
+from src.core.diff import DiffConflictError
+from src.core.storage import JsonStorage, StorageFormatError
 from src.renderer.feed import write_feed
 from tools.actions_support import ActionsCheckError, diagnostics, main, preflight, stage_public, validate_state
 
@@ -142,6 +144,44 @@ class ActionsSupportTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertNotIn(SECRET, console.getvalue())
 
+    def test_corrupt_restored_state_blocks_staging_without_reset(self):
+        self.save()
+        corrupt = '{"credential": "' + SECRET + '"'
+        self.store.notices_path.write_text(corrupt, encoding='utf-8')
+        report = diagnostics(self.store.data_dir)
+        self.assertEqual(report['check'], 'StorageFormatError')
+        self.assertNotIn(SECRET, repr(report))
+        with self.assertRaises(StorageFormatError):
+            stage_public(self.store.data_dir, self.public, self.stage)
+        self.assertFalse(self.stage.exists())
+        self.assertEqual(self.store.notices_path.read_text(encoding='utf-8'), corrupt)
+
+    def test_duplicate_restored_identity_blocks_publication(self):
+        self.save()
+        record = json.loads(self.store.notices_path.read_text(encoding='utf-8'))[0]
+        self.store.notices_path.write_text(json.dumps([record, record]), encoding='utf-8')
+        with self.assertRaises(DiffConflictError):
+            stage_public(self.store.data_dir, self.public, self.stage)
+        self.assertFalse(self.stage.exists())
+
+    def test_diagnostics_unknown_exception_never_exposes_dynamic_name_or_message(self):
+        unsafe_error = type(SECRET, (Exception,), {})
+        with patch('tools.actions_support.validate_state', side_effect=unsafe_error(SECRET)):
+            report = diagnostics(self.store.data_dir)
+        self.assertEqual(report['check'], 'VALIDATION_ERROR')
+        self.assertNotIn(SECRET, repr(report))
+
+    def test_stage_cli_and_diagnostics_use_temporary_paths_without_network(self):
+        self.save()
+        with patch('urllib.request.OpenerDirector.open', side_effect=AssertionError('network forbidden')):
+            for command in ('validate-state', 'stage', 'diagnostics'):
+                with self.subTest(command=command), contextlib.redirect_stdout(io.StringIO()) as console:
+                    code = main([command, '--data-dir', str(self.store.data_dir),
+                                 '--public-dir', str(self.public), '--stage-dir', str(self.stage)])
+                self.assertEqual(code, 0)
+                self.assertNotIn(SECRET, console.getvalue())
+                self.assertIsInstance(json.loads(console.getvalue()), dict)
+
 
 class WorkflowContractTests(unittest.TestCase):
     @classmethod
@@ -194,6 +234,14 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIs(diagnostics_step['with']['include-hidden-files'], True)
         self.assertEqual(self.workflow['jobs']['deploy']['needs'], 'build')
         self.assertEqual(self.workflow['jobs']['deploy']['environment']['name'], 'github-pages')
+
+    def test_deployed_urls_are_recorded_from_actual_pages_output(self):
+        steps = self.workflow['jobs']['deploy']['steps']
+        report = next(s for s in steps if s.get('env', {}).get('PAGE_URL'))
+        self.assertEqual(report['env']['PAGE_URL'], '${{ steps.deployment.outputs.page_url }}')
+        self.assertIn('notices.json metadata.json', report['run'])
+        self.assertIn('GITHUB_STEP_SUMMARY', report['run'])
+        self.assertNotIn('${{', report['run'])
 
 
 if __name__ == '__main__':

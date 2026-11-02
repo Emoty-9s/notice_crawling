@@ -113,7 +113,7 @@
       ],
       "list_url": "https://www.khidi.or.kr/board?menuId=MENU01108",
       "detail_url_pattern": "/board/view?menuId=MENU01108&linkId={linkId}",
-      "enabled": true,
+      "enabled": false,
       "access_status": "READABLE_LIST",
       "content_type": "STATIC_HTML",
       "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
@@ -515,7 +515,44 @@
         }
       ],
       "monitoring_scope": "INCLUDED",
-      "scope_evidence": "사용자 지정 협력기관 입찰 게시판. 공개 표본 noticeSeq=553에서 상표출원 지원사업(협력기관), 직접 상표출원 대리 가능한 변리업체 및 단독입찰 가능 조건 확인. 개별 공고별 자격 판단은 별도."
+      "scope_evidence": "사용자 지정 협력기관 입찰 게시판. 공개 표본 noticeSeq=553에서 상표출원 지원사업(협력기관), 직접 상표출원 대리 가능한 변리업체 및 단독입찰 가능 조건 확인. 개별 공고별 자격 판단은 별도.",
+      "pre_m16_monitoring": {
+        "list_url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do",
+        "detail_url_pattern": "/pms/biz/partner/tenderNotice/info.do?bizYear={year}&noticeSeq={id}",
+        "pagination": {
+          "type": "UNVERIFIED",
+          "parameter": null,
+          "example_url": null,
+          "second_page_verified": false,
+          "notes": "협력기관 입찰 목록의 공고 행과 페이지 UI/요청을 확보하지 못함. 2페이지 미검증. 임의 ID 순회나 요청 인자 추측을 하지 않음."
+        },
+        "fallback": {
+          "strategy": "MANUAL_ONLY",
+          "trigger": "목록 데이터/페이지 탐색 방식 확인 전 또는 자동수집 실패 시",
+          "url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do",
+          "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+        }
+      },
+      "max_pages": 3,
+      "m16_validation": {
+        "status": "PASS",
+        "raw_http_fixture": false,
+        "live_http_smoke": "SUCCESS",
+        "verification_evidence": "USER_PROVIDED_EXTERNAL_POWERSHELL",
+        "notice_count": 1,
+        "list_count": 10,
+        "title_nonempty": true,
+        "apply_start": "2026-08-07",
+        "apply_end": "2026-08-21",
+        "unittest": {"status": "PASS", "count": 442, "elapsed_seconds": 40.192},
+        "codex_environment_limitation": "DNS_ERROR_11001",
+        "pagination_request_verified": false,
+        "requested_list_url": "https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do",
+        "browser_html_fixture": true,
+        "request_structure_from_html": true,
+        "ajax_response_fixture": false,
+        "attachment_download_verified": false
+      }
     },
     {
       "source_id": "kipa_bid",
@@ -535,7 +572,7 @@
       ],
       "list_url": "https://www.kipa.org/kipa/notice/kw_0402.jsp",
       "detail_url_pattern": "/kipa/notice/kw_0402.jsp?mode=view&article_no={id}&board_no=15",
-      "enabled": true,
+      "enabled": false,
       "access_status": "READABLE_LIST",
       "content_type": "STATIC_HTML",
       "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
@@ -1290,7 +1327,7 @@
           ]
         }
       ],
-      "list_url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+      "list_url": "https://biz.kista.re.kr/ippro//com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
       "detail_url_pattern": "/ippro/com/iprndMain/selectBusinessAnnounceView.do?annId={id}&annYy={year}&bbsType=ac",
       "enabled": false,
       "access_status": "READABLE_LIST",
@@ -1378,7 +1415,7 @@
       "fallback": {
         "strategy": "MANUAL_ONLY",
         "trigger": "페이지 이동 재현 실패 또는 상세 설명 부족 시",
-        "url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+        "url": "https://biz.kista.re.kr/ippro//com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
         "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
       },
       "user_selected_urls": [
@@ -1390,7 +1427,43 @@
       ],
       "monitoring_scope": "INCLUDED",
       "scope_evidence": "사용자가 특허법인 업무 대상인 협력기관 모집공고 URL을 MVP에 직접 추가 요청.",
-      "followup_checked_on": "2026-10-30"
+      "followup_checked_on": "2026-10-30",
+      "pre_m16_monitoring": {
+        "list_url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+        "detail_url_pattern": "/ippro/com/iprndMain/selectBusinessAnnounceView.do?annId={id}&annYy={year}&bbsType=ac",
+        "pagination": {
+          "type": "UI_NUMERIC_UNRESOLVED",
+          "parameter": null,
+          "example_url": null,
+          "second_page_verified": false,
+          "notes": "숫자 2~20 UI 확인. web 도구에서 2 링크 클릭은 같은 URL/같은 첫 페이지 목록으로 반환되어 실제 2페이지 이동은 미확인. 요청 인자를 추측하지 않음."
+        },
+        "fallback": {
+          "strategy": "MANUAL_ONLY",
+          "trigger": "페이지 이동 재현 실패 또는 상세 설명 부족 시",
+          "url": "https://biz.kista.re.kr/ippro/com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+          "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+        }
+      },
+      "max_pages": 3,
+      "m16_validation": {
+        "status": "PASS",
+        "raw_http_fixture": false,
+        "live_http_smoke": "SUCCESS",
+        "verification_evidence": "USER_PROVIDED_EXTERNAL_POWERSHELL",
+        "notice_count": 1,
+        "list_count": 20,
+        "title_nonempty": true,
+        "apply_start": "2026-01-12",
+        "apply_end": "2026-12-31",
+        "unittest": {"status": "PASS", "count": 442, "elapsed_seconds": 40.192},
+        "codex_environment_limitation": "DNS_ERROR_11001",
+        "pagination_request_verified": false,
+        "requested_list_url": "https://biz.kista.re.kr/ippro//com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac",
+        "browser_html_fixture": true,
+        "request_structure_from_html": true,
+        "attachment_download_verified": false
+      }
     },
     {
       "source_id": "kista_ipas",
@@ -2578,7 +2651,7 @@
       ],
       "list_url": "https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry",
       "detail_url_pattern": "/board/board.do?mode=updateCnt&boardId=bidancm&prgId=bid_bidancmEntry&dataNo={id}",
-      "enabled": true,
+      "enabled": false,
       "access_status": "READABLE_LIST",
       "content_type": "STATIC_HTML",
       "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
@@ -2673,7 +2746,7 @@
       ],
       "list_url": "https://seoul.rnbd.kr/client/c030200/c030200_00.jsp",
       "detail_url_pattern": "/client/c030200/c030200_04.jsp?seqNo={id}",
-      "enabled": true,
+      "enabled": false,
       "access_status": "READABLE_LIST",
       "content_type": "STATIC_HTML",
       "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
@@ -3776,7 +3849,7 @@
       ],
       "list_url": "https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000",
       "detail_url_pattern": "/board.es?act=view&bid=0005&mid=a10303000000&list_no={id}",
-      "enabled": true,
+      "enabled": false,
       "access_status": "ALTERNATIVE_LIST",
       "content_type": "STATIC_HTML",
       "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",

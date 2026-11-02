@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Generic, Protocol, TypeVar
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from src.core.models import Notice
@@ -55,6 +56,12 @@ class UrllibTransport:
         request = Request(url, headers=dict(headers), method="GET")
         with urlopen(request, timeout=timeout) as response:
             encoding = response.headers.get_content_charset() or "utf-8"
+            return response.read().decode(encoding)
+
+    def post(self, url: str, *, data: Mapping[str, str], timeout: float, headers: Mapping[str, str]) -> str:
+        request = Request(url, data=urlencode(data).encode('utf-8'), headers=dict(headers), method='POST')
+        with urlopen(request, timeout=timeout) as response:
+            encoding = response.headers.get_content_charset() or 'utf-8'
             return response.read().decode(encoding)
 
 
@@ -122,13 +129,22 @@ class BaseScraper(ABC, Generic[Item, Parsed]):
         control bypass. The timeout applies to transport socket operations,
         not an absolute deadline for the entire scraper run.
         """
+        return self._request_text(url)
+
+    def request_form(self, url: str, data: Mapping[str, str]) -> str:
+        """Observed public form POST, with the same GET retry/timeout/UA policy."""
+        return self._request_text(url, data=data)
+
+    def _request_text(self, url: str, *, data=None) -> str:
         options = self.http_settings
         for attempt in range(options.max_retries + 1):
             try:
-                text = self.transport.get(
-                    url, timeout=options.timeout_seconds,
-                    headers={"User-Agent": options.user_agent},
-                )
+                headers = {"User-Agent": options.user_agent}
+                if data is None:
+                    text = self.transport.get(url, timeout=options.timeout_seconds, headers=headers)
+                else:
+                    headers['Content-Type'] = 'application/x-www-form-urlencoded'
+                    text = self.transport.post(url, data=dict(data), timeout=options.timeout_seconds, headers=headers)
                 if not isinstance(text, str):
                     raise TypeError("transport.get must return text")
                 return text

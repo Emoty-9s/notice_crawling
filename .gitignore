@@ -10,6 +10,19 @@ build/
 dist/
 .run/
 .actions-diagnostics.json
+local/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
 *.egg-info/
 
 # Local environment and credentials
@@ -26,3 +39,10 @@ credentials/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Local business source files
+*.xlsb
+
+# Generated public feed
+public/*.json
+!public/.gitkeep

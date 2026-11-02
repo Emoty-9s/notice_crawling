@@ -87,7 +87,13 @@
       "environment": {"name": "github-pages", "url": "${{ steps.deployment.outputs.page_url }}"},
       "steps": [
         {"name": "Configure Pages (repository must enable Actions source)", "uses": "actions/configure-pages@v5"},
-        {"name": "Deploy JSON pair to GitHub Pages", "id": "deployment", "uses": "actions/deploy-pages@v4"}
+        {"name": "Deploy JSON pair to GitHub Pages", "id": "deployment", "uses": "actions/deploy-pages@v4"},
+        {
+          "name": "Record deployed feed URLs",
+          "shell": "bash",
+          "env": {"PAGE_URL": "${{ steps.deployment.outputs.page_url }}"},
+          "run": "base=\"${PAGE_URL%/}\"\nfor file in notices.json metadata.json; do\n  printf '%s/%s\\n' \"$base\" \"$file\"\n  printf -- '- [%s](%s/%s)\\n' \"$file\" \"$base\" \"$file\" >> \"$GITHUB_STEP_SUMMARY\"\ndone"
+        }
       ]
     }
   }

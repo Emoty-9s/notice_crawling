@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import re
+import base64
+import hashlib
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from urllib.parse import parse_qs, urljoin, urlsplit
@@ -89,9 +91,35 @@ class BoardScraper(BaseScraper[NoticeLink, ParsedNotice]):
     def fetch_detail(self, item):
         return self.request_text(item.url)
 
-    def detail(self, item, title_node, body, *, published=None, start=None, end=None, institution=None):
+    def detail(self, item, title_node, body, *, published=None, start=None, end=None, institution=None,
+               allow_image_body=False):
         title = title_node.text()
         content = body.text()
+        if not content and allow_image_body:
+            # Some real notices contain only a poster. Preserve the observed
+            # resource identity for hashing; never invent OCR/body prose.
+            images = []
+            for image in body.find('img'):
+                src = image.attrs.get('src', '').strip()
+                if not src:
+                    continue
+                embedded = re.fullmatch(r'data:image/(png|jpeg|gif|webp);base64,([A-Za-z0-9+/=\s]+)', src)
+                if embedded:
+                    try:
+                        data = base64.b64decode(''.join(embedded[2].split()), validate=True)
+                    except ValueError:
+                        continue
+                    if data:
+                        images.append('embedded-image-sha256:' + hashlib.sha256(data).hexdigest())
+                    continue
+                try:
+                    url = normalize_url(urljoin(item.url, src))
+                except ValueError:
+                    continue
+                if url not in images:
+                    images.append(url)
+            if images:
+                content = '[이미지 본문: 텍스트 미추출, OCR 미수행] ' + ' '.join(images)
         if not title or not content:
             raise StructureError('empty detail title/body')
         if normalize_whitespace(title) != normalize_whitespace(item.title):

@@ -21,4 +21,4 @@ class SeoulRndNoticeScraper(TableBoardScraper):
         if scope.one('input', attr={'name': 'seqNo'}).attrs.get('value') != item.source_notice_id:
             raise StructureError('detail identity mismatch')
         return self.detail(item, scope.one('td', cls='tit'), scope.one('td', cls='view smartOutput'),
-                           published=field_value(scope, '등록일'))
+                           published=field_value(scope, '등록일'), allow_image_body=True)

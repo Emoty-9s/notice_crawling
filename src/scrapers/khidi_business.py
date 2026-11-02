@@ -20,4 +20,5 @@ class KhidiBusinessScraper(TableBoardScraper):
             raise StructureError('detail identity mismatch')
         scope = root.one('article', cls='news_view')
         return self.detail(item, scope.one('h1', cls='newsTitle'), scope.one('div', cls='viewContent'),
-                           published=field_value(scope.one('table', cls='tstyle_view'), '작성일'))
+                           published=field_value(scope.one('table', cls='tstyle_view'), '작성일'),
+                           allow_image_body=True)

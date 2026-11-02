@@ -43,6 +43,3 @@ Thumbs.db
 # Local business source files
 *.xlsb
 
-# Generated public feed
-public/*.json
-!public/.gitkeep

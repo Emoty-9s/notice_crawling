@@ -47,3 +47,31 @@ status or provider quota cause cannot be recovered from these logs.
 analyzer skips all EXISTING records, even PENDING. This made the backlog stick
 across central runs rather than progress as a normal queue. Unobserved records
 were also never analyzed. Successful unchanged hashes remain reusable.
+
+Central orchestration now explicitly opts into retrying PENDING/NOT_ANALYZED
+records, including retained records outside the current first page or from a
+temporarily failed source. Disabled sources are excluded. Standalone analyzer
+defaults and unchanged FAILED records retain their prior no-call semantics;
+content changes still permit analysis. Observation times are not advanced by
+retrying unobserved records. No state reset or schema migration is required.
+
+`ANALYSIS_MAX_CALLS_PER_RUN = 10` limits all new/retry attempts together. Old
+pending work is ordered first by first_seen_at and stable notice ID. Complete
+SUCCESS/hash matches consume no budget. Deferred work remains PENDING and
+makes the run PARTIAL. A 429 pauses further attempts until a new run; other
+retryable errors remain bounded by the cap. There are no immediate repeated
+calls, sleeps or extra API costs from a retry loop. A continuously unavailable
+provider cannot guarantee progression; 10 persistently retryable failures at
+the front may hold later work until the service recovers. Permanent FAILED
+results need content change or explicit operator intervention rather than
+unbounded retries. Numeric HTTP status is now logged without API body/key/model.
+
+Offline persisted-backlog verification (fake provider, no paid calls):
+118 PENDING -> 108 -> 98 over two new analyzers, exactly 10 calls per run.
+Pipeline storage/feed integration also drains 3 -> 1 -> 0 with cap=2 and
+reuses all subsequent SUCCESS records without calls. Tests cover 429 pause,
+new-run retry, retained/unobserved backlog and disabled-source exclusion.
+Historical provider rejection status cannot be retroactively identified;
+these tests establish queue progression when the provider accepts requests.
+
+Stage 1 regression: 450 tests, OK (original 446 plus four image-body cases).

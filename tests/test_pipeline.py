@@ -101,6 +101,46 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(before.gemini, after.gemini)
         self.assertEqual(before_feed, self.feed()['notices'])
 
+    def test_pending_backlog_drains_across_runs_with_call_cap(self):
+        first = self.run_pipeline(analysis_max_calls=2)
+        self.assertEqual(self.client.generate.call_count, 2)
+        self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in first.notices), 3)
+        self.now += timedelta(days=1)
+        second = self.run_pipeline(analysis_max_calls=2)
+        self.assertEqual(self.client.generate.call_count, 4)
+        self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in second.notices), 1)
+        third = self.run_pipeline(analysis_max_calls=2)
+        self.assertEqual(self.client.generate.call_count, 5)
+        self.assertEqual(third.feed_count, 5)
+        self.run_pipeline(analysis_max_calls=2)
+        self.assertEqual(self.client.generate.call_count, 5)
+
+    def test_pending_outside_list_retried_without_changing_observation(self):
+        from src.ai.gemini import GeminiError
+        self.client.generate.side_effect = GeminiError('API_ERROR', retryable=True, http_status=429)
+        first = self.run_pipeline()
+        self.assertEqual(self.client.generate.call_count, 1)
+        self.assertTrue(all(n.gemini.status == GeminiStatus.PENDING for n in first.notices))
+        self.empty_lists()
+        self.client.generate.side_effect = None
+        self.client.generate.return_value = decision()
+        self.now += timedelta(days=1)
+        second = self.run_pipeline()
+        self.assertEqual(second.observed, ())
+        self.assertEqual(second.feed_count, 5)
+        self.assertEqual([n.last_seen_at for n in first.notices], [n.last_seen_at for n in second.notices])
+
+    def test_disabled_pending_source_is_not_retried(self):
+        self.client.generate.side_effect = TimeoutError()
+        self.run_pipeline()
+        calls = self.client.generate.call_count
+        for site in self.configs:
+            site['enabled'] = False
+        self.save_config()
+        self.client.generate.side_effect = None
+        self.run_pipeline()
+        self.assertEqual(self.client.generate.call_count, calls)
+
     def change_kipa(self):
         listing, detail = self.html['kipa_bid']
         scraper = fixture_context('kipa_bid')[0]

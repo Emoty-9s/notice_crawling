@@ -31,9 +31,10 @@ ERROR_CODES = frozenset({
 
 class GeminiError(Exception):
     """Safe diagnostic code only; never includes raw HTTP/LLM error content."""
-    def __init__(self, code: str, *, retryable: bool = False):
+    def __init__(self, code: str, *, retryable: bool = False, http_status=None):
         self.code = code if isinstance(code, str) and code in ERROR_CODES else 'ANALYSIS_ERROR'
         self.retryable = retryable
+        self.http_status = http_status if type(http_status) is int and 100 <= http_status <= 599 else None
         super().__init__(self.code)
 
 
@@ -141,12 +142,13 @@ class GeminiClient:
         try:
             with self._open(request, timeout=self.timeout) as response:
                 if response.getcode() != 200:
-                    raise GeminiError('API_ERROR', retryable=response.getcode() == 429 or response.getcode() >= 500)
+                    raise GeminiError('API_ERROR', retryable=response.getcode() == 429 or response.getcode() >= 500,
+                                      http_status=response.getcode())
                 data = strict_json(response.read().decode('utf-8'))
         except HTTPError as error:
             retryable = error.code == 429 or error.code >= 500
             error.close()
-            raise GeminiError('API_ERROR', retryable=retryable) from None
+            raise GeminiError('API_ERROR', retryable=retryable, http_status=error.code) from None
         except (TimeoutError, URLError, ConnectionError):
             raise GeminiError('NETWORK_OR_TIMEOUT', retryable=True) from None
         except UnicodeError:

@@ -119,6 +119,7 @@ class GeminiClientTests(unittest.TestCase):
                     client.generate(notice_payload(notice()))
                 self.assertNotIn(KEY, str(context.exception))
                 self.assertTrue(context.exception.__suppress_context__)
+                self.assertEqual(context.exception.http_status, error.code if isinstance(error, HTTPError) else None)
 
     def test_missing_config_makes_no_request(self):
         for key, model in (('', MODEL), (KEY, ''), (KEY, '../wrong'), ('bad\nkey', MODEL)):
@@ -200,6 +201,48 @@ class RelevanceTests(unittest.TestCase):
             result = analyzer.analyze(original)
             self.assertIs(result.gemini.status, GeminiStatus.PENDING if status == GeminiStatus.NOT_ANALYZED else status)
             client.generate.assert_not_called()
+
+    def test_central_opt_in_retries_pending_but_preserves_existing_failed(self):
+        for status in (GeminiStatus.PENDING, GeminiStatus.NOT_ANALYZED, GeminiStatus.FAILED):
+            client = Mock()
+            client.generate.return_value = json.dumps(decision())
+            analyzer = RelevanceAnalyzer(client, clock=lambda: NOW, retry_existing=True, max_calls=2)
+            result = analyzer.analyze(notice(status='EXISTING', gemini=GeminiResult(status=status)))
+            self.assertEqual(client.generate.call_count, int(status != GeminiStatus.FAILED))
+            self.assertEqual(result.gemini.status, GeminiStatus.FAILED if status == GeminiStatus.FAILED else GeminiStatus.SUCCESS)
+
+    def test_rate_limit_stops_managed_session_and_next_session_can_progress(self):
+        client = Mock()
+        client.generate.side_effect = GeminiError('API_ERROR', retryable=True, http_status=429)
+        analyzer = RelevanceAnalyzer(client, clock=lambda: NOW, retry_existing=True,
+                                     max_calls=10, stop_on_rate_limit=True)
+        pending = analyzer.analyze_batch([notice('one'), notice('two')])
+        self.assertEqual(client.generate.call_count, 1)
+        self.assertTrue(all(n.gemini.status == GeminiStatus.PENDING for n in pending))
+        self.assertEqual(analyzer.errors['two'], 'RATE_LIMIT_DEFERRED')
+        client.generate.side_effect = None
+        client.generate.return_value = json.dumps(decision())
+        next_analyzer = RelevanceAnalyzer(client, clock=lambda: NOW, retry_existing=True, max_calls=1)
+        result = next_analyzer.analyze_batch([replace(n, status='EXISTING') for n in pending])
+        self.assertEqual([n.gemini.status for n in result], [GeminiStatus.SUCCESS, GeminiStatus.PENDING])
+        self.assertEqual(next_analyzer.errors['two'], 'BUDGET_DEFERRED')
+
+    def test_analysis_cap_must_be_positive_integer(self):
+        for value in (0, -1, True, 1.5):
+            with self.assertRaises(ValueError):
+                RelevanceAnalyzer(Mock(), max_calls=value)
+
+    def test_118_persisted_pending_progress_with_ten_call_budget(self):
+        client = Mock()
+        client.generate.return_value = json.dumps(decision())
+        records = [Notice.from_json(notice(str(i), status='EXISTING',
+                   gemini=GeminiResult(status=GeminiStatus.PENDING)).to_json()) for i in range(118)]
+        for expected in (108, 98):
+            analyzer = RelevanceAnalyzer(client, clock=lambda: NOW, retry_existing=True, max_calls=10)
+            records = analyzer.analyze_batch(records)
+            self.assertEqual(analyzer.calls, 10)
+            self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in records), expected)
+        self.assertEqual(client.generate.call_count, 20)
 
     def test_hash_cache_is_scoped_by_notice_identity(self):
         analyzer, client = fake_analyzer(json.dumps(decision()), json.dumps(decision(False)))

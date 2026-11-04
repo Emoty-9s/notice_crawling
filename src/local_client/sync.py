@@ -24,6 +24,9 @@ NOTICE_FIELDS = frozenset({
     'published_at', 'apply_start', 'apply_end', 'url', 'summary', 'keywords',
     'relevance_reason', 'first_seen_at', 'updated_at', 'is_new',
 })
+V3_NOTICE_FIELDS = frozenset({'notice_id','source_id','institution','title','url','published_at',
+    'apply_start','apply_end','summary','content_text','prefilter_status','prefilter_reason_code',
+    'prefilter_policy_version','content_hash','public_content_hash','first_seen_at','updated_at','is_new'})
 
 
 class SyncError(Exception):
@@ -77,7 +80,7 @@ def _stamp(value):
 def _version(document):
     if not isinstance(document, dict):
         raise SyncError('INVALID_FEED')
-    if type(document.get('schema_version')) is not int or document['schema_version'] != PUBLIC_SCHEMA_VERSION:
+    if type(document.get('schema_version')) is not int or document['schema_version'] not in (2,3):
         raise SyncError('UNSUPPORTED_SCHEMA')
 
 
@@ -93,6 +96,8 @@ def validate_pair(feed, metadata):
     """Validate M09 v1 fields without importing internal Notice/AI models."""
     validate_metadata(metadata)
     _version(feed)
+    if feed['schema_version'] != metadata['schema_version']:
+        raise SyncError('SNAPSHOT_MISMATCH')
     if set(feed) != {'schema_version', 'generated_at', 'notices'} or not isinstance(feed['notices'], list):
         raise SyncError('INVALID_FEED')
     _stamp(feed['generated_at'])
@@ -101,6 +106,21 @@ def validate_pair(feed, metadata):
     identities = set()
     dates = {'published_at', 'apply_start', 'apply_end'}
     for notice in feed['notices']:
+        if feed['schema_version'] == 3:
+            if not isinstance(notice,dict) or set(notice)!=V3_NOTICE_FIELDS or type(notice['is_new']) is not bool:
+                raise SyncError('INVALID_FEED')
+            for field in V3_NOTICE_FIELDS-dates-{'is_new'}:
+                if not isinstance(notice[field],str) or (field not in {'summary','content_text'} and not notice[field].strip()):
+                    raise SyncError('INVALID_FEED')
+            if any(notice[field] is not None and not isinstance(notice[field],str) for field in dates):
+                raise SyncError('INVALID_FEED')
+            from src.core.public_text import public_hash
+            if notice['public_content_hash'] != public_hash(notice) or notice['prefilter_status'] not in ('CANDIDATE','REVIEW'):
+                raise SyncError('INVALID_FEED')
+            for field in ('first_seen_at','updated_at'): _stamp(notice[field])
+            if notice['notice_id'] in identities: raise SyncError('DUPLICATE_NOTICE_ID')
+            identities.add(notice['notice_id'])
+            continue
         if not isinstance(notice, dict) or set(notice) != NOTICE_FIELDS:
             raise SyncError('INVALID_FEED')
         if type(notice['is_new']) is not bool:

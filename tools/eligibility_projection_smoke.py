@@ -46,7 +46,7 @@ def main():
         missing = notice('missing')
         missing = replace(missing, gemini=replace(missing.gemini, analysis_policy=None))
         denied = notice('denied')
-        denied = replace(denied, gemini=replace(denied.gemini, relevant=False))
+        denied = replace(denied,title='청소 용역 계약',content_text='청소 용역 계약의 시설 청소 세부 작업 사항입니다.',gemini=replace(denied.gemini, relevant=False))
         expired = notice('expired', apply_end='2020-01-01', gemini=GeminiResult())
         store.save_notices([cached, old, missing, denied, expired])
         fresh = notice('new', gemini=GeminiResult())
@@ -60,15 +60,15 @@ def main():
             feed = json.loads((public/'notices.json').read_text(encoding='utf-8'))
             metadata = json.loads((public/'metadata.json').read_text(encoding='utf-8'))
             validate_pair(feed, metadata)
-            assert feed['schema_version'] == metadata['schema_version'] == 2
+            assert feed['schema_version'] == metadata['schema_version'] == 3
             assert {n['notice_id'] for n in feed['notices']} == {'cached','old','missing','new'}
             return feed, metadata
         with patch('src.pipeline.build_mvp_registry', return_value=registry):
             first = run_pipeline(client=client, config_path=config, storage=store,
                                  public_dir=public, clock=lambda:now)
             assert len(first.notices) == 6 and first.feed_count == 4
-            assert client.generate.call_count == 3
-            assert all(current_analysis(n) for n in first.notices if n.notice_id != 'expired')
+            assert client.generate.call_count == 0
+            assert next(n for n in first.notices if n.notice_id=='new').gemini.status=='NOT_ANALYZED'
             feed, metadata = load_pair()
             assert [n['notice_id'] for n in feed['notices'] if n['is_new']] == ['new']
             sync = FeedClient(base, cache_dir=root/'cache', clock=lambda:now,
@@ -83,15 +83,15 @@ def main():
             second = run_pipeline(client=client, config_path=config, storage=store,
                                   public_dir=public, clock=lambda:now+timedelta(minutes=1))
             assert len(second.notices) == len(store.load_notices()) == 6
-            assert client.generate.call_count == 3
+            assert client.generate.call_count == 0
             feed, metadata = load_pair()
             assert not any(n['is_new'] for n in feed['notices'])
             assert sync.sync().status == 'UPDATED'
             assert sync.sync().status == 'UNCHANGED'
             stage_public(store.data_dir, public, root/'stage-second')
         assert load_site_configs() == configs
-        print(json.dumps(dict(status='PASS', schema_version=2, eligible_count=metadata['notice_count'],
-            history_count=6, first_run_calls=3, second_run_calls=0,
+        print(json.dumps(dict(status='PASS', schema_version=3, eligible_count=metadata['notice_count'],
+            history_count=6, first_run_calls=0, second_run_calls=0,
             new_transition=[True,False], local_sync='PASS', dashboard='PASS',
             publication='PASS', private_data_used=False, real_provider_calls=0)))
     return 0

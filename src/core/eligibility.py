@@ -11,7 +11,7 @@ from datetime import date, datetime
 from .retention import KST, retention_date
 
 ANALYSIS_POLICY = 'patent-firm-participation-v2'
-PUBLIC_SCHEMA_VERSION = 2
+PUBLIC_SCHEMA_VERSION = 3
 LEGACY_SCHEMA_FINGERPRINT = '75a521c34b60419a509b634441ab77350872cc3b118658de7a831ffe7a6fdef3'
 
 
@@ -61,5 +61,7 @@ def current_analysis(notice):
 
 
 def eligible_active_notices(notices, *, today=None):
-    return [n for n in notices if current_analysis(n) and n.gemini.relevant is True
+    from src.ai.prefilter import Prefilter
+    prefilter = Prefilter()
+    return [n for n in notices if prefilter.classify(n)[0] in {'CANDIDATE','REVIEW'}
             and deadline_state(n.apply_end, today=today, title=n.title, content=n.content_text) != 'EXPIRED']

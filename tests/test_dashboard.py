@@ -17,7 +17,7 @@ from src.local_client.dashboard import (DashboardError, load_dashboard, notice_d
                                         recommendation_details, recommendation_rows)
 from src.local_client.performance import Performance, PerformanceStore
 from src.local_client.ui import main
-from src.renderer.feed import build_feed
+from _v2_fixture import build_feed
 
 
 STAMP = '2026-11-02T01:00:00Z'

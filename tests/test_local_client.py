@@ -15,6 +15,7 @@ from src.core.models import GeminiResult, Notice
 from src.local_client.__main__ import main
 from src.local_client.sync import FeedClient, MAX_DOWNLOAD_BYTES, SyncError, download, validate_pair
 from src.renderer.feed import build_feed
+from src.core.public_text import public_hash
 
 
 BASE = 'https://example.test/project/'
@@ -37,7 +38,7 @@ class LocalClientTests(unittest.TestCase):
             gemini=GeminiResult(status='SUCCESS', analysis_policy='patent-firm-participation-v2', relevant=True, category='IP', participation_type='협력기관',
                                 reason='참여 가능', keywords=['특허'], analyzed_content_hash='hash', analyzed_at=STAMP))
         self.feed = build_feed([notice], generated_at=STAMP)
-        self.metadata = {'schema_version': 2, 'generated_at': STAMP, 'notice_count': 1}
+        self.metadata = {'schema_version': 3, 'generated_at': STAMP, 'notice_count': 1}
         self.transport = Mock(side_effect=self.serve)
         self.client = FeedClient(BASE, cache_dir=self.root/'cache', timeout=7, transport=self.transport)
         # Any accidental real HTTP, including from central code, fails this suite.
@@ -81,6 +82,7 @@ class LocalClientTests(unittest.TestCase):
         self.seed()
         self.feed['generated_at'] = self.metadata['generated_at'] = '2026-11-03T01:00:00Z'
         self.feed['notices'][0]['title'] = '수정 공고'
+        self.feed['notices'][0]['public_content_hash']=public_hash(self.feed['notices'][0])
         self.assertEqual(self.client.sync().status, 'UPDATED')
         reader = FeedClient(BASE.rstrip('/'), cache_dir=self.client.cache_path.parent)
         self.assertEqual(reader.load_cache()['feed'], self.feed)
@@ -126,12 +128,12 @@ class LocalClientTests(unittest.TestCase):
     def test_unsupported_schema_in_both_documents_including_bool_and_float(self):
         self.seed()
         for document in (self.feed, self.metadata):
-            for version in (1, 3, True, 2.0, '2', None):
+            for version in (1, 4, True, 3.0, '3', None):
                 document['schema_version'] = version
                 with self.subTest(version=version):
                     result = self.client.sync()
                     self.assertEqual((result.status, result.error_code), ('FALLBACK', 'UNSUPPORTED_SCHEMA'))
-            document['schema_version'] = 2
+            document['schema_version'] = 3
 
     def test_invalid_metadata_stops_before_feed_download(self):
         self.metadata['notice_count'] = True
@@ -171,7 +173,8 @@ class LocalClientTests(unittest.TestCase):
                 validate_pair(feed, metadata)
 
     def test_nullable_dates_empty_summary_and_empty_keywords_match_public_contract(self):
-        self.feed['notices'][0].update(published_at=None, apply_start=None, apply_end=None, summary='', keywords=[])
+        self.feed['notices'][0].update(published_at=None,apply_start=None,apply_end=None,summary='')
+        self.feed['notices'][0]['public_content_hash']=public_hash(self.feed['notices'][0])
         self.assertEqual(self.client.sync().status, 'UPDATED')
 
     def test_corrupt_cache_is_never_fallback_and_valid_download_repairs_it(self):

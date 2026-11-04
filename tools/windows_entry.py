@@ -57,6 +57,17 @@ def smoke_check(report_path, feed_url, *, database_path=None):
             window._source_document, window._source_cached = read_sources(feed_url, client.cache_path)
             window._render_sources()
             root.update()
+            # Verify real public A processing as well as the feed contract.
+            # This is opt-in smoke only; normal startup stays asynchronous.
+            import time
+            from collections import Counter
+            deadline=time.monotonic()+60
+            while len(window.work_results)<len(first.feed['notices']) and time.monotonic()<deadline:
+                root.update();time.sleep(.01)
+            report['local_work_count']=len(window.work_results)
+            report['local_work_grades']=dict(Counter(r['status'] for r in window.work_results.values()))
+            report['local_work_states']=dict(Counter(r['analysis_state'] for r in window.work_results.values()))
+            report['local_work_runtime']=getattr(window,'_work_runtime',{})
             report['github_state'] = window.github_text.get()
             report['source_cards'] = len(window._source_widgets)
             report['source_status_available'] = window._source_document is not None
@@ -98,6 +109,11 @@ def smoke_check(report_path, feed_url, *, database_path=None):
 
 def entry(argv=None):
     args = list(sys.argv[1:] if argv is None else argv)
+    if '--local-analysis-smoke-report' in args:
+        parser=argparse.ArgumentParser(description='Synthetic offline Tk/ONNX A/B check; no company DB')
+        parser.add_argument('--local-analysis-smoke-report',required=True)
+        from tools.local_notice_smoke import check
+        return check(parser.parse_args(args).local_analysis_smoke_report)
     if '--upload-smoke-report' in args:
         parser = argparse.ArgumentParser(description='Explicit local-only upload runtime check (writes the selected DB)')
         parser.add_argument('--upload-smoke-report', required=True)

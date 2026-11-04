@@ -97,6 +97,8 @@ def notice_rows(data, *, query='', institution='', category=''):
     query = query.strip().casefold()
     rows = []
     for notice in data.snapshot['feed']['notices']:
+        from .notice_analysis import adapt_notice
+        notice = adapt_notice(notice)
         if institution and notice['institution'] != institution:
             continue
         if category and notice['category'] != category:
@@ -126,6 +128,8 @@ def recommendation_rows(data, notice_id, *, reference_year, top_n=5):
     notice = next((row for row in data.snapshot['feed']['notices'] if row['notice_id'] == notice_id), None)
     if notice is None:
         raise DashboardError('SELECT_NOTICE')
+    from .notice_analysis import adapt_notice
+    notice = adapt_notice(notice)
     try:
         results = matcher.match_notice(notice, data.performances, reference_year=year, top_n=count)
     except matcher.MatchInputError:

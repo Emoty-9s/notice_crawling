@@ -14,6 +14,8 @@ from .performance import DEFAULT_DB_PATH
 from .sync import DEFAULT_CACHE_DIR, SyncError
 from .seen import SeenStore, SeenStateError, seen_path
 from src.renderer.source_status import SOURCES
+from .notice_analysis import LocalNoticeAnalysis, public_only, digest, performance_input, adapt_notice
+from src.core.public_text import public_hash
 
 BG = '#0c0f14'
 CARD = '#15191f'
@@ -56,6 +58,11 @@ class DashboardWindow:
         self.notice_cards = {}
         self.expanded = set()
         self.matches = {}
+        self.work_results = {}
+        self.technical_results = {}
+        self._work_snapshot = None
+        self._technical_pending = set()
+        self._analysis_cancel = threading.Event()
         self.results = []
         self.selected_notice_id = None
         self.detail_notice = None
@@ -161,6 +168,9 @@ class DashboardWindow:
         search.pack(side='left', ipady=5)
         search.bind('<Return>', lambda event: self.filter_notices())
         self.button(toolbar, '검색', self.filter_notices).pack(side='left', padx=(6, 18))
+        self.show_excluded = tk.BooleanVar(root,False)
+        tk.Checkbutton(toolbar,text='명백한 제외 보기',variable=self.show_excluded,command=self.filter_notices,
+                       bg=BG,fg=TEXT,selectcolor=CARD,activebackground=BG,activeforeground=TEXT).pack(side='left')
         self.label(toolbar, '매칭 기준 연도', bg=BG, size=9, color=MUTED).pack(side='left')
         self.entry(toolbar, self.reference_year, width=6).pack(side='left', padx=(8, 14), ipady=5)
         self.label(toolbar, 'TOP N', bg=BG, size=9, color=MUTED).pack(side='left')
@@ -279,6 +289,7 @@ class DashboardWindow:
             self.close()
 
     def close(self):
+        self._analysis_cancel.set()
         self._closed = True
         self._generation += 1
         for job in tuple(self._jobs):
@@ -330,6 +341,21 @@ class DashboardWindow:
                         self._apply_data(result)
                 elif kind == 'performances':
                     self._apply_performances(*result)
+                elif kind == 'work_results':
+                    fingerprint,rows,runtime = result
+                    if fingerprint == self._work_snapshot:
+                        self.work_results = rows
+                        self._work_runtime = runtime
+                        self.filter_notices()
+                elif kind == 'technical_results':
+                    notice_id,revision,content,result_rows = result
+                    self._technical_pending.discard((notice_id,revision,content))
+                    if self.data and revision == self._performance_revision():
+                        notice=next((n for n in self.data.snapshot['feed']['notices'] if n['notice_id']==notice_id),None)
+                        if notice and public_hash(public_only(notice))==content:
+                            self.technical_results[notice_id]=(revision,content,result_rows)
+                            if self.detail_notice: self.show_detail(self.detail_notice,mark_seen=False)
+                            elif notice_id in self.expanded: self._render_list()
                 elif kind == 'done':
                     self._busy = False
                     self.sync_button.configure(state='normal')
@@ -363,7 +389,59 @@ class DashboardWindow:
         self.database_error = result.database_error
         self.matches.clear()
         self.db_text.set('실적 DB 미연결 · 설정에서 연결' if self.database_error else f'로컬 실적 {len(self.data.performances):,}건 연결')
+        self._start_work_analysis()
         self.filter_notices()
+
+    def _start_work_analysis(self):
+        if not self.data: return
+        notices=[public_only(n) for n in self.data.snapshot['feed']['notices']]
+        fingerprint=digest(sorted(notices,key=lambda n:n['notice_id']))
+        if fingerprint == self._work_snapshot: return
+        self._work_snapshot=fingerprint
+        self.work_results={}
+        token=self._generation
+        path=self.cache_path.get()
+        def work():
+            runtime={}
+            try:
+                from .analysis_worker import run_notice_analysis
+                rows,runtime=run_notice_analysis('A',path,notices,cancel=self._analysis_cancel)
+            except Exception:
+                rows={n['notice_id']:dict(status='REVIEW',qualification='CHECK_REQUIRED',score=None,
+                    reason='공개 수행 업무 확인 필요',analysis_state='UNAVAILABLE',error_code='LOCAL_MODEL_UNAVAILABLE') for n in notices}
+            self._events.put((token,'work_results',(fingerprint,rows,runtime)))
+        threading.Thread(target=work,name='local-public-work-analysis',daemon=True).start()
+
+    def _performance_revision(self):
+        return digest([performance_input(r) for r in self.data.performances]) if self.data else ''
+
+    def _start_technical_analysis(self,notice):
+        revision=self._performance_revision();content=public_hash(public_only(notice))
+        key=(notice['notice_id'],revision,content)
+        cached=self.technical_results.get(notice['notice_id'])
+        if cached and cached[:2]==(revision,content): return cached[2]
+        if key in self._technical_pending: return None
+        self._technical_pending.add(key)
+        records=self.data.performances;token=self._generation;path=self.cache_path.get()
+        public=public_only(notice)
+        def work():
+            try:
+                from .analysis_worker import run_notice_analysis
+                result,runtime=run_notice_analysis('B',path,(public,records),cancel=self._analysis_cancel)
+                result['runtime_stats']=runtime
+            except Exception: result=dict(status='UNAVAILABLE',rows=[])
+            self._events.put((token,'technical_results',(*key,result)))
+        threading.Thread(target=work,name='local-technical-similarity',daemon=True).start()
+        return None
+
+    def _work_text(self,notice):
+        result=self.work_results.get(notice['notice_id'])
+        if not result: return '추가 검토 · 로컬 분석 대기 / 자격 확인 필요'
+        status={'HIGH':'업무 관련성 높음','REVIEW':'추가 검토','EXCLUDE':'명백한 업무 무관'}[result['status']]
+        qualification={'EVIDENCE':'자격 관련 근거 있음','CHECK_REQUIRED':'자격 확인 필요','EXPLICIT_EXCLUSION':'명시적 배제 조건 있음'}[result['qualification']]
+        score=f" · 업무 관련성 {result['score']:.3f}" if result.get('score') is not None else ''
+        state='로컬 분석 완료' if result['analysis_state']=='SUCCESS' else '로컬 분석 불가 · '+str(result.get('error_code'))
+        return f"{status}{score} / {qualification} / {state} — {result['reason']}"
 
     def set_connection(self, state):
         self.connection_state = state
@@ -396,7 +474,7 @@ class DashboardWindow:
             dot.light_color = color
             count = sum(n['source_id'] == source for n in self.eligible_active_notices)
             label.configure(text=text + (' · 저장 상태' if self._source_cached else ''), fg=color)
-            stamp.configure(text=f'지원가능 {count}건')
+            stamp.configure(text=f'검토 대상 {count}건')
 
     def _invalidate_matches(self, *args):
         self.matches.clear()
@@ -409,6 +487,9 @@ class DashboardWindow:
     def filter_notices(self):
         if self.data:
             self.eligible_active_notices = notice_rows(self.data)
+            if not self.show_excluded.get():
+                self.eligible_active_notices=[n for n in self.eligible_active_notices
+                    if self.work_results.get(n['notice_id'],{}).get('status')!='EXCLUDE']
             query = self.query.get().strip().casefold()
             filtered = [n for n in self.eligible_active_notices if not query or query in
                         ' '.join(str(n[k] or '') for k in ('title','institution','category','participation_type','summary','keywords')).casefold()]
@@ -418,7 +499,7 @@ class DashboardWindow:
             self.visible_notices = []
         self._render_sources()
         if self.detail_notice:
-            notice = next((n for n in self.data.snapshot['feed']['notices'] if n['notice_id'] == self.detail_notice['notice_id']), None) if self.data else None
+            notice = next((adapt_notice(n) for n in self.data.snapshot['feed']['notices'] if n['notice_id'] == self.detail_notice['notice_id']), None) if self.data else None
             if notice:
                 self.show_detail(notice, mark_seen=False)
             else:
@@ -463,13 +544,14 @@ class DashboardWindow:
         title.pack(anchor='w', fill='x', padx=16, pady=(0, 1))
         title.configure(cursor='hand2')
         title.bind('<Button-1>', lambda event, n=notice: self.show_detail(n))
+        self.label(card,self._work_text(notice),size=9,color=MUTED,wrap=1050).pack(anchor='w',fill='x',padx=16,pady=(1,3))
         card.bind('<Button-1>', lambda event, n=notice: self.show_detail(n))
         footer = self.tk.Frame(card, bg=CARD)
         footer.pack(fill='x', padx=16, pady=(0, 5))
         from src.core.eligibility import deadline_date
         end = deadline_date(notice.get('apply_end'))
         deadline = f'마감 {end.isoformat()}' if end else '마감 미확인'
-        reason = notice['relevance_reason'].replace('\n', ' ')[:90]
+        reason = '지원 자격은 원문 확인 · 유사도는 적격 확률이 아닙니다'
         self.label(footer, deadline + ' · ' + reason, size=9, color=MUTED).pack(side='left')
         button = self.button(footer, '실적 매칭 펼쳐보기  ▾', lambda n=notice: self.toggle_match(n['notice_id']))
         button.pack(side='right')
@@ -512,6 +594,16 @@ class DashboardWindow:
             self.label(parent, '등록된 실적이 없습니다.\n실적 업로드를 통해 데이터를 추가하세요.',
                        bg=INNER, color=MUTED).pack(anchor='w', padx=22, pady=(3, 20))
             return
+        technical=self._start_technical_analysis(notice)
+        self.label(parent,'기술 의미 유사도 · 기존 matcher 점수·순위와 별도',bg=INNER,color=BLUE).pack(anchor='w',padx=22,pady=(3,4))
+        if technical is None:
+            self.label(parent,'로컬 기술 분석 중…',bg=INNER,color=MUTED).pack(anchor='w',padx=22)
+        elif technical['status']!='SUCCESS':
+            self.label(parent,'기술 의미 분석 불가 · 기존 matcher 결과를 표시합니다.',bg=INNER,color=YELLOW).pack(anchor='w',padx=22)
+        else:
+            for item in sorted(technical['rows'],key=lambda r:(-r['technical_similarity'],r['performance_id']))[:5]:
+                self.label(parent,f"{item['project_name']} · 기술 의미 유사도 {item['technical_similarity']:.3f}",bg=INNER,color=MUTED,wrap=950).pack(anchor='w',padx=22,pady=2)
+        self.label(parent,'기존 matcher 추천 순위 (계산식 유지)',bg=INNER,size=10,bold=True).pack(anchor='w',padx=22,pady=(10,3))
         try:
             key = (notice['notice_id'], self.reference_year.get(), self.top_n.get())
             if key not in self.matches:
@@ -582,6 +674,7 @@ class DashboardWindow:
         self._schedule(60000, self._retention_tick)
 
     def show_detail(self, notice, *, mark_seen=True):
+        notice=adapt_notice(notice)
         if mark_seen:
             self.mark_seen(notice, refresh=False)
         self.detail_notice = notice
@@ -596,7 +689,7 @@ class DashboardWindow:
         self.label(card, notice['institution'], color=MUTED, size=11).pack(anchor='w', padx=24, pady=(23, 8))
         self.label(card, notice['title'], size=19, bold=True, wrap=1120).pack(anchor='w', padx=24, pady=(0, 12))
         self.label(card, self.period(notice), color=MUTED).pack(anchor='w', padx=24, pady=(0, 25))
-        for label, value in (('공고 요약', notice['summary']), ('분류 · 참여 형태', f"{notice['category']}  /  {notice['participation_type']}"),
+        for label, value in (('로컬 업무 지원 가능성',self._work_text(notice)),('공개 상세 내용',notice.get('content_text') or notice['summary']),('공고 요약', notice['summary']), ('분류 · 참여 형태', f"{notice['category']}  /  {notice['participation_type']}"),
                              ('키워드', '   ·   '.join(notice['keywords'])), ('참여 관련성', notice['relevance_reason'])):
             self.label(card, label, size=10, color=MUTED, bold=True).pack(anchor='w', padx=24, pady=(10, 7))
             self.label(card, value or '공개 feed에 제공된 내용이 없습니다.', size=11, wrap=1120).pack(anchor='w', padx=24, pady=(0, 15))
@@ -604,7 +697,13 @@ class DashboardWindow:
                    size=9, color='#687586', wrap=1100).pack(anchor='w', padx=24, pady=(5, 23))
         matches = self.tk.Frame(self.body, bg=INNER, highlightbackground=LINE, highlightthickness=1)
         matches.pack(fill='x', pady=(0, 12))
-        self._render_matches(matches, notice)
+        if notice['notice_id'] in self.expanded:
+            self._render_matches(matches, notice)
+        else:
+            def expand_detail():
+                self.expanded.add(notice['notice_id'])
+                self.show_detail(notice,mark_seen=False)
+            self.button(matches,'실적 매칭 펼쳐보기',expand_detail).pack(anchor='w',padx=22,pady=12)
         self.canvas.yview_moveto(0)
         if self._seen_error:
             self.status.set('확인 상태를 저장하지 못했습니다. 저장 경로와 권한을 확인해 주세요.')
@@ -661,6 +760,7 @@ class DashboardWindow:
         if self.data is not None:
             self.data = DashboardData(self.data.snapshot, records)
             self.matches.clear()
+            self.technical_results.clear()
             self.results = []
             self.filter_notices()
         self.status.set('실적 변경 반영 · 로컬 매칭 데이터를 갱신했습니다.' if not error else '변경 후 DB를 읽지 못했습니다.')
@@ -685,6 +785,8 @@ class DashboardWindow:
                 self.status.set('동기화가 끝난 후 설정을 적용해 주세요.')
                 return
             self._generation += 1
+            self._technical_pending.clear()
+            if not self.work_results: self._work_snapshot=None
             for current, value in zip((self.base_url, self.cache_path, self.database_path), fields):
                 current.set(value.get().strip())
             self.data = None

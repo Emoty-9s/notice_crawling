@@ -28,8 +28,9 @@ PUBLIC_INDEX = '''<!doctype html>
 <style>body{background:#0c0f14;color:#e8edf5;font:17px/1.7 system-ui;
 max-width:760px;margin:10vh auto;padding:24px}a{color:#8db9ff}</style>
 <h1>공개 공고 feed</h1>
-<p>현재 분석 정책에서 특허법인 참여가 가능하고 유효한 공고를 제공합니다.</p>
-<ul><li><a href="notices.json">공고 목록 · schema v2</a></li>
+<p>사전 필터를 통과한 유효 공고입니다. 지원 가능성과 참가 자격은 Windows 앱에서 확인하세요.</p>
+<p>schema v3는 최신 Windows 앱이 필요합니다. 이전 v2 앱은 업데이트해 주세요.</p>
+<ul><li><a href="notices.json">공고 목록 · schema v3</a></li>
 <li><a href="metadata.json">생성 시각 및 공고 수</a></li>
 <li><a href="source_status.json">7개 기관 수집 상태</a></li></ul>
 <p>실적 업로드와 실적 관리는 Windows 앱의 로컬 DB에서 처리합니다.</p>
@@ -43,11 +44,6 @@ def preflight(config_path=CONFIG_PATH, *, environ=None):
     count = sum(site.get('enabled', False) for site in sites)
     if not count:
         raise ActionsCheckError('NO_ENABLED_SITES: enable at least one implemented source')
-    key, model = env.get('GEMINI_API_KEY', ''), env.get('GEMINI_MODEL', '')
-    if not key.strip() or any(ord(c) < 32 or ord(c) == 127 for c in key):
-        raise ActionsCheckError('INVALID_GEMINI_KEY: configure the GEMINI_API_KEY Actions secret')
-    if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9._-]*', model):
-        raise ActionsCheckError('INVALID_GEMINI_MODEL: configure the GEMINI_MODEL Actions variable')
     return {'enabled_sites': count, 'configuration': 'READY'}
 
 
@@ -114,8 +110,9 @@ def diagnostics(data_dir):
         'analysis_counts': {status: sum(notice.gemini.status.value == status for notice in notices)
                             for status in ('NOT_ANALYZED', 'SUCCESS', 'FAILED', 'PENDING')},
     }
-    from src.ai.work_queue import queue_statistics
-    report['queue'] = queue_statistics(notices)
+    report['external_ai_calls'] = 0
+    report['prefilter_counts'] = {s:sum(n.analysis.prefilter_status==s for n in notices)
+                                  for s in ('CANDIDATE','REVIEW','CLEARLY_UNRELATED')}
     # This file is an operator-only allowlisted metrics document produced by the
     # queue, never copied into metadata.json or Pages.
     path = Path(data_dir)/'analysis_diagnostics.json'

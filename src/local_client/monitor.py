@@ -29,7 +29,9 @@ class MonitorResult:
 
 def read_local(cache_path, database_path, base_url):
     if Path(database_path).resolve() in (Path(cache_path).resolve(), seen_path(cache_path).resolve(),
-                                       Path(str(cache_path) + '.sources.json').resolve()):
+                                       Path(str(cache_path) + '.sources.json').resolve(),
+                                       Path(str(cache_path)+'.work.json').resolve(),
+                                       Path(str(cache_path)+'.technical.json').resolve()):
         return None
     try:
         client = FeedClient(base_url)
@@ -50,7 +52,8 @@ def read_database(path):
 
 def sync_monitor(base_url, cache_path, database_path, *, transport=None):
     cache = Path(cache_path).resolve()
-    if Path(database_path).resolve() in (cache, cache.with_name(cache.name + '.sources.json'), seen_path(cache).resolve()):
+    if Path(database_path).resolve() in (cache, cache.with_name(cache.name + '.sources.json'), seen_path(cache).resolve(),
+                                       Path(str(cache)+'.work.json'),Path(str(cache)+'.technical.json')):
         return MonitorResult('ERROR', None, error_code='PATH_COLLISION')
     client = FeedClient(base_url, cache_dir=Path(cache_path).parent, timeout=15, transport=transport)
     client.cache_path = Path(cache_path)  # Preserve an explicit arbitrary cache filename.

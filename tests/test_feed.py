@@ -38,55 +38,43 @@ def notice(identifier='one', **overrides):
 
 
 class FeedTests(unittest.TestCase):
-    def test_relevant_only_and_all_non_success_states_excluded(self):
-        good = notice()
-        excluded = [replace(good, notice_id='irrelevant', gemini=replace(good.gemini, relevant=False))]
-        excluded += [replace(good, notice_id=status.value, gemini=replace(good.gemini, status=status))
-                     for status in GeminiStatus if status != GeminiStatus.SUCCESS]
-        excluded.append(replace(good, notice_id='unknown', gemini=replace(good.gemini, relevant=None)))
-        feed = build_feed([*excluded, good], generated_at=STAMP)
-        self.assertEqual([record['notice_id'] for record in feed['notices']], ['one'])
+    def test_gemini_status_never_controls_v3_publication(self):
+        good=notice()
+        records=[replace(good,notice_id=s.value,gemini=replace(good.gemini,status=s)) for s in GeminiStatus]
+        records.append(replace(good,notice_id='negative',gemini=replace(good.gemini,relevant=False)))
+        feed=build_feed(records,generated_at=STAMP)
+        self.assertEqual(len(feed['notices']),5)
+        self.assertTrue(all('relevance_reason' not in n for n in feed['notices']))
 
     def test_empty_result_schema(self):
-        expected = {'schema_version': 2, 'generated_at': STAMP, 'notices': []}
-        self.assertEqual(build_feed([], generated_at=STAMP), expected)
-        excluded = replace(notice(), gemini=GeminiResult(status='FAILED', relevant=True))
-        self.assertEqual(build_feed([excluded], generated_at=STAMP), expected)
+        self.assertEqual(build_feed([],generated_at=STAMP),dict(schema_version=3,generated_at=STAMP,notices=[]))
+        unrelated=notice(title='청소 용역 계약',category=None,content_text='청소 용역 계약의 구체적인 수행 사항과 시설 청소 내용입니다.')
+        self.assertEqual(build_feed([unrelated],generated_at=STAMP)['notices'],[])
 
-    def test_required_fields_and_structured_result_mapping(self):
-        record = build_feed([notice()], generated_at=STAMP)['notices'][0]
-        self.assertEqual(set(record), PUBLIC_FIELDS)
-        self.assertEqual(record['category'], 'IP-R&D')
-        self.assertEqual(record['participation_type'], '협력기관')
-        self.assertEqual(record['keywords'], ['특허분석', '반도체'])
-        self.assertEqual(record['relevance_reason'], '특허법인이 협력기관으로 참여 가능')
-        self.assertIsNone(record['published_at'])
-        self.assertIsNone(record['apply_start'])
+    def test_required_fields_and_public_prefilter_mapping(self):
+        from src.local_client.sync import V3_NOTICE_FIELDS
+        record=build_feed([notice()],generated_at=STAMP)['notices'][0]
+        self.assertEqual(set(record),V3_NOTICE_FIELDS)
+        self.assertEqual(record['prefilter_status'],'CANDIDATE')
+        self.assertNotIn('category',record)
+        self.assertIn('특허법인',record['content_text'])
         self.assertIsNone(record['apply_end'])
-        self.assertEqual(record['first_seen_at'], STAMP)
-        self.assertEqual(record['updated_at'], STAMP)
+        self.assertEqual(record['updated_at'],STAMP)
 
-    def test_dates_are_preserved_and_empty_keywords_allowed(self):
-        original = notice(published_at='2026-10-29', apply_start='2026-10-30', apply_end='2026-11-10')
-        original = replace(original, gemini=replace(original.gemini, keywords=[]))
-        record = build_feed([original], generated_at=STAMP)['notices'][0]
-        for field in ('published_at', 'apply_start', 'apply_end'):
-            self.assertEqual(record[field], getattr(original, field))
-        self.assertEqual(record['keywords'], [])
+    def test_dates_are_preserved_without_model_keywords(self):
+        original=notice(published_at='2026-10-29',apply_start='2026-10-30',apply_end='2026-11-10')
+        record=build_feed([original],generated_at=STAMP)['notices'][0]
+        for field in ('published_at','apply_start','apply_end'): self.assertEqual(record[field],getattr(original,field))
+        self.assertNotIn('keywords',record)
 
-    def test_summary_normalization_limit_and_no_full_content_distribution(self):
-        original = notice(content_text='요약 대상 ' * 100 + 'BODY_TAIL_MUST_NOT_BE_PUBLIC')
-        feed = build_feed([original], generated_at=STAMP)
-        summary = feed['notices'][0]['summary']
-        self.assertLessEqual(len(summary), SUMMARY_LIMIT)
-        self.assertTrue(summary.endswith('…'))
-        public_text = json.dumps(feed, ensure_ascii=False)
-        for forbidden in ('content_text', 'content_hash', 'analyzed_content_hash', 'gemini', 'score', 'last_seen_at',
-                          'BODY_TAIL_MUST_NOT_BE_PUBLIC'):
-            self.assertNotIn(forbidden, public_text)
-        self.assertNotIn(original.content_text, public_text)
-        short = build_feed([notice()], generated_at=STAMP)['notices'][0]
-        self.assertEqual(short['summary'], '특허법인 대상 협력기관 모집')
+    def test_summary_limit_full_evidence_and_contact_minimization(self):
+        original=notice(content_text='특허분석 용역 '+('공개 설명 '*100)+' 참가 자격: 특허법인 담당자: 홍길동 02-123-4567 person@example.test')
+        record=build_feed([original],generated_at=STAMP)['notices'][0]
+        self.assertLessEqual(len(record['summary']),SUMMARY_LIMIT)
+        self.assertTrue(record['summary'].endswith('…'))
+        self.assertIn('참가 자격: 특허법인',record['content_text'])
+        for private in ('홍길동','02-123-4567','person@example.test'): self.assertNotIn(private,record['content_text'])
+        self.assertNotIn('gemini',record);self.assertNotIn('analysis',record)
 
     def test_empty_body_summary_is_empty_string(self):
         self.assertEqual(build_feed([notice(content_text='')], generated_at=STAMP)['notices'][0]['summary'], '')
@@ -112,14 +100,12 @@ class FeedTests(unittest.TestCase):
             with self.subTest(value=invalid), self.assertRaises(FeedInputError):
                 build_feed([], generated_at=invalid)
 
-    def test_stale_or_incomplete_success_excluded(self):
-        good = notice()
-        for missing in ('category', 'participation_type', 'reason', 'keywords', 'analyzed_content_hash'):
-            with self.subTest(missing=missing):
-                old = replace(good, gemini=replace(good.gemini, **{missing: None}))
-                self.assertEqual(build_feed([old], generated_at=STAMP)['notices'], [])
-        stale = replace(good, content_hash='changed-body')
-        self.assertEqual(build_feed([stale], generated_at=STAMP)['notices'], [])
+    def test_stale_or_incomplete_legacy_analysis_is_preserved_not_required(self):
+        good=notice()
+        for missing in ('category','participation_type','reason','keywords','analyzed_content_hash'):
+            old=replace(good,gemini=replace(good.gemini,**{missing:None}))
+            self.assertEqual(len(build_feed([old],generated_at=STAMP)['notices']),1)
+        self.assertEqual(len(build_feed([replace(good,content_hash='changed')],generated_at=STAMP)['notices']),1)
 
     def test_notice_lifecycle_status_does_not_hide_relevant_existing(self):
         for status in ('NEW', 'UPDATED', 'EXISTING'):
@@ -134,11 +120,11 @@ class FeedTests(unittest.TestCase):
             with self.assertRaises(FeedInputError):
                 build_feed(values, generated_at=STAMP)
 
-    def test_inputs_not_modified_and_output_does_not_alias_keywords(self):
-        original = notice()
-        before = original.to_json()
-        build_feed([original], generated_at=STAMP)['notices'][0]['keywords'].append('외부 변경')
-        self.assertEqual(original.to_json(), before)
+    def test_inputs_and_historical_analysis_are_not_modified(self):
+        original=notice();before=original.to_json()
+        record=build_feed([original],generated_at=STAMP)['notices'][0]
+        record['content_text']='modified outside history'
+        self.assertEqual(original.to_json(),before)
 
     def test_invalid_input_contract_is_explicit(self):
         with self.assertRaises(FeedInputError):
@@ -161,12 +147,13 @@ class FeedFileTests(unittest.TestCase):
         self.assertEqual([p.name for p in paths], ['notices.json', 'metadata.json'])
         feed, metadata = [json.loads(p.read_text(encoding='utf-8')) for p in paths]
         self.assertEqual(set(feed), {'schema_version', 'generated_at', 'notices'})
-        self.assertEqual(metadata, {'schema_version': 2, 'generated_at': STAMP, 'notice_count': 1})
-        self.assertEqual(set(feed['notices'][0]), PUBLIC_FIELDS)
+        self.assertEqual(metadata, {'schema_version': 3, 'generated_at': STAMP, 'notice_count': 1})
+        from src.local_client.sync import V3_NOTICE_FIELDS
+        self.assertEqual(set(feed['notices'][0]), V3_NOTICE_FIELDS)
 
     def test_empty_files_and_count_after_filtering_and_dedup(self):
         good = notice()
-        bad = replace(good, notice_id='bad', gemini=replace(good.gemini, relevant=False))
+        bad = replace(good, notice_id='bad',title='청소 용역',category=None,content_text='청소 용역 계약의 시설 청소 작업에 관한 구체적 사항입니다.')
         paths = write_feed([good, good, bad], generated_at=STAMP, output_dir=self.root)
         self.assertEqual(json.loads(paths[1].read_text(encoding='utf-8'))['notice_count'], 1)
         paths = write_feed([], generated_at=STAMP, output_dir=self.root)

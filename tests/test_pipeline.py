@@ -17,7 +17,6 @@ from _site_cases import (CLOCK, CONFIGS, SPECS, body_container, fixture_context,
 from src.core.diff import DiffConflictError
 from src.core.models import GeminiStatus, NoticeStatus
 from src.core.storage import JsonStorage, StorageFormatError, StorageIOError
-from src.ai.work_queue import RunLimits
 from src.main import main
 from src.pipeline import MVP_SOURCES, PipelineConfigError, load_site_configs, run_pipeline
 from src.scrapers._html import parse_html
@@ -30,11 +29,6 @@ def decision(relevant=True):
 
 class PipelineTests(unittest.TestCase):
     def setUp(self):
-        # Operational request budgets must not change this fixture's defaults.
-        limits_env = patch.dict('os.environ', {'ANALYSIS_'+key.upper(): str(value)
-                                             for key,value in vars(RunLimits()).items()})
-        limits_env.start()
-        self.addCleanup(limits_env.stop)
         tests_root = Path(__file__).resolve().parent
         temp = tempfile.TemporaryDirectory(dir=tests_root, prefix='pipeline-test-')
         self.root = Path(temp.name).resolve()
@@ -76,15 +70,11 @@ class PipelineTests(unittest.TestCase):
     def feed(self):
         return json.loads((self.public/'notices.json').read_text(encoding='utf-8'))
 
-    def test_environment_request_budget_defers_remaining_history(self):
-        with patch.dict('os.environ', {'ANALYSIS_MAX_API_REQUESTS_PER_RUN': '1'}):
-            result = self.run_pipeline()
-        self.assertTrue(result.degraded)
-        self.assertEqual(self.client.generate.call_count, 1)
-        self.assertEqual(len(result.notices), 5)
-        self.assertEqual(result.feed_count, 1)
-        self.assertEqual(len(result.analysis_failures), 3)
-        self.assertEqual(self.storage.load_notices(), list(result.notices))
+    def test_retired_request_budget_environment_does_not_limit_publication(self):
+        with patch.dict('os.environ',{'ANALYSIS_MAX_API_REQUESTS_PER_RUN':'invalid-retired-value'}): result=self.run_pipeline()
+        self.assertFalse(result.degraded)
+        self.assertEqual(result.feed_count,4)
+        self.client.generate.assert_not_called()
 
     def test_first_run_new_analyzed_saved_and_public(self):
         result = self.run_pipeline()
@@ -95,23 +85,23 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result.feed_count, 4)
         self.assertTrue(all(n.status == NoticeStatus.NEW for n in result.observed))
         analyzed = [n for n in result.observed if n.source_id != 'seoul_rnd_notice']
-        self.assertTrue(all(n.gemini.status == GeminiStatus.SUCCESS for n in analyzed))
-        self.assertTrue(all(n.content_hash == n.gemini.analyzed_content_hash for n in analyzed))
+        self.assertTrue(all(n.gemini.status == GeminiStatus.NOT_ANALYZED for n in analyzed))
+        self.assertTrue(all(n.gemini.analyzed_content_hash is None for n in analyzed))
         self.assertEqual(next(n for n in result.observed if n.source_id == 'seoul_rnd_notice').analysis.prefilter_status,'CLEARLY_UNRELATED')
         self.assertEqual(self.storage.load_notices(), list(result.notices))
-        self.assertEqual(self.client.generate.call_count, 4)
+        self.assertEqual(self.client.generate.call_count, 0)
         statuses = self.storage.load_scraper_status()
         self.assertEqual(set(statuses), MVP_SOURCES)
         self.assertTrue(all(s['status'] == 'SUCCESS' and s['notices_found'] == 1 for s in statuses.values()))
         self.assertEqual(len(self.feed()['notices']), 4)
-        self.assertNotIn('content_text', json.dumps(self.feed()))
+        self.assertIn('content_text', json.dumps(self.feed()))
 
     def test_second_run_existing_no_duplicate_no_gemini_call(self):
         first = self.run_pipeline()
         before_feed = self.feed()['notices']
         self.now += timedelta(days=1)
         second = self.run_pipeline()
-        self.assertEqual(self.client.generate.call_count, 4)
+        self.assertEqual(self.client.generate.call_count, 0)
         self.assertEqual(len(second.notices), 5)
         self.assertTrue(all(n.status == NoticeStatus.EXISTING for n in second.observed))
         for before, after in zip(first.notices, second.notices):
@@ -124,34 +114,20 @@ class PipelineTests(unittest.TestCase):
         self.assertFalse(any(n['is_new'] for n in self.feed()['notices']))
         self.assertEqual([dict(n,is_new=False) for n in before_feed],self.feed()['notices'])
 
-    def test_pending_backlog_drains_across_runs_with_call_cap(self):
-        first = self.run_pipeline(analysis_max_calls=2)
-        self.assertEqual(self.client.generate.call_count, 2)
-        self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in first.notices), 2)
-        self.now += timedelta(days=1)
-        second = self.run_pipeline(analysis_max_calls=2)
-        self.assertEqual(self.client.generate.call_count, 4)
-        self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in second.notices), 0)
-        third = self.run_pipeline(analysis_max_calls=2)
-        self.assertEqual(self.client.generate.call_count, 4)
-        self.assertEqual(third.feed_count, 4)
-        self.run_pipeline(analysis_max_calls=2)
-        self.assertEqual(self.client.generate.call_count, 4)
+    def test_old_call_cap_never_gates_publication(self):
+        for budget in (0,1,2):
+            result=self.run_pipeline(analysis_max_calls=budget)
+            self.assertEqual(result.feed_count,4)
+            self.assertEqual(result.analysis_failures,())
+        self.client.generate.assert_not_called()
 
-    def test_pending_outside_list_retried_without_changing_observation(self):
-        from src.ai.gemini import GeminiError
-        self.client.generate.side_effect = GeminiError('API_ERROR', retryable=True, http_status=429)
-        first = self.run_pipeline()
-        self.assertEqual(self.client.generate.call_count, 1)
-        self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in first.notices),4)
-        self.empty_lists()
-        self.client.generate.side_effect = None
-        self.client.generate.return_value = decision()
-        self.now += timedelta(days=1)
-        second = self.run_pipeline()
-        self.assertEqual(second.observed, ())
-        self.assertEqual(second.feed_count, 4)
-        self.assertEqual([n.last_seen_at for n in first.notices], [n.last_seen_at for n in second.notices])
+    def test_unobserved_public_history_needs_no_provider(self):
+        self.client.generate.side_effect=AssertionError('provider retired')
+        first=self.run_pipeline();self.empty_lists();self.now+=timedelta(days=1)
+        second=self.run_pipeline()
+        self.assertEqual(second.observed,());self.assertEqual(second.feed_count,4)
+        self.assertEqual([n.last_seen_at for n in first.notices],[n.last_seen_at for n in second.notices])
+        self.client.generate.assert_not_called()
 
     def test_disabled_pending_source_is_not_retried(self):
         self.client.generate.side_effect = TimeoutError()
@@ -164,15 +140,19 @@ class PipelineTests(unittest.TestCase):
         self.run_pipeline()
         self.assertEqual(self.client.generate.call_count, calls)
 
-    def test_not_yet_due_retry_is_still_partial_without_spending_api(self):
-        from src.ai.gemini import GeminiError
-        self.client.generate.side_effect = GeminiError('API_ERROR',retryable=True,http_status=429)
-        self.run_pipeline()
-        self.client.generate.side_effect = None
-        result = self.run_pipeline()
-        self.assertEqual(self.client.generate.call_count,1)
-        self.assertTrue(result.analysis_incomplete)
-        self.assertTrue(result.degraded)
+    def test_historical_retry_state_is_preserved_without_blocking_publication(self):
+        from src.core.analysis_state import AnalysisState
+        from src.core.models import GeminiResult
+        first=self.run_pipeline()
+        old=first.notices[0]
+        historical=replace(old,gemini=GeminiResult(status='SUCCESS',relevant=False,analysis_policy='old-v1'),
+            analysis=replace(old.analysis,analysis_status='RETRY_WAIT',attempts=7,next_retry_at='2030-01-01T00:00:00+00:00',last_error_code='HTTP_429_DAILY'))
+        self.storage.save_notices([historical,*first.notices[1:]])
+        result=self.run_pipeline()
+        current=next(n for n in result.notices if n.notice_id==historical.notice_id)
+        self.assertEqual(current.gemini,historical.gemini);self.assertEqual(current.analysis,historical.analysis)
+        self.assertFalse(result.degraded);self.assertEqual(result.feed_count,4)
+        self.client.generate.assert_not_called()
 
     def test_unexpected_prefilter_failure_still_preserves_collected_history(self):
         with patch('src.ai.prefilter.Prefilter.evaluate',side_effect=RuntimeError('INJECTED')):
@@ -196,9 +176,9 @@ class PipelineTests(unittest.TestCase):
         previous = next(n for n in first.notices if n.source_id == 'kipa_bid')
         self.assertEqual(changed.status, NoticeStatus.UPDATED)
         self.assertNotEqual(changed.content_hash, previous.content_hash)
-        self.assertEqual(changed.gemini.analyzed_content_hash, changed.content_hash)
+        self.assertEqual(changed.gemini, previous.gemini)
         self.assertEqual(changed.first_seen_at, previous.first_seen_at)
-        self.assertEqual(self.client.generate.call_count, 5)
+        self.assertEqual(self.client.generate.call_count, 0)
         self.assertEqual(len(second.notices), 5)
 
     def test_failed_scraper_keeps_old_source_and_other_sites_continue(self):
@@ -225,34 +205,21 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result.feed_count, 3)
         self.assertEqual(result.scraper_failures, ('rda_bid',))
 
-    def test_gemini_partial_failure_and_irrelevant_excluded(self):
-        self.client.generate.side_effect = [TimeoutError('secret-test'), 'malformed', decision(False), decision(), decision()]
-        result = self.run_pipeline()
-        self.assertTrue(result.degraded)
-        self.assertEqual(len(result.notices), 5)
-        self.assertEqual(len(result.analysis_failures), 1)
-        self.assertEqual(result.feed_count, 2)
-        states = [n.gemini.status for n in result.observed]
-        self.assertIn(GeminiStatus.PENDING, states)
-        self.assertTrue(any(n.analysis.analysis_status == 'RETRY_WAIT' for n in result.observed))
-        self.assertTrue(all(s['status'] == 'SUCCESS' for s in self.storage.load_scraper_status().values()))
-        self.assertNotIn('secret-test', repr(self.logger.mock_calls))
+    def test_provider_failure_cannot_affect_collection_or_feed(self):
+        self.client.generate.side_effect=AssertionError('must never be invoked')
+        result=self.run_pipeline()
+        self.assertFalse(result.degraded);self.assertEqual(result.feed_count,4)
+        self.assertEqual(len(result.notices),5);self.assertEqual(result.analysis_failures,())
+        self.client.generate.assert_not_called()
 
-    def test_failed_updated_analysis_keeps_history_and_other_feed_records(self):
-        first = self.run_pipeline()
-        old = next(n for n in first.notices if n.source_id == 'kipa_bid')
-        self.change_kipa()
-        self.client.generate.side_effect = TimeoutError('secret-test')
-        result = self.run_pipeline()
-        updated = next(n for n in result.notices if n.source_id == 'kipa_bid')
-        # The historical successful judgment remains intact; queue state and
-        # content-hash mismatch prevent its stale publication.
-        self.assertEqual(updated.gemini.status, GeminiStatus.SUCCESS)
-        self.assertEqual(updated.analysis.analysis_status, 'RETRY_WAIT')
-        self.assertEqual(updated.gemini.analyzed_content_hash, old.content_hash)
-        self.assertEqual(updated.gemini.reason, old.gemini.reason)
-        self.assertEqual(result.feed_count, 3)
-        self.assertEqual(len(self.storage.load_notices()), 5)
+    def test_updated_public_content_does_not_wait_for_ai(self):
+        first=self.run_pipeline();old=next(n for n in first.notices if n.source_id=='kipa_bid')
+        self.change_kipa();result=self.run_pipeline()
+        updated=next(n for n in result.notices if n.source_id=='kipa_bid')
+        self.assertNotEqual(updated.content_hash,old.content_hash)
+        self.assertEqual(updated.gemini,old.gemini);self.assertEqual(result.feed_count,4)
+        self.assertNotEqual(updated.analysis.prefilter_content_hash,old.analysis.prefilter_content_hash)
+        self.client.generate.assert_not_called()
 
     def empty_lists(self):
         for source in SPECS:
@@ -279,7 +246,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(second.notices, tuple(replace(n, status='EXISTING') for n in first.notices))
         self.assertEqual(second.observed, ())
         self.assertEqual(second.feed_count, 4)
-        self.assertEqual(self.client.generate.call_count, 4)
+        self.assertEqual(self.client.generate.call_count, 0)
 
     def test_all_failed_scrapers_preserve_snapshot_and_feed(self):
         first = self.run_pipeline()
@@ -357,19 +324,13 @@ class PipelineTests(unittest.TestCase):
             with self.subTest(text=text[:30]), self.assertRaises(PipelineConfigError):
                 load_site_configs(self.config_path)
 
-    def test_cli_no_enabled_sites_and_missing_gemini_config_make_no_request(self):
-        console = io.StringIO()
-        with patch.dict('os.environ', {}, clear=True), patch('src.main.run_pipeline') as run:
-            with contextlib.redirect_stdout(console):
-                self.assertEqual(main(['--config', str(self.config_path)]), 2)
-            self.assertIn('MISSING_GEMINI_CONFIG', console.getvalue())
-            for config in self.configs:
-                config['enabled'] = False
-            self.save_config()
-            with contextlib.redirect_stdout(console):
-                self.assertEqual(main(['--config', str(self.config_path)]), 2)
-            run.assert_not_called()
-            self.assertIn('NO_ENABLED_SITES', console.getvalue())
+    def test_cli_needs_no_ai_environment_and_disabled_sources_still_fail(self):
+        result=self.run_pipeline()
+        with patch.dict('os.environ',{},clear=True),patch('src.main.run_pipeline',return_value=result) as run,contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(main(['--config',str(self.config_path)]),0)
+            self.assertNotIn('client',run.call_args.kwargs)
+            for config in self.configs: config['enabled']=False
+            self.save_config();self.assertEqual(main(['--config',str(self.config_path)]),2)
 
     def test_cli_success_and_partial_exit_codes(self):
         result = self.run_pipeline()

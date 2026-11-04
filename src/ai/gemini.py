@@ -27,7 +27,7 @@ POLICY_PATH = Path(__file__).resolve().parents[2] / 'config' / 'relevance_policy
 ERROR_CODES = frozenset({
     'MALFORMED_JSON', 'INVALID_POLICY', 'INVALID_OUTPUT_SCHEMA', 'INVALID_TIMEOUT',
     'MISSING_OR_INVALID_CONFIGURATION', 'INVALID_INPUT_FIELDS', 'API_ERROR',
-    'NETWORK_OR_TIMEOUT', 'MALFORMED_API_RESPONSE', 'ANALYSIS_ERROR',
+    'NETWORK_OR_TIMEOUT', 'MALFORMED_API_RESPONSE', 'ANALYSIS_ERROR', 'PROVIDER_RETIRED',
 })
 
 
@@ -186,8 +186,14 @@ class GeminiClient:
             raise GeminiError('INVALID_TIMEOUT')
         self.timeout = timeout
         self.policy = load_policy(policy_path)
-        self._open = opener if opener is not None else build_opener(_NoRedirect()).open
+        # Historical parsers/injected offline regression clients remain usable;
+        # the default real provider transport is permanently disabled.
+        self._open = opener if opener is not None else self._retired_transport
         self.last_usage = {}
+
+    @staticmethod
+    def _retired_transport(*args,**kwargs):
+        raise GeminiError('PROVIDER_RETIRED')
 
     def generate(self, payload: dict) -> str:
         if set(payload) != set(INPUT_FIELDS):

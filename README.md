@@ -1,89 +1,36 @@
 # 사업공고 모니터링 시스템
 
-공고 사이트의 신규/수정 공고를 수집하고, Gemini가 특허법인/특허사무소의
-수행 주체 참여 가능성을 판정하여 공통 JSON으로 제공합니다.
-현재 개발 범위는 `MILESTONES_V2.md`를 따릅니다. 회사 실적 매칭은 로컬 영역에서 수행합니다.
+GitHub Actions는 7개 기관의 공개 공고를 수집하고 history를 보존합니다.
+결정적 사전 필터에서 CANDIDATE/REVIEW인 유효 공고를 **feed v3**로 게시합니다.
+중앙 Gemini 호출·키 검사·호출 예산·재시도 queue 처리는 제거했습니다.
+이전 Gemini 결과와 queue 필드는 과거 이력으로 보존하며, 실제 provider 기본 transport도 비활성입니다.
 
-중앙 구현은 **M10 — Central End-to-End Pipeline**, 로컬 구현은 **M12 feed 동기화 / M13 실적 DB / M14 규칙 매칭 / M15 UI 및 로컬 실적 업로드**입니다.
-사이트 설정 → 수집/정규화 → diff → Gemini → 저장 → feed → scraper status를 연결했습니다.
-기본 사이트 설정은 모두 비활성이므로 기본 명령은 외부 호출 전에 설정 오류로 종료합니다.
+Windows의 내장 ONNX INT8 `intfloat/multilingual-e5-small`을 재사용합니다.
+**A: 업무 지원 가능성**은 공개 공고만 사용하며 회사 DB/실적과 독립입니다.
+**B: 기술 의미 유사도**는 펼쳐보기에서 회사 실적과 비교하고, 기존 matcher 점수·순위와 별도로 표시합니다.
+코사인 유사도는 적격 확률이 아닙니다. 참가 자격은 별도의 근거/확인 필요/배제 조건으로 표시합니다.
+기술명만 같거나 IP 행사를 운영한다는 이유로 업무 관련성을 높음으로 판단하지 않습니다.
 
-## 환경 및 실행
-
-Python 3.13 기준이며, 프로젝트 루트에서 PowerShell로 실행합니다.
-가상환경 활성화 없이 아래 명령을 사용할 수 있습니다.
-
-```powershell
-& 'C:\Users\이재혁\AppData\Local\Python\pythoncore-3.13-64\python.exe' -m venv .venv
-.\.venv\Scripts\python.exe --version
-.\.venv\Scripts\python.exe -m src.main
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-```
-
-현재 기본 실행 출력: `CONFIGURATION ERROR: NO_ENABLED_SITES: ...` (종료 코드 2).
-
-실제 실행에는 `config/sites.yaml`에서 구현된 사이트를 명시적으로 활성화하고,
-프로세스 환경변수 `GEMINI_API_KEY`, `GEMINI_MODEL`을 설정해야 합니다.
-`.env.example`은 이름 예시이며 `.env` 자동 로딩은 없습니다. 키를 코드/JSON에 저장하지 마세요.
-구현된 사이트는 khidi_business, kised_bid_public, rda_bid, seoul_rnd_notice, kipa_bid입니다.
-그 외 미구현 사이트를 활성화하면 설정 오류로 종료합니다. RIPC/KISTA는 아래 M16의 잠정 지원 범위를 확인해야 합니다.
-기본 config의 enabled 값은 변경하지 않았습니다.
+## 실행과 배포
 
 ```powershell
-.\.venv\Scripts\python.exe -m src.main --help
-.\.venv\Scripts\python.exe -m src.main --config .\config\sites.yaml --data-dir .\data --public-dir .\public
+.\.venv\Scripts\python.exe -m unittest discover -s tests
+.\.venv\Scripts\python.exe -m src.main --config .run/sites.yaml --data-dir .run/data --public-dir .run/public
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build_windows.ps1
 ```
 
-설정이 갖춰진 실행은 실제 사이트/API 요청 및 파일 저장을 수행합니다.
-종료 코드는 0=정상, 1=사이트/분석 일부 실패 후 결과 저장, 2=설정/저장/검증 오류입니다.
-표준 라이브러리 unittest 테스트는 실제 HTML fixture/fake Gemini/임시 저장소만 사용하며 외부 패키지가 필요 없습니다.
+checked-in `config/sites.yaml` 활성 상태는 유지합니다. Actions가 `.run/sites.yaml`에서 7개 기관을 활성화합니다.
+cron은 `17 22 * * *`, 매일 한국시간 07:17 예정이며 지연될 수 있습니다. 기관별 최대 수집은 3페이지입니다.
+중앙 실행에는 AI 키나 모델이 필요 없습니다. 종료 코드는 0=정상, 1=수집 일부 실패, 2=설정/저장/검증 오류입니다.
+history는 마감·무관·미관측 공고도 보존합니다. 만료일 미상은 명시적 종료 근거가 없으면 검토 대상으로 유지합니다.
 
-## 기본 구조와 예정 역할
+v3는 Gemini 판정이 아닌 사전 필터 통과 데이터를 뜻합니다. 과거 v2 EXE는 버전을 거부하므로 최신 EXE로 업데이트하세요.
+새 consumer는 v2 캐시도 읽지만 A단계는 과거 Gemini 필드를 사용하지 않고 공개 제목/본문으로 재판단합니다.
+공개 v3에는 원문 상세 근거와 prefilter/hash가 포함되고, 회사 실적 및 로컬 A/B 결과·캐시는 포함하지 않습니다.
+개인 연락처는 마스킹하며 참가 자격 근거는 보존합니다.
 
-```text
-src/main.py          중앙 명령 진입점/설정 preflight
-src/pipeline.py      중앙 orchestration 및 기존 데이터 병합
-src/core/            공통 모델/정규화/저장/diff
-src/scrapers/        사이트별 수집과 registry
-src/ai/              중앙 Gemini 판정/캐시/실패 격리
-src/renderer/        공개 JSON feed 생성
-src/local_client/    feed 동기화/실적 DB/로컬 매칭/오프라인 Tk UI
-config/              사이트/중앙 판정 정책
-data/                notices.json / scraper_status.json (실행 시 생성)
-public/              notices.json / metadata.json
-tests/test_smoke.py  모듈 실행 smoke test
-tests/fixtures/      실제 HTML 테스트 입력 자료
-docs/site-audit/     사이트 조사
-docs/progress/       마일스톤 결과와 인계 상태
-```
-
-빈 디렉터리는 `.gitkeep`, Python 패키지는 `__init__.py`로 유지합니다.
-중앙 storage/history는 실패/빈 목록/비활성/미관측/마감 공고를 포함한 관측 이력을 보존합니다.
-마감 후 기간 경과를 이유로 history를 삭제하지 않습니다. 공개 feed v2에는 현재 분석 정책
-`patent-firm-participation-v2`와 본문 hash가 일치하는 SUCCESS 중 특허법인이 참여 가능하고
-현재 유효한 공고만 포함합니다. 확정 마감일은 한국 날짜 기준 당일까지 유효하며,
-마감일 미상/상시 공고는 명백한 종료 근거가 없으면 유지합니다.
-이전 policy의 성공 결과는 재분석하고 마감 공고는 Gemini 호출 전에 제외합니다.
-실행당 기본 HTTP 요청 12회(재시도 포함)·고유 공고 60건·입력 토큰 보수 추정 120,000·분석 600초로 제한합니다.
-일반 generateContent 요청에 기본 5건(최대 10건)을 묶고 실제 provider 요청은 최소 6초 간격입니다.
-429 이후 해당 run의 추가 요청을 중단하며 Retry-After/일일 제한 reset 이후 자동 재개합니다.
-NEW는 현재 중앙 run에서 발견한 신규 공고의 `is_new`이며 로컬 확인 이력과 독립적입니다.
-로컬은 동기화/오프라인 로딩/1분 주기 갱신에서 유효 공고를 표시하며 producer cache를 보존합니다.
-7개 operational source의 수집 범위는 최신 최대 3페이지이며 checked-in 설정은 비활성으로 유지합니다.
-
-사전 필터 `config/prefilter_policy.json`은 CANDIDATE/REVIEW만 분석 대상으로 넘기며
-명백한 무관 공고도 history에 보존합니다. 관련·무관 신호 혼재와 부족한 본문은 REVIEW로 유지합니다.
-사전 필터 버전+설정 digest+입력 fingerprint, 분석 상태·attempts·lease·next_retry_at은
-Notice 내부 `analysis`에 저장하여 history와 함께 원자적으로 checkpoint합니다.
-503/timeout은 제한된 지수 backoff+jitter 및 circuit breaker를 적용합니다.
-누락/잘못된 개별 결과는 성공 처리하지 않으며 5→2→1 축소와 단건 fallback을 지원합니다.
-이미 유효한 성공 결과는 재사용하고 다른 묶음 실패에도 계속 공개합니다.
-환경변수, 영구 대기 상태, 실제 244건 읽기 전용 감사와 복구 범위는
-[중앙 묶음 분석 운영 안내](docs/operations/BATCH_ANALYSIS.md)를 참고하세요.
-파일별 atomic write이며 여러 파일 전체 transaction이나 동시 writer 병합은 제공하지 않습니다.
-M11 daily/수동 Actions 및 Pages 배포 workflow를 추가했습니다. 실제 저장소 연결·배포는 미검증입니다.
-GitHub의 Secret/Variable, 사이트 활성화, Pages 설정, 최초 state bootstrap은
-[운영 설정 안내](docs/operations/GITHUB_PAGES.md)를 따릅니다. 현재 설정 그대로는 실운영 실행이 중단됩니다.
+현재 아키텍처·캐시·검증은 [LOCAL_ANALYSIS_V3.md](docs/operations/LOCAL_ANALYSIS_V3.md)를 참고하세요.
+과거 중앙 AI/마일스톤 문서는 당시 설계 이력입니다. 아래 실적 관리·matcher 계약은 유지합니다.
 
 ## 로컬 feed 동기화 (M12)
 
@@ -262,14 +209,8 @@ UI는 기존 matcher를 그대로 호출하고 매칭 시 DB를 SQLite mode=ro�
 DB가 없어도 공고는 볼 수 있습니다. 매칭에 사용할 DB는 기존 M13 절차로 준비합니다.
 동기화 실패 시 같은 feed 주소의 마지막 정상 cache를 사용하고 노란색 상태를 표시합니다. cache도 없으면 빨간색 오류입니다.
 `--offline`은 기존 cache만 표시하고 네트워크를 사용하지 않습니다. `--base-url`로 공개 feed 디렉터리를 지정할 수 있습니다.
-NEW는 로컬 사용자가 아직 확인하지 않은 공고입니다. 생성일이나 앱 실행 간격과 무관하며,
-상세 열기 또는 공고별 `확인 처리`를 눌렀을 때만 일반 공고(SAVED)로 바뀝니다.
-확인 후 수정된 공고는 UPDATED로 구분하고 다시 확인하면 일반 공고로 전환합니다.
-확인 이력은 cache 옆 `<cache 파일명>.<사용자 식별 해시>.seen.json`에 feed 출처별로 저장하며 중앙에 전송하지 않습니다.
-사용자 이름 대신 로컬 프로필 경로의 해시를 사용해, 사용자 지정 cache 경로를 공유해도 확인 이력은 분리합니다.
-EXE 기본 경로는 Windows 사용자별 `%LOCALAPPDATA%/NoticeCrawling/cache`입니다.
-cache만 갱신해도 확인 이력은 유지됩니다. 기존 cache는 확인 이력이 아니므로 최초 적용 시
-보존 중인 모든 미확인 공고가 NEW로 표시됩니다. 중앙 Notice/Gemini 상태는 변경하지 않습니다.
+NEW는 현재 중앙 run의 `is_new`입니다. 로컬 확인 상태와 독립이며 실적이나 로컬 AI가 바꾸지 않습니다.
+확인 이력은 사용자별 로컬 sidecar에만 저장합니다.
 기준 연도/TOP N 변경 후 이전 매칭은 무효화됩니다.
 
 기관 상태는 `source_status.json`의 마지막 중앙 수집 결과만 표시합니다. 로컬에서 기관 사이트를 검사하지 않습니다.

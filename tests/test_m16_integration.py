@@ -85,7 +85,7 @@ class M16IntegrationTests(unittest.TestCase):
         second = self.run_pipeline()
         self.assertEqual([n.notice_id for n in first.notices], [n.notice_id for n in second.notices])
         self.assertTrue(all(n.status == NoticeStatus.EXISTING for n in second.observed))
-        self.assertEqual(self.client.generate.call_count, 2)
+        self.assertEqual(self.client.generate.call_count, 0)
 
     def test_failed_source_preserves_last_notice_and_other_source_continues(self):
         first = self.run_pipeline()

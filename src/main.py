@@ -3,7 +3,6 @@
 import argparse
 import os
 
-from src.ai.gemini import GeminiClient, GeminiError
 from src.core.diff import DiffInputError
 from src.core.storage import JsonStorage, StorageError
 from src.pipeline import CONFIG_PATH, PipelineConfigError, load_site_configs, run_pipeline
@@ -20,11 +19,9 @@ def main(argv=None) -> int:
         configs = load_site_configs(args.config)
         if not any(config.get('enabled', False) for config in configs):
             raise PipelineConfigError('NO_ENABLED_SITES: enable an implemented source in sites.yaml')
-        if not os.environ.get('GEMINI_API_KEY', '').strip() or not os.environ.get('GEMINI_MODEL', '').strip():
-            raise PipelineConfigError('MISSING_GEMINI_CONFIG: set GEMINI_API_KEY and GEMINI_MODEL in process environment')
-        result = run_pipeline(client=GeminiClient(), config_path=args.config,
+        result = run_pipeline(config_path=args.config,
                               storage=JsonStorage(args.data_dir), public_dir=args.public_dir)
-    except (PipelineConfigError, GeminiError) as error:
+    except PipelineConfigError as error:
         print(f'CONFIGURATION ERROR: {error}')
         return 2
     except (StorageError, DiffInputError, FeedInputError):
@@ -41,7 +38,7 @@ def main(argv=None) -> int:
           f'stored={len(result.notices)} feed={result.feed_count} '
           f'scraper_failures={len(result.scraper_failures)} analysis_failures={len(result.analysis_failures)}')
     print('STAGES: COLLECTION='+('PARTIAL' if result.scraper_failures else 'SUCCESS')+
-          ' PREFILTER=SUCCESS ANALYSIS='+('PARTIAL' if result.analysis_incomplete else 'SUCCESS')+
+          ' PREFILTER=SUCCESS ANALYSIS=LOCAL_ONLY'+
           ' PUBLICATION=SUCCESS')
     return 1 if result.degraded else 0
 

@@ -55,6 +55,16 @@ class MonitorTests(unittest.TestCase):
         self.network.assert_not_called()
         self.assertEqual(self.db.read_bytes(), before)
 
+    def test_analysis_cache_database_collision_preserves_private_database(self):
+        for suffix in ('.work.json','.technical.json'):
+            database=Path(str(self.cache)+suffix)
+            database.write_bytes(self.db.read_bytes());before=database.read_bytes()
+            result=sync_monitor(BASE,self.cache,database,transport=self.network)
+            self.assertEqual(result.error_code,'PATH_COLLISION')
+            self.assertIsNone(read_local(self.cache,database,BASE))
+            self.network.assert_not_called()
+            self.assertEqual(database.read_bytes(),before)
+
     def test_optional_health_missing_does_not_fabricate_success(self):
         self.assertEqual(read_sources(BASE, self.cache, transport=Mock(side_effect=URLError('404'))), (None, False))
 

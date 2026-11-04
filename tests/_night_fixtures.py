@@ -5,7 +5,7 @@ from pathlib import Path
 
 from src.core.models import GeminiResult, Notice
 from src.local_client.performance import Performance, PerformanceStore
-from src.renderer.feed import build_feed
+from _v2_fixture import build_feed
 from src.renderer.source_status import SOURCES, public_source_status
 
 STAMP = '2026-11-02T09:00:00Z'

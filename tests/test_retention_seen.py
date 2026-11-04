@@ -62,7 +62,7 @@ class HistoryTests(unittest.TestCase):
 
     def test_cache_projection_does_not_delete_validated_producer_snapshot(self):
         feed=build_feed([notice('expired','2026-11-02'),notice('today','2026-11-03')],generated_at='2026-11-01T00:00:00Z')
-        snapshot=dict(base_url=BASE,feed=feed,metadata=dict(schema_version=2,generated_at=feed['generated_at'],notice_count=2))
+        snapshot=dict(base_url=BASE,feed=feed,metadata=dict(schema_version=3,generated_at=feed['generated_at'],notice_count=2))
         client=FeedClient(BASE,cache_dir=self.root,clock=lambda:NOW)
         client.cache_path.write_text(json.dumps(snapshot),encoding='utf-8');before=client.cache_path.read_bytes()
         view=client.load_cache();validate_pair(view['feed'],view['metadata'])

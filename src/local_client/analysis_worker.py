@@ -3,6 +3,66 @@ import multiprocessing
 import os
 import sys
 import time
+import threading
+
+_NOTICE_PROCESS_LOCK=threading.Lock()
+
+def _notice_child(operation, cache, payload, cancel, sender):
+    """A receives public-only data; B alone receives local performance tuples."""
+    calls=[]
+    def audit(event,args):
+        if event in ('socket.connect','socket.getaddrinfo','urllib.Request'):
+            calls.append(event)
+            raise RuntimeError('LOCAL_NOTICE_NETWORK_FORBIDDEN')
+    sys.addaudithook(audit)
+    started=time.perf_counter()
+    try:
+        from .notice_analysis import LocalNoticeAnalysis,public_only
+        from .local_model import LocalEncoder
+        service=LocalNoticeAnalysis(cache)
+        if operation=='A': result=service.analyze_a([public_only(n) for n in payload],cancel=cancel)
+        elif operation=='B': result=service.analyze_b(public_only(payload[0]),payload[1],cancel=cancel)
+        else: raise ValueError('INVALID_LOCAL_STAGE')
+        if calls: raise RuntimeError('LOCAL_NOTICE_NETWORK_FORBIDDEN')
+        sender.send(('result',(result,dict(subprocess=True,external_calls=len(calls),
+            elapsed_seconds=round(time.perf_counter()-started,3),active_sessions_after=LocalEncoder.active_sessions))))
+    except Exception:
+        sender.send(('error','LOCAL_NOTICE_ANALYSIS_UNAVAILABLE'))
+    finally: sender.close()
+
+def run_notice_analysis(operation, cache, payload, *, cancel=None):
+    with _NOTICE_PROCESS_LOCK:
+        if cancel and cancel.is_set(): raise RuntimeError('CANCELLED')
+        return _run_notice_analysis(operation,cache,payload,cancel=cancel)
+
+def _run_notice_analysis(operation, cache, payload, *, cancel=None):
+    """UI worker thread supervises the existing spawn-only model architecture."""
+    if operation=='A':
+        from .notice_analysis import public_only
+        payload=[public_only(n) for n in payload]
+    context=multiprocessing.get_context('spawn')
+    receiver,sender=context.Pipe(duplex=False)
+    child_cancel=context.Event()
+    process=context.Process(target=_notice_child,args=(operation,str(cache),payload,child_cancel,sender),
+                            name='LocalNotice'+operation,daemon=True)
+    started=False;deadline=time.monotonic()+180
+    try:
+        process.start();started=True;sender.close()
+        while time.monotonic()<deadline:
+            if cancel and cancel.is_set():
+                child_cancel.set();raise RuntimeError('CANCELLED')
+            if receiver.poll(.05):
+                kind,value=receiver.recv()
+                if kind=='result': return value
+                raise RuntimeError('LOCAL_NOTICE_ANALYSIS_UNAVAILABLE')
+            if not process.is_alive(): raise RuntimeError('LOCAL_NOTICE_PROCESS_FAILED')
+        raise RuntimeError('LOCAL_NOTICE_ANALYSIS_TIMEOUT')
+    finally:
+        receiver.close();sender.close()
+        if started:
+            process.join(timeout=2)
+            if process.is_alive(): process.terminate();process.join(timeout=2)
+            process.close()
 
 
 def _memory():

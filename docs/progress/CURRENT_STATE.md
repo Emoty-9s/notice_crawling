@@ -1,5 +1,19 @@
 # Current State
 
+Latest v3/local A-B work (2026-11-04): central Gemini runtime, key checks and
+queue execution removed; archived default provider transport disabled. Public
+active CANDIDATE/REVIEW projection now uses explicit schema v3. History and old
+Gemini/queue fields stay intact. Windows A uses only public duties; B separately
+compares technical embeddings with local performances. Existing matcher formula
+and ranking, upload/management and model artifacts remain unchanged. Independent
+versioned caches, spawned offline inference supervised by worker threads, and
+separate work/qualification/technical/matcher UI labels are implemented.
+Final local full suite 656 PASS (215.074 seconds); actual public audit: history
+244, v3 target 83, local work HIGH 2 / REVIEW 81 / EXCLUDE 0, qualifications all
+require checking. Actual ONNX/source Tk smoke PASS, no company DB/network inference.
+See [LOCAL_ANALYSIS_V3.md](../operations/LOCAL_ANALYSIS_V3.md). Older entries below
+describe previous central Gemini operations and are historical.
+
 Final batch/recovery local validation: 635 unittest PASS (223.065 seconds,
 manual workflow request-budget environment),
 projection/feed/local-sync smoke PASS, freshly built frozen EXE synthetic

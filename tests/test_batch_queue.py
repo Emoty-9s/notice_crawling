@@ -351,10 +351,10 @@ class QueueTests(unittest.TestCase):
         client=FakeBatch([{'results':[decision('a')]},error])
         result,session=self.run_queue([*success,notice('a'),notice('b')],client,batch_size=1)
         feed=build_feed(result,generated_at=STAMP)
-        self.assertEqual({n['notice_id'] for n in feed['notices']},{'cached','a'})
-        validate_pair(feed,dict(schema_version=2,generated_at=feed['generated_at'],notice_count=2))
+        self.assertEqual({n['notice_id'] for n in feed['notices']},{'cached','a','b'})
+        validate_pair(feed,dict(schema_version=3,generated_at=feed['generated_at'],notice_count=3))
         stats=queue_statistics(result,NOW)
-        self.assertEqual(stats['public_eligible'],2);self.assertEqual(stats['analysis_status'],'PARTIAL')
+        self.assertEqual(stats['public_eligible'],3);self.assertEqual(stats['analysis_status'],'PARTIAL')
 
     def test_bad_limits_rejected(self):
         for change in ({'batch_size':11},{'batch_size':True},{'max_api_requests_per_run':0},{'max_retries':8}):

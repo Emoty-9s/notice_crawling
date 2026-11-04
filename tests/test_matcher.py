@@ -13,7 +13,7 @@ from src.core.models import GeminiResult, Notice
 from src.local_client.matcher import MatchInputError, MatchWeights, match_notice, match_store
 from src.local_client.performance import Performance, PerformanceDatabaseError, PerformanceStore
 from src.local_client.sync import FeedClient
-from src.renderer.feed import build_feed
+from _v2_fixture import build_feed
 
 
 NOTICE = {

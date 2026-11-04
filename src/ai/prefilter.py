@@ -4,7 +4,19 @@ import json
 import re
 from dataclasses import replace
 from pathlib import Path
-from .gemini import notice_payload, strict_json
+
+def strict_json(text):
+    def pairs(items):
+        value = {}
+        for key,item in items:
+            if key in value: raise ValueError('DUPLICATE_POLICY_KEY')
+            value[key] = item
+        return value
+    return json.loads(text, object_pairs_hook=pairs)
+
+def notice_payload(notice):
+    return {name:getattr(notice,name) for name in
+            ('institution','title','category','published_at','apply_start','apply_end','content_text','url')}
 
 POLICY_PATH = Path(__file__).resolve().parents[2]/'config/prefilter_policy.json'
 

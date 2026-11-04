@@ -67,9 +67,9 @@ class ActionsSupportTests(unittest.TestCase):
         for env in ({}, {**self.env, 'GEMINI_API_KEY': SECRET+'\n'},
                     {**self.env, 'GEMINI_MODEL': '../'+SECRET}):
             with self.subTest(env_fields=list(env)):
-                with self.assertRaises(ActionsCheckError) as error:
-                    preflight(self.config, environ=env)
-                self.assertNotIn(SECRET, str(error.exception))
+                report=preflight(self.config,environ=env)
+                self.assertEqual(report['configuration'],'READY')
+                self.assertNotIn(SECRET,repr(report))
 
     def test_stage_only_allowlisted_pair_and_minimal_health_matching_saved_snapshot(self):
         self.save()
@@ -84,7 +84,8 @@ class ActionsSupportTests(unittest.TestCase):
         self.assertNotIn(SECRET, index)
         text = (self.stage/'notices.json').read_text(encoding='utf-8')
         self.assertNotIn(SECRET, text)
-        self.assertNotIn('content_text', text)
+        self.assertIn('content_text', text)
+        self.assertNotIn('gemini',text)
 
     def test_empty_snapshot_is_valid_publication(self):
         self.save([])
@@ -228,7 +229,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertEqual(jobs['deploy']['permissions']['id-token'], 'write')
         self.assertNotIn('GEMINI_API_KEY', self.workflow['env'])
         secret_steps = [s for s in self.steps if 'GEMINI_API_KEY' in s.get('env', {})]
-        self.assertEqual(len(secret_steps), 2)
+        self.assertEqual(len(secret_steps), 0)
         self.assertTrue(all(s['env']['GEMINI_API_KEY'] == '${{ secrets.GEMINI_API_KEY }}' for s in secret_steps))
 
     def test_state_restore_before_pipeline_and_no_silent_cold_start(self):

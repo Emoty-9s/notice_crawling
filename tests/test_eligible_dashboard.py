@@ -29,7 +29,7 @@ class EligibilityTests(unittest.TestCase):
     def test_incomplete_expired_old_policy_excluded(self):
         good=notice();bad=[replace(good,gemini=replace(good.gemini,status='PENDING')),
             replace(good,apply_end='2026-11-02'),replace(good,gemini=replace(good.gemini,analysis_policy=None))]
-        self.assertEqual(eligible_active_notices([good,*bad],today=NOW),[good])
+        self.assertEqual(eligible_active_notices([good,*bad],today=NOW),[good,bad[0],bad[2]])
 
     def test_policy_role_examples(self):
         policy=load_policy();self.assertEqual(policy['version'],2)
@@ -43,7 +43,7 @@ class EligibilityTests(unittest.TestCase):
         client=Mock();client.generate.return_value=json.dumps(dict(relevant=False,category='지원사업',participation_type='수혜기업',reason='수혜기업 전용',keywords=[]))
         result=RelevanceAnalyzer(client,retry_existing=True,clock=lambda:NOW).analyze(old)
         self.assertFalse(result.gemini.relevant);self.assertEqual(result.gemini.analysis_policy,ANALYSIS_POLICY)
-        self.assertEqual(build_feed([result],generated_at=STAMP)['notices'],[])
+        self.assertEqual(len(build_feed([result],generated_at=STAMP)['notices']),1)
         self.assertEqual(RelevanceAnalyzer(client,retry_existing=True).analyze(result),result)
         self.assertEqual(client.generate.call_count,1)
 
@@ -84,9 +84,9 @@ class EligibilityTests(unittest.TestCase):
             client=Mock();client.generate.return_value=json.dumps(dict(relevant=True,category='IP',participation_type='협력기관',reason='참여 가능',keywords=[]))
             with patch('src.pipeline.build_mvp_registry',return_value=registry):
                 result=run_pipeline(client=client,config_path=config,storage=store,public_dir=root/'public',clock=lambda:NOW,analysis_max_calls=2)
-            self.assertEqual([n.gemini.status for n in result.observed],['SUCCESS','SUCCESS'])
-            self.assertEqual(client.generate.call_count,2);self.assertEqual(len(result.notices),4)
-            self.assertEqual(next(n for n in result.notices if n.notice_id=='backlog').gemini.status,'PENDING')
+            self.assertEqual([n.gemini.status for n in result.observed],['NOT_ANALYZED','NOT_ANALYZED'])
+            self.assertEqual(client.generate.call_count,0);self.assertEqual(len(result.notices),4)
+            self.assertEqual(next(n for n in result.notices if n.notice_id=='backlog').gemini.status,'NOT_ANALYZED')
 
     def test_active_unanalyzed_precedes_unknown_backlog_and_expired_never_calls(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as folder:
@@ -106,12 +106,12 @@ class EligibilityTests(unittest.TestCase):
             with patch('src.pipeline.build_mvp_registry', return_value=registry):
                 result = run_pipeline(client=client, config_path=config, storage=store,
                     public_dir=root/'public', clock=lambda:NOW, analysis_max_calls=1)
-            client.generate.assert_called_once()
+            client.generate.assert_not_called()
             records = {n.notice_id:n for n in result.notices}
-            self.assertEqual(records['z-active'].gemini.status, 'SUCCESS')
-            self.assertEqual(records['a-backlog'].gemini.status, 'PENDING')
+            self.assertEqual(records['z-active'].gemini.status, 'NOT_ANALYZED')
+            self.assertEqual(records['a-backlog'].gemini.status, 'NOT_ANALYZED')
             self.assertEqual(records['expired'].gemini.status, 'NOT_ANALYZED')
-            self.assertEqual(result.feed_count, 1)
+            self.assertEqual(result.feed_count, 2)
 
 class PaginationTests(unittest.TestCase):
     def test_seven_share_cap(self):

@@ -7,7 +7,6 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
-from src.ai.work_queue import BatchSession, RunLimits, utcnow, queue_statistics
 from src.ai.prefilter import Prefilter
 from src.core.state_lock import state_writer
 from src.core.storage import _atomic_json
@@ -21,7 +20,7 @@ from src.scrapers.registry import build_mvp_registry, build_registry
 CONFIG_PATH = Path(__file__).resolve().parents[1] / 'config' / 'sites.yaml'
 MVP_SOURCES = frozenset({'khidi_business', 'kised_bid_public', 'rda_bid', 'seoul_rnd_notice', 'kipa_bid'})
 SUPPORTED_SOURCES = MVP_SOURCES | {'ripc_pms', 'kista_ippro'}
-ANALYSIS_MAX_CALLS_PER_RUN = RunLimits().max_api_requests_per_run  # legacy name: HTTP requests, including retries
+ANALYSIS_MAX_CALLS_PER_RUN = 0  # retired compatibility constant; never invokes AI
 
 
 class PipelineConfigError(ValueError):
@@ -82,7 +81,7 @@ class PipelineResult:
 
 
 def run_pipeline(
-    *, client, config_path=CONFIG_PATH, storage=None, public_dir=None,
+    *, client=None, config_path=CONFIG_PATH, storage=None, public_dir=None,
     clock=None, transport_factory=None, logger=None, analysis_max_calls=None, analysis_limits=None,
 ) -> PipelineResult:
     # Validate config/state before acquiring the OS lock; validate again inside
@@ -101,7 +100,7 @@ def run_pipeline(
 
 
 def _run_pipeline(
-    *, client, config_path=CONFIG_PATH, storage=None, public_dir=None,
+    *, client=None, config_path=CONFIG_PATH, storage=None, public_dir=None,
     clock=None, transport_factory=None, logger=None, analysis_max_calls=None, analysis_limits=None,
 ) -> PipelineResult:
     """One central run. Preserved history and bounded enabled-source backlog.
@@ -115,9 +114,6 @@ def _run_pipeline(
     if not isinstance(now, datetime) or now.tzinfo is None or now.utcoffset() is None:
         raise PipelineConfigError('INVALID_CLOCK: timezone-aware datetime required')
     stamp = now.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
-    limits = analysis_limits or RunLimits.from_env()
-    if analysis_max_calls is not None:
-        limits = replace(limits,max_api_requests_per_run=analysis_max_calls)
     prefilter = Prefilter()  # Fail bad policy configuration before any collection.
     store = storage if storage is not None else JsonStorage()
     public_root = Path(public_dir) if public_dir is not None else PUBLIC_DIR
@@ -165,13 +161,10 @@ def _run_pipeline(
     # queue and decisions. Checkpoint before calls and after each accepted result.
     store.save_notices(sorted(merged.values(),key=lambda n:(n.source_id,n.notice_id)))
     store.save_scraper_status(statuses)
-    analyzer = BatchSession(client,limits=limits,clock=clock or utcnow,prefilter=prefilter)
-    def checkpoint(records):
-        store.save_notices(sorted(records,key=lambda n:(n.source_id,n.notice_id)))
-        _atomic_json(store.data_dir/'analysis_diagnostics.json',dict(
-            metrics_phase='CHECKPOINT',collection_status='PARTIAL' if registry.errors else 'SUCCESS',
-            prefilter_status='SUCCESS',publication_status='PENDING',**queue_statistics(records,now),gemini=analyzer.metrics))
-    snapshot = analyzer.run(list(merged.values()),enabled,checkpoint)
+    # Historical Gemini results and queue fields remain untouched. Only update
+    # the deterministic prefilter metadata; no provider or local model here.
+    snapshot = [prefilter.evaluate(n,stamp) for n in merged.values()]
+    store.save_notices(sorted(snapshot,key=lambda n:(n.source_id,n.notice_id)))
     snapshot.sort(key=lambda n:(n.source_id,n.notice_id))
     merged = {n.notice_id:n for n in snapshot}
     observed = [merged[n.notice_id] for n in current_notices]
@@ -185,7 +178,9 @@ def _run_pipeline(
     store.save_scraper_status(statuses)
     _atomic_json(store.data_dir/'analysis_diagnostics.json',dict(
         metrics_phase='FINAL',collection_status='PARTIAL' if registry.errors else 'SUCCESS',
-        prefilter_status='SUCCESS',publication_status='SUCCESS',**queue_statistics(snapshot,now),gemini=analyzer.metrics))
+        prefilter_status='SUCCESS',publication_status='SUCCESS',analysis_status='LOCAL_ONLY',
+        total_history=len(snapshot),public_eligible=len(feed['notices']),external_ai_calls=0,
+        prefilter_counts={s:sum(n.analysis.prefilter_status==s for n in snapshot)
+                          for s in ('CANDIDATE','REVIEW','CLEARLY_UNRELATED')}))
     return PipelineResult(tuple(snapshot), tuple(observed), tuple(sorted(registry.errors)),
-                          tuple(sorted(analyzer.errors)), tuple(registry.skipped), len(feed['notices']),
-                          queue_statistics(snapshot,now)['analysis_status'] != 'SUCCESS')
+                          (), tuple(registry.skipped), len(feed['notices']), False)

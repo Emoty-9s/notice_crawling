@@ -1,5 +1,5 @@
 """Versioned public-work profiles. No company data or industry taxonomy."""
-VERSION = 'local-work-v4'
+VERSION = 'local-work-v5'
 WORK = (
  '특허 조사 분석 수행 용역', '선행기술조사 및 특허동향 분석',
  '특허맵 및 특허 포트폴리오 분석', 'IP-R&D 기술 특허전략 수립',

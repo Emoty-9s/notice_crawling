@@ -11,6 +11,7 @@ import threading
 from pathlib import Path
 from .local_model import LocalEncoder, model_directory
 from .work_profiles import VERSION, WORK, UNRELATED, PHRASES
+from .work_opportunity import classify, VERSION as OPPORTUNITY_VERSION
 from src.core.public_text import public_hash
 from src.core.storage import _atomic_json
 
@@ -77,7 +78,7 @@ class LocalNoticeAnalysis:
         self.path=Path(cache_path)
         self.encoder_factory=encoder_factory
         self.model_version=model_version or json.loads((model_directory()/'manifest.json').read_text(encoding='utf-8'))['model_version']
-        self.policy=VERSION+':'+digest([WORK,UNRELATED,PHRASES])[:16]
+        self.policy=VERSION+':'+OPPORTUNITY_VERSION+':'+digest([WORK,UNRELATED,PHRASES])[:16]
         self.tech_policy=TECH_VERSION+':'+digest([WORK,PHRASES])[:16]
         self._lock=threading.Lock()
 
@@ -102,37 +103,32 @@ class LocalNoticeAnalysis:
         results={}; pending=[]
         for raw in notices:
             notice=public_only(raw);key=self.a_key(notice);cached=self._cached('work',key)
-            if (isinstance(cached,dict) and cached.get('status') in ('HIGH','REVIEW','EXCLUDE')
+            decision=classify(notice)
+            if (isinstance(cached,dict) and all(cached.get(k)==v for k,v in decision.items())
                     and cached.get('model_version')==self.model_version and cached.get('policy_version')==self.policy
                     and cached.get('analysis_state')=='SUCCESS' and isinstance(cached.get('reason'),str)
                     and cached.get('qualification') in ('EVIDENCE','CHECK_REQUIRED','EXPLICIT_EXCLUSION')
                     and type(cached.get('score')) in (int,float) and math.isfinite(cached['score']) and -1.001<=cached['score']<=1.001):
                 results[notice['notice_id']]=cached
-            else: pending.append((notice,key,work_evidence(notice)))
+            else: pending.append((notice,key,decision))
         if not pending: return results
         try:
             with _MODEL_LOCK,self.encoder_factory() as encoder:
-                vectors=encoder.encode([*WORK,*UNRELATED,*[e['duties'] for _,_,e in pending]])
+                vectors=encoder.encode([*WORK,*UNRELATED,*[e['detected_work_expression'] or '전문 수행 업무 미확인' for _,_,e in pending]])
                 if cancel and cancel.is_set(): return results
                 for i,(notice,key,e) in enumerate(pending):
                     vector=vectors[len(WORK)+len(UNRELATED)+i]
                     positive=max(float(vector @ v) for v in vectors[:len(WORK)])
-                    negative=max(float(vector @ v) for v in vectors[len(WORK):len(WORK)+len(UNRELATED)])
-                    status='REVIEW'
-                    if e['manufacturer'] or e['explicit_exclusion'] or (e['unrelated'] and not e['phrases']): status='EXCLUDE'
-                    elif (e['phrases'] and e['duty_context']
-                          and not e['beneficiary'] and not e['manufacturer'] and positive>negative): status='HIGH'
-                    qualification='EXPLICIT_EXCLUSION' if e['manufacturer'] or e['explicit_exclusion'] else 'EVIDENCE' if e['professional'] and not e['beneficiary'] and not e['mixed_qualification'] else 'CHECK_REQUIRED'
-                    result=dict(status=status,qualification=qualification,score=round(positive,6),
-                                reason=e['duties'],model_version=self.model_version,policy_version=self.policy,
+                    result=dict(**e,score=round(positive,6),
+                                model_version=self.model_version,policy_version=self.policy,
                                 analysis_state='SUCCESS',error_code=None)
                     self._save('work',key,result);results[notice['notice_id']]=result
         except Exception:
             # Do not cache failure as a successful decision. Existing matching
             # policy/hash cache was already reused above, before model loading.
             for notice,key,e in pending:
-                results.setdefault(notice['notice_id'],dict(status='REVIEW',qualification='CHECK_REQUIRED',
-                    score=None,reason=e['duties'],model_version=self.model_version,policy_version=self.policy,
+                results.setdefault(notice['notice_id'],dict(**e,
+                    score=None,model_version=self.model_version,policy_version=self.policy,
                     analysis_state='UNAVAILABLE',error_code='LOCAL_MODEL_OR_CACHE_UNAVAILABLE'))
         return results
 

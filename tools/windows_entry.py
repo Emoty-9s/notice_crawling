@@ -72,6 +72,22 @@ def smoke_check(report_path, feed_url, *, database_path=None):
             report['source_cards'] = len(window._source_widgets)
             report['source_status_available'] = window._source_document is not None
             report['notice_cards'] = len(window.notice_cards)
+            from src.local_client.work_opportunity import is_displayable
+            report['default_visible_count']=len(window.visible_notices)
+            report['default_visible_titles']=[n['title'] for n in window.visible_notices]
+            if any(not is_displayable(window.work_results.get(n['notice_id'])) for n in window.visible_notices):
+                raise RuntimeError('unproven opportunity in default list')
+            def descendants(widget):
+                for child in widget.winfo_children():
+                    yield child
+                    yield from descendants(child)
+            toggle=next(w for w in descendants(root) if isinstance(w,tk.Checkbutton) and w.cget('text')=='제외된 공고 보기')
+            toggle.invoke();root.update()
+            report['excluded_toggle_count']=len(window.visible_notices)
+            report['excluded_reasons_available']=all(window._work_text(n) for n in window.visible_notices)
+            if len(window.visible_notices)!=len(first.feed['notices']):
+                raise RuntimeError('excluded toggle lost public notices')
+            toggle.invoke();root.update()
             report['active_projection'] = True
             report['local_seen_state'] = not window._seen_error
             if window.visible_notices:

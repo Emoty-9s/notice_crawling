@@ -254,6 +254,12 @@ def check(options):
                     raise RuntimeError('MANAGEMENT_FLOW_FAILED')
         if window.data is None:
             raise RuntimeError('CACHE_REQUIRED_FOR_MATCH_CHECK')
+        # Default rows are intentionally hidden until public A proves an
+        # opportunity. A warm restart must wait for its asynchronous completion
+        # too; never enable excluded rows to make this matching check pass.
+        wait(lambda:all(n['notice_id'] in window.work_results
+                        for n in window.data.snapshot['feed']['notices']))
+        report['work_analysis_ready']=True
         report['records_after'] = len(window.data.performances)
         if not window.visible_notices or not window.data.performances:
             raise RuntimeError('MATCH_INPUT_REQUIRED')

@@ -38,7 +38,7 @@ def check(report_path):
             notice=dict(notice_id='AB-N',source_id='kipa_bid',institution='합성 기관',
                 title='전기자동차 배터리팩 하우징 특허분석 용역',url='https://example.test/AB',
                 published_at=None,apply_start=None,apply_end='2099-12-31',
-                summary='특허분석 전문기관 용역',content_text='전기자동차 이차전지 배터리 모듈 하우징 특허분석 용역. 참가 자격은 원문 확인.',
+                summary='특허분석 전문기관 용역',content_text='전기자동차 이차전지 배터리 모듈 하우징 특허분석 용역 수행기관 모집. 참가 자격은 원문 확인.',
                 content_hash='synthetic',prefilter_status='CANDIDATE',prefilter_reason_code='PUBLIC_RELATED_WORK',
                 prefilter_policy_version='synthetic-v1',first_seen_at=stamp,updated_at=stamp,is_new=True)
             notice['public_content_hash']=public_hash(notice)

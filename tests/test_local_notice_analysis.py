@@ -11,6 +11,7 @@ from src.local_client.performance import Performance
 from src.local_client.matcher import match_notice
 
 def row(title='전기자동차 배터리팩 하우징 특허분석 용역',**changes):
+    changes.setdefault('content_text',title+' 공고')
     return dict(notice_id='n',title=title,**changes)
 
 class Vector(tuple):
@@ -36,7 +37,8 @@ class LocalStagesTests(unittest.TestCase):
         result=self.service.analyze_a([row()])['n']
         self.assertEqual(result['status'],'HIGH')
         self.assertEqual(result['qualification'],'CHECK_REQUIRED')
-        self.assertEqual(result['reason'],'특허분석')
+        self.assertEqual(result['actual_work'],'특허분석')
+        self.assertTrue(result['provider_evidence'])
 
     def test_public_only_no_sql_no_network_and_company_fields_ignored(self):
         original=row()
@@ -57,7 +59,7 @@ class LocalStagesTests(unittest.TestCase):
         mixed=self.service.analyze_a([row('특허 전문인력 양성 및 기업 특허 컨설팅 수행기관 모집')])['n']
         self.assertNotEqual(mixed['status'],'EXCLUDE')
         beneficiary=self.service.analyze_a([row('중소기업 특허 지원 참여기업 모집')])['n']
-        self.assertEqual(beneficiary['status'],'REVIEW')
+        self.assertEqual(beneficiary['status'],'EXCLUDE')
 
     def test_explicit_qualification_is_evidence_not_probability(self):
         result=self.service.analyze_a([row(content_text='참가 자격: 특허법인 또는 변리사')])['n']
@@ -68,25 +70,25 @@ class LocalStagesTests(unittest.TestCase):
         self.assertEqual((result['status'],result['qualification']),('EXCLUDE','EXPLICIT_EXCLUSION'))
         mixed=self.service.analyze_a([row(content_text='변리사 참여 불가. 특허법인 참여 가능.')])['n']
         self.assertEqual((mixed['status'],mixed['qualification']),('REVIEW','CHECK_REQUIRED'))
-        also=self.service.analyze_a([row('특허법인 또는 제조업체 모집',content_text='특허법인 참여 가능.')])['n']
+        also=self.service.analyze_a([row('특허분석 용역 수행기관 모집',content_text='특허법인 또는 제조업체 참여 가능.')])['n']
         self.assertNotEqual(also['status'],'EXCLUDE')
         negated=self.service.analyze_a([row(content_text='특허법인은 제외하지 않음')])['n']
         self.assertEqual((negated['status'],negated['qualification']),('REVIEW','CHECK_REQUIRED'))
 
-    def test_unclear_duties_remain_review(self):
-        self.assertEqual(self.service.analyze_a([row('전문 용역 수행기관 모집')])['n']['status'],'REVIEW')
+    def test_unclear_duties_are_not_assumed_professional_opportunities(self):
+        self.assertEqual(self.service.analyze_a([row('전문 용역 수행기관 모집')])['n']['status'],'INSUFFICIENT')
         for title,body in (('IP 마이스터 창의인재양성 교육','지식재산 전문기관 지원 프로그램'),
                            ('지식재산대전 행사 운영 용역','기술거래 활성화를 위한 행사 개최'),
                            ('BIO-Europe 참가지원 사업 공고','기술거래 및 해외 진출을 지원합니다.'),
                            ('인공지능 기술사업화 지원사업 최종 선정 결과 안내','기술사업화 전문기관 용역')):
-            self.assertEqual(self.service.analyze_a([row(title,content_text=body)])['n']['status'],'REVIEW')
+            self.assertEqual(self.service.analyze_a([row(title,content_text=body)])['n']['status'],'EXCLUDE')
 
     def test_cache_hit_precedes_model_load_and_failure_is_not_success(self):
         first=self.service.analyze_a([row()])
         failed=LocalNoticeAnalysis(self.path,encoder_factory=broken,model_version='synthetic-v1')
         self.assertEqual(failed.analyze_a([row()]),first)
         result=failed.analyze_a([row('변경된 특허분석 용역')])['n']
-        self.assertEqual(result['status'],'REVIEW');self.assertEqual(result['analysis_state'],'UNAVAILABLE')
+        self.assertEqual(result['status'],'HIGH');self.assertEqual(result['analysis_state'],'UNAVAILABLE')
         self.assertIsNone(result['score'])
 
     def test_hash_policy_and_model_invalidate_only_a(self):
@@ -134,10 +136,10 @@ class RealOfflineModelTests(unittest.TestCase):
     def test_real_onnx_work_and_technology_examples_without_network(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as folder,patch('socket.create_connection',side_effect=AssertionError('offline')):
             service=LocalNoticeAnalysis(Path(folder)/'cache')
-            titles=['전기자동차 배터리팩 하우징 특허분석 용역','반도체 특허동향 분석','의료기기 기술이전 컨설팅',
+            titles=['전기자동차 배터리팩 하우징 특허분석 용역','반도체 특허동향 분석 용역','의료기기 기술이전 컨설팅 용역',
                     '배터리 제조업체 모집','일반 인재양성 교육생 모집','전문 용역 수행기관 모집']
             results=service.analyze_a([dict(row(t),notice_id=str(i)) for i,t in enumerate(titles)])
-            self.assertEqual([results[str(i)]['status'] for i in range(6)],['HIGH','HIGH','HIGH','EXCLUDE','EXCLUDE','REVIEW'])
+            self.assertEqual([results[str(i)]['status'] for i in range(6)],['HIGH','HIGH','HIGH','EXCLUDE','EXCLUDE','INSUFFICIENT'])
             records=[Performance(performance_id='battery',project_name='전기차 이차전지 배터리 모듈 기술조사'),
                      Performance(performance_id='food',project_name='식품 포장재 특허분석'),
                      Performance(performance_id='semi',project_name='반도체 제조 공정 기술분석'),

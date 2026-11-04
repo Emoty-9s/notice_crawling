@@ -169,7 +169,7 @@ class DashboardWindow:
         search.bind('<Return>', lambda event: self.filter_notices())
         self.button(toolbar, '검색', self.filter_notices).pack(side='left', padx=(6, 18))
         self.show_excluded = tk.BooleanVar(root,False)
-        tk.Checkbutton(toolbar,text='명백한 제외 보기',variable=self.show_excluded,command=self.filter_notices,
+        tk.Checkbutton(toolbar,text='제외된 공고 보기',variable=self.show_excluded,command=self.filter_notices,
                        bg=BG,fg=TEXT,selectcolor=CARD,activebackground=BG,activeforeground=TEXT).pack(side='left')
         self.label(toolbar, '매칭 기준 연도', bg=BG, size=9, color=MUTED).pack(side='left')
         self.entry(toolbar, self.reference_year, width=6).pack(side='left', padx=(8, 14), ipady=5)
@@ -407,8 +407,9 @@ class DashboardWindow:
                 from .analysis_worker import run_notice_analysis
                 rows,runtime=run_notice_analysis('A',path,notices,cancel=self._analysis_cancel)
             except Exception:
-                rows={n['notice_id']:dict(status='REVIEW',qualification='CHECK_REQUIRED',score=None,
-                    reason='공개 수행 업무 확인 필요',analysis_state='UNAVAILABLE',error_code='LOCAL_MODEL_UNAVAILABLE') for n in notices}
+                from .work_opportunity import classify
+                rows={n['notice_id']:dict(**classify(n),score=None,
+                    analysis_state='UNAVAILABLE',error_code='LOCAL_MODEL_UNAVAILABLE') for n in notices}
             self._events.put((token,'work_results',(fingerprint,rows,runtime)))
         threading.Thread(target=work,name='local-public-work-analysis',daemon=True).start()
 
@@ -436,10 +437,10 @@ class DashboardWindow:
 
     def _work_text(self,notice):
         result=self.work_results.get(notice['notice_id'])
-        if not result: return '추가 검토 · 로컬 분석 대기 / 자격 확인 필요'
-        status={'HIGH':'업무 관련성 높음','REVIEW':'추가 검토','EXCLUDE':'명백한 업무 무관'}[result['status']]
+        if not result: return '로컬 분석 대기 · 수행 기회 미확인'
+        status={'HIGH':'전문 업무 수행 기회 확인','REVIEW':'추가 검토 · 수행기관 모집 근거 있음','EXCLUDE':'기본 목록 제외','INSUFFICIENT':'정보 부족 · 원문 재수집 필요'}[result['status']]
         qualification={'EVIDENCE':'자격 관련 근거 있음','CHECK_REQUIRED':'자격 확인 필요','EXPLICIT_EXCLUSION':'명시적 배제 조건 있음'}[result['qualification']]
-        score=f" · 업무 관련성 {result['score']:.3f}" if result.get('score') is not None else ''
+        score=f" · AI 의미 유사도(참고) {result['score']:.3f}" if result.get('score') is not None else ''
         state='로컬 분석 완료' if result['analysis_state']=='SUCCESS' else '로컬 분석 불가 · '+str(result.get('error_code'))
         return f"{status}{score} / {qualification} / {state} — {result['reason']}"
 
@@ -488,8 +489,9 @@ class DashboardWindow:
         if self.data:
             self.eligible_active_notices = notice_rows(self.data)
             if not self.show_excluded.get():
+                from .work_opportunity import is_displayable
                 self.eligible_active_notices=[n for n in self.eligible_active_notices
-                    if self.work_results.get(n['notice_id'],{}).get('status')!='EXCLUDE']
+                    if is_displayable(self.work_results.get(n['notice_id']))]
             query = self.query.get().strip().casefold()
             filtered = [n for n in self.eligible_active_notices if not query or query in
                         ' '.join(str(n[k] or '') for k in ('title','institution','category','participation_type','summary','keywords')).casefold()]
@@ -689,7 +691,11 @@ class DashboardWindow:
         self.label(card, notice['institution'], color=MUTED, size=11).pack(anchor='w', padx=24, pady=(23, 8))
         self.label(card, notice['title'], size=19, bold=True, wrap=1120).pack(anchor='w', padx=24, pady=(0, 12))
         self.label(card, self.period(notice), color=MUTED).pack(anchor='w', padx=24, pady=(0, 25))
-        for label, value in (('로컬 업무 지원 가능성',self._work_text(notice)),('공개 상세 내용',notice.get('content_text') or notice['summary']),('공고 요약', notice['summary']), ('분류 · 참여 형태', f"{notice['category']}  /  {notice['participation_type']}"),
+        decision=self.work_results.get(notice['notice_id'],{})
+        evidence='\n'.join(f'{label}: {decision.get(key) or "미확인"}' for label,key in
+            (('모집 유형','recruitment_type'),('실제 수행 업무','actual_work'),('모집 근거 원문','provider_evidence'),
+             ('자격 근거 원문','qualification_evidence'),('원문 수집 상태','original_availability'),('원문 정보 상태','information_status'),('판정 코드','reason_code')))
+        for label, value in (('로컬 업무 수행 기회',self._work_text(notice)),('판단 근거',evidence),('공개 상세 내용',notice.get('content_text') or notice['summary']),('공고 요약', notice['summary']), ('분류 · 참여 형태', f"{notice['category']}  /  {notice['participation_type']}"),
                              ('키워드', '   ·   '.join(notice['keywords'])), ('참여 관련성', notice['relevance_reason'])):
             self.label(card, label, size=10, color=MUTED, bold=True).pack(anchor='w', padx=24, pady=(10, 7))
             self.label(card, value or '공개 feed에 제공된 내용이 없습니다.', size=11, wrap=1120).pack(anchor='w', padx=24, pady=(0, 15))

@@ -1,5 +1,23 @@
 # Current State
 
+Final batch/recovery local validation: 633 unittest PASS (218.170 seconds),
+projection/feed/local-sync smoke PASS, freshly built frozen EXE synthetic
+selection/management/offline-AI/restart checks PASS with external calls 0.
+
+Latest central batch/recovery work (2026-11-04): config-driven conservative
+prefilter, ordinary generateContent batches default 5/max 10, independent results,
+5→2→1 fallback and preserved single API. Durable per-notice analysis state is
+embedded in atomic history with claims/leases/checkpoints, OS writer lock and
+always-upload of validated Actions state. 429 honors safe quota/retry details;
+503/timeout use bounded retry/jitter/circuit breaker. Default budget is now
+12 HTTP requests (including retries), 60 unique notices, conservative 120k input
+bound and 600 analysis seconds. Existing cron and public feed v2 remain unchanged.
+Read-only 244 history audit: active 102; candidate 19/review 64/unrelated 19;
+83 AI targets, estimated 17 normal batches versus 102 old single requests.
+Fresh EXE build and synthetic offline selection/management/restart regression PASS.
+See [BATCH_ANALYSIS.md](../operations/BATCH_ANALYSIS.md). Prior single-request
+budget/queue descriptions below are historical.
+
 Latest final operations/EXE work (2026-11-04): fresh Windows build, actual frozen
 5→3 selected save→edit two fields/work type→delete→restart two-record verification PASS;
 offline AI and DB integrity/orphan metadata checks PASS, external calls 0.

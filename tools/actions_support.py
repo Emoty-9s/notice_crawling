@@ -107,13 +107,28 @@ def diagnostics(data_dir):
         return {'state': 'MISSING_OR_INVALID',
                 'check': kind if kind in known else 'VALIDATION_ERROR',
                 'hint': 'Inspect the first failed Actions step; state was not reset'}
-    return {
+    report = {
         'state': 'VALID', 'stored_notices': len(notices),
         'scrapers': {source: {'status': status['status'], 'notices_found': status.get('notices_found')}
                      for source, status in sorted(statuses.items())},
         'analysis_counts': {status: sum(notice.gemini.status.value == status for notice in notices)
                             for status in ('NOT_ANALYZED', 'SUCCESS', 'FAILED', 'PENDING')},
     }
+    from src.ai.work_queue import queue_statistics
+    report['queue'] = queue_statistics(notices)
+    # This file is an operator-only allowlisted metrics document produced by the
+    # queue, never copied into metadata.json or Pages.
+    path = Path(data_dir)/'analysis_diagnostics.json'
+    if path.is_file():
+        metrics = _read_json(path,{})
+        report['metrics_phase'] = metrics.get('metrics_phase','UNKNOWN')
+        report['stages'] = {name:metrics.get(name+'_status','UNKNOWN')
+                            for name in ('collection','prefilter','analysis','publication')}
+        allowed = {'api_requests','analyzed_notices','successful_notices','failed_notices','input_tokens',
+            'output_tokens','estimated_input_tokens','retries','http_429','http_503','timeouts','cache_hits',
+            'quota_scope','quota_limit','quota_metrics','model_id','unique_analyzed_notices','stop_reason','elapsed_seconds'}
+        report['gemini'] = {k:v for k,v in metrics.get('gemini',{}).items() if k in allowed}
+    return report
 
 
 def main(argv=None):

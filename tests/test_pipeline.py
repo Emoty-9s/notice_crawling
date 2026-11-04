@@ -74,15 +74,20 @@ class PipelineTests(unittest.TestCase):
         result = self.run_pipeline()
         self.assertFalse(result.degraded)
         self.assertEqual(len(result.notices), 5)
-        self.assertEqual(result.feed_count, 5)
-        self.assertTrue(all(n.status == NoticeStatus.NEW and n.gemini.status == GeminiStatus.SUCCESS for n in result.observed))
-        self.assertTrue(all(n.content_hash == n.gemini.analyzed_content_hash for n in result.observed))
+        # The Seoul fixture is a final-selection result announcement, not an
+        # open provider opportunity. Keep it in history without an AI request.
+        self.assertEqual(result.feed_count, 4)
+        self.assertTrue(all(n.status == NoticeStatus.NEW for n in result.observed))
+        analyzed = [n for n in result.observed if n.source_id != 'seoul_rnd_notice']
+        self.assertTrue(all(n.gemini.status == GeminiStatus.SUCCESS for n in analyzed))
+        self.assertTrue(all(n.content_hash == n.gemini.analyzed_content_hash for n in analyzed))
+        self.assertEqual(next(n for n in result.observed if n.source_id == 'seoul_rnd_notice').analysis.prefilter_status,'CLEARLY_UNRELATED')
         self.assertEqual(self.storage.load_notices(), list(result.notices))
-        self.assertEqual(self.client.generate.call_count, 5)
+        self.assertEqual(self.client.generate.call_count, 4)
         statuses = self.storage.load_scraper_status()
         self.assertEqual(set(statuses), MVP_SOURCES)
         self.assertTrue(all(s['status'] == 'SUCCESS' and s['notices_found'] == 1 for s in statuses.values()))
-        self.assertEqual(len(self.feed()['notices']), 5)
+        self.assertEqual(len(self.feed()['notices']), 4)
         self.assertNotIn('content_text', json.dumps(self.feed()))
 
     def test_second_run_existing_no_duplicate_no_gemini_call(self):
@@ -90,7 +95,7 @@ class PipelineTests(unittest.TestCase):
         before_feed = self.feed()['notices']
         self.now += timedelta(days=1)
         second = self.run_pipeline()
-        self.assertEqual(self.client.generate.call_count, 5)
+        self.assertEqual(self.client.generate.call_count, 4)
         self.assertEqual(len(second.notices), 5)
         self.assertTrue(all(n.status == NoticeStatus.EXISTING for n in second.observed))
         for before, after in zip(first.notices, second.notices):
@@ -106,30 +111,30 @@ class PipelineTests(unittest.TestCase):
     def test_pending_backlog_drains_across_runs_with_call_cap(self):
         first = self.run_pipeline(analysis_max_calls=2)
         self.assertEqual(self.client.generate.call_count, 2)
-        self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in first.notices), 3)
+        self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in first.notices), 2)
         self.now += timedelta(days=1)
         second = self.run_pipeline(analysis_max_calls=2)
         self.assertEqual(self.client.generate.call_count, 4)
-        self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in second.notices), 1)
+        self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in second.notices), 0)
         third = self.run_pipeline(analysis_max_calls=2)
-        self.assertEqual(self.client.generate.call_count, 5)
-        self.assertEqual(third.feed_count, 5)
+        self.assertEqual(self.client.generate.call_count, 4)
+        self.assertEqual(third.feed_count, 4)
         self.run_pipeline(analysis_max_calls=2)
-        self.assertEqual(self.client.generate.call_count, 5)
+        self.assertEqual(self.client.generate.call_count, 4)
 
     def test_pending_outside_list_retried_without_changing_observation(self):
         from src.ai.gemini import GeminiError
         self.client.generate.side_effect = GeminiError('API_ERROR', retryable=True, http_status=429)
         first = self.run_pipeline()
         self.assertEqual(self.client.generate.call_count, 1)
-        self.assertTrue(all(n.gemini.status == GeminiStatus.PENDING for n in first.notices))
+        self.assertEqual(sum(n.gemini.status == GeminiStatus.PENDING for n in first.notices),4)
         self.empty_lists()
         self.client.generate.side_effect = None
         self.client.generate.return_value = decision()
         self.now += timedelta(days=1)
         second = self.run_pipeline()
         self.assertEqual(second.observed, ())
-        self.assertEqual(second.feed_count, 5)
+        self.assertEqual(second.feed_count, 4)
         self.assertEqual([n.last_seen_at for n in first.notices], [n.last_seen_at for n in second.notices])
 
     def test_disabled_pending_source_is_not_retried(self):
@@ -142,6 +147,22 @@ class PipelineTests(unittest.TestCase):
         self.client.generate.side_effect = None
         self.run_pipeline()
         self.assertEqual(self.client.generate.call_count, calls)
+
+    def test_not_yet_due_retry_is_still_partial_without_spending_api(self):
+        from src.ai.gemini import GeminiError
+        self.client.generate.side_effect = GeminiError('API_ERROR',retryable=True,http_status=429)
+        self.run_pipeline()
+        self.client.generate.side_effect = None
+        result = self.run_pipeline()
+        self.assertEqual(self.client.generate.call_count,1)
+        self.assertTrue(result.analysis_incomplete)
+        self.assertTrue(result.degraded)
+
+    def test_unexpected_prefilter_failure_still_preserves_collected_history(self):
+        with patch('src.ai.prefilter.Prefilter.evaluate',side_effect=RuntimeError('INJECTED')):
+            with self.assertRaises(RuntimeError): self.run_pipeline()
+        self.assertEqual(len(self.storage.load_notices()),5)
+        self.client.generate.assert_not_called()
 
     def change_kipa(self):
         listing, detail = self.html['kipa_bid']
@@ -161,7 +182,7 @@ class PipelineTests(unittest.TestCase):
         self.assertNotEqual(changed.content_hash, previous.content_hash)
         self.assertEqual(changed.gemini.analyzed_content_hash, changed.content_hash)
         self.assertEqual(changed.first_seen_at, previous.first_seen_at)
-        self.assertEqual(self.client.generate.call_count, 6)
+        self.assertEqual(self.client.generate.call_count, 5)
         self.assertEqual(len(second.notices), 5)
 
     def test_failed_scraper_keeps_old_source_and_other_sites_continue(self):
@@ -175,7 +196,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result.scraper_failures, ('khidi_business',))
         self.assertEqual(len(result.observed), 4)
         self.assertEqual(next(n for n in result.notices if n.source_id == 'khidi_business'), replace(old, status='EXISTING'))
-        self.assertEqual(result.feed_count, 5)
+        self.assertEqual(result.feed_count, 4)
         status = self.storage.load_scraper_status()['khidi_business']
         self.assertEqual(status['status'], 'ERROR')
         self.assertEqual(status['last_success_at'], last_success)
@@ -185,7 +206,7 @@ class PipelineTests(unittest.TestCase):
         self.html['rda_bid'] = ('<html>invalid</html>', '')
         result = self.run_pipeline()
         self.assertEqual(len(result.notices), 4)
-        self.assertEqual(result.feed_count, 4)
+        self.assertEqual(result.feed_count, 3)
         self.assertEqual(result.scraper_failures, ('rda_bid',))
 
     def test_gemini_partial_failure_and_irrelevant_excluded(self):
@@ -193,11 +214,11 @@ class PipelineTests(unittest.TestCase):
         result = self.run_pipeline()
         self.assertTrue(result.degraded)
         self.assertEqual(len(result.notices), 5)
-        self.assertEqual(len(result.analysis_failures), 2)
+        self.assertEqual(len(result.analysis_failures), 1)
         self.assertEqual(result.feed_count, 2)
         states = [n.gemini.status for n in result.observed]
         self.assertIn(GeminiStatus.PENDING, states)
-        self.assertIn(GeminiStatus.FAILED, states)
+        self.assertTrue(any(n.analysis.analysis_status == 'RETRY_WAIT' for n in result.observed))
         self.assertTrue(all(s['status'] == 'SUCCESS' for s in self.storage.load_scraper_status().values()))
         self.assertNotIn('secret-test', repr(self.logger.mock_calls))
 
@@ -208,10 +229,13 @@ class PipelineTests(unittest.TestCase):
         self.client.generate.side_effect = TimeoutError('secret-test')
         result = self.run_pipeline()
         updated = next(n for n in result.notices if n.source_id == 'kipa_bid')
-        self.assertEqual(updated.gemini.status, GeminiStatus.PENDING)
+        # The historical successful judgment remains intact; queue state and
+        # content-hash mismatch prevent its stale publication.
+        self.assertEqual(updated.gemini.status, GeminiStatus.SUCCESS)
+        self.assertEqual(updated.analysis.analysis_status, 'RETRY_WAIT')
         self.assertEqual(updated.gemini.analyzed_content_hash, old.content_hash)
         self.assertEqual(updated.gemini.reason, old.gemini.reason)
-        self.assertEqual(result.feed_count, 4)
+        self.assertEqual(result.feed_count, 3)
         self.assertEqual(len(self.storage.load_notices()), 5)
 
     def empty_lists(self):
@@ -238,8 +262,8 @@ class PipelineTests(unittest.TestCase):
         second = self.run_pipeline()
         self.assertEqual(second.notices, tuple(replace(n, status='EXISTING') for n in first.notices))
         self.assertEqual(second.observed, ())
-        self.assertEqual(second.feed_count, 5)
-        self.assertEqual(self.client.generate.call_count, 5)
+        self.assertEqual(second.feed_count, 4)
+        self.assertEqual(self.client.generate.call_count, 4)
 
     def test_all_failed_scrapers_preserve_snapshot_and_feed(self):
         first = self.run_pipeline()
@@ -248,7 +272,7 @@ class PipelineTests(unittest.TestCase):
         result = self.run_pipeline()
         self.assertEqual(result.notices, tuple(replace(n, status='EXISTING') for n in first.notices))
         self.assertEqual(len(result.scraper_failures), 5)
-        self.assertEqual(result.feed_count, 5)
+        self.assertEqual(result.feed_count, 4)
 
     def test_disabled_source_retains_data_and_health_history(self):
         first = self.run_pipeline()

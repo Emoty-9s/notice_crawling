@@ -137,7 +137,7 @@ def _compare(collected: Notice, previous: Notice | None, observed_at: str) -> No
         return NoticeDiff(replace(previous, status=NoticeStatus.EXISTING, last_seen_at=observed_at))
     return NoticeDiff(replace(
         collected, status=NoticeStatus.UPDATED, first_seen_at=previous.first_seen_at,
-        last_seen_at=observed_at, updated_at=observed_at, gemini=previous.gemini,
+        last_seen_at=observed_at, updated_at=observed_at, gemini=previous.gemini, analysis=previous.analysis,
     ), changes)
 
 

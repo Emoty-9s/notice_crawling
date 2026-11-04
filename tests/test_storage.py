@@ -200,6 +200,20 @@ class StorageTests(unittest.TestCase):
         self.assertEqual(self.storage.load_notices(), [])
         self.assertEqual(list(self.storage.data_dir.glob('*.tmp')), [])
 
+    def test_transient_windows_sharing_lock_retries_same_complete_snapshot(self):
+        self.storage.save_notices([notice('old')])
+        real_replace = os.replace
+        denied = PermissionError('transient sharing lock');denied.winerror = 32
+        calls = []
+        def commit(source,target):
+            calls.append((source,target))
+            if len(calls) == 1: raise denied
+            real_replace(source,target)
+        with patch('src.core.storage.os.replace',side_effect=commit), patch('src.core.storage.time.sleep') as sleep:
+            self.storage.save_notices([notice('new')])
+        self.assertEqual(calls[0],calls[1]);sleep.assert_called_once_with(.02)
+        self.assertEqual(self.storage.load_notices(),[notice('new')])
+
     def test_io_error_is_not_treated_as_empty_store(self):
         with patch('pathlib.Path.read_text', side_effect=PermissionError('denied')):
             with self.assertRaises(StorageIOError) as error:

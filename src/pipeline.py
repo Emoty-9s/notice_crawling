@@ -7,12 +7,13 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
-from src.ai.relevance import RelevanceAnalyzer
-from src.ai.gemini import GeminiClient
+from src.ai.work_queue import BatchSession, RunLimits, utcnow, queue_statistics
+from src.ai.prefilter import Prefilter
+from src.core.state_lock import state_writer
+from src.core.storage import _atomic_json
 from src.core.diff import compare_batch
-from src.core.models import Notice, GeminiStatus, NoticeStatus
+from src.core.models import Notice, NoticeStatus
 from src.core.storage import JsonStorage
-from src.core.eligibility import deadline_state, current_analysis
 from src.renderer.feed import PUBLIC_DIR, build_feed, write_feed
 from src.scrapers.registry import build_mvp_registry, build_registry
 
@@ -20,7 +21,7 @@ from src.scrapers.registry import build_mvp_registry, build_registry
 CONFIG_PATH = Path(__file__).resolve().parents[1] / 'config' / 'sites.yaml'
 MVP_SOURCES = frozenset({'khidi_business', 'kised_bid_public', 'rda_bid', 'seoul_rnd_notice', 'kipa_bid'})
 SUPPORTED_SOURCES = MVP_SOURCES | {'ripc_pms', 'kista_ippro'}
-ANALYSIS_MAX_CALLS_PER_RUN = 60
+ANALYSIS_MAX_CALLS_PER_RUN = RunLimits().max_api_requests_per_run  # legacy name: HTTP requests, including retries
 
 
 class PipelineConfigError(ValueError):
@@ -73,15 +74,35 @@ class PipelineResult:
     analysis_failures: tuple[str, ...]
     skipped: tuple[str, ...]
     feed_count: int
+    analysis_incomplete: bool = False
 
     @property
     def degraded(self) -> bool:
-        return bool(self.scraper_failures or self.analysis_failures)
+        return bool(self.scraper_failures or self.analysis_failures or self.analysis_incomplete)
 
 
 def run_pipeline(
     *, client, config_path=CONFIG_PATH, storage=None, public_dir=None,
-    clock=None, transport_factory=None, logger=None, analysis_max_calls=ANALYSIS_MAX_CALLS_PER_RUN,
+    clock=None, transport_factory=None, logger=None, analysis_max_calls=None, analysis_limits=None,
+) -> PipelineResult:
+    # Validate config/state before acquiring the OS lock; validate again inside
+    # the locked run so no stale pre-lock state is used for work selection.
+    load_site_configs(config_path)
+    store = storage if storage is not None else JsonStorage()
+    store.load_notices();store.load_scraper_status()
+    public_root = Path(public_dir) if public_dir is not None else PUBLIC_DIR
+    protected = {store.notices_path.resolve(),store.scraper_status_path.resolve()}
+    if any((public_root/name).resolve() in protected for name in ('notices.json','metadata.json')):
+        raise PipelineConfigError('OUTPUT_PATH_COLLISION: public feed must not overwrite storage files')
+    with state_writer(store.data_dir):
+        return _run_pipeline(client=client,config_path=config_path,storage=store,public_dir=public_dir,
+            clock=clock,transport_factory=transport_factory,logger=logger,
+            analysis_max_calls=analysis_max_calls,analysis_limits=analysis_limits)
+
+
+def _run_pipeline(
+    *, client, config_path=CONFIG_PATH, storage=None, public_dir=None,
+    clock=None, transport_factory=None, logger=None, analysis_max_calls=None, analysis_limits=None,
 ) -> PipelineResult:
     """One central run. Preserved history and bounded enabled-source backlog.
 
@@ -94,10 +115,10 @@ def run_pipeline(
     if not isinstance(now, datetime) or now.tzinfo is None or now.utcoffset() is None:
         raise PipelineConfigError('INVALID_CLOCK: timezone-aware datetime required')
     stamp = now.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
-    analyzer = RelevanceAnalyzer(client, clock=lambda: now, logger=logger,
-                                 retry_existing=True, max_calls=analysis_max_calls,
-                                 stop_on_rate_limit=True,
-                                 min_call_interval=6 if isinstance(client, GeminiClient) else 0)
+    limits = analysis_limits or RunLimits.from_env()
+    if analysis_max_calls is not None:
+        limits = replace(limits,max_api_requests_per_run=analysis_max_calls)
+    prefilter = Prefilter()  # Fail bad policy configuration before any collection.
     store = storage if storage is not None else JsonStorage()
     public_root = Path(public_dir) if public_dir is not None else PUBLIC_DIR
     protected = {store.notices_path.resolve(), store.scraper_status_path.resolve()}
@@ -119,18 +140,6 @@ def run_pipeline(
     merged = {n.notice_id: replace(n, status=NoticeStatus.EXISTING) for n in previous}
     merged.update({n.notice_id: n for n in current_notices})
     enabled = {c['source_id'] for c in configs if c.get('enabled', False)}
-    queue = [n for n in merged.values() if n.source_id in enabled and not current_analysis(n)
-             and deadline_state(n.apply_end, today=now, title=n.title, content=n.content_text) != 'EXPIRED']
-    queue.sort(key=lambda n: ({NoticeStatus.NEW: 0, NoticeStatus.UPDATED: 1}.get(n.status,
-                              2 if deadline_state(n.apply_end, today=now) == 'ACTIVE' else 3),
-                              n.first_seen_at, n.notice_id))
-    analyzed = {n.notice_id: n for n in analyzer.analyze_batch(queue)}
-    merged.update(analyzed)
-    observed = [merged[n.notice_id] for n in current_notices]
-    snapshot = sorted(merged.values(), key=lambda notice: (notice.source_id, notice.notice_id))
-    # Validate the complete public projection before committing the new storage.
-    feed = build_feed(snapshot, generated_at=stamp)
-
     for source, records in registry.results.items():
         statuses[source] = {
             'status': 'SUCCESS', 'last_attempt_at': stamp, 'last_success_at': stamp,
@@ -152,7 +161,21 @@ def run_pipeline(
             'error_type': 'DISABLED', 'error_message': 'Scraper disabled; no attempt made',
         }
 
-    store.save_notices(snapshot)
+    # Preserve collection first; one atomic Notice snapshot contains history,
+    # queue and decisions. Checkpoint before calls and after each accepted result.
+    store.save_notices(sorted(merged.values(),key=lambda n:(n.source_id,n.notice_id)))
+    store.save_scraper_status(statuses)
+    analyzer = BatchSession(client,limits=limits,clock=clock or utcnow,prefilter=prefilter)
+    def checkpoint(records):
+        store.save_notices(sorted(records,key=lambda n:(n.source_id,n.notice_id)))
+        _atomic_json(store.data_dir/'analysis_diagnostics.json',dict(
+            metrics_phase='CHECKPOINT',collection_status='PARTIAL' if registry.errors else 'SUCCESS',
+            prefilter_status='SUCCESS',publication_status='PENDING',**queue_statistics(records,now),gemini=analyzer.metrics))
+    snapshot = analyzer.run(list(merged.values()),enabled,checkpoint)
+    snapshot.sort(key=lambda n:(n.source_id,n.notice_id))
+    merged = {n.notice_id:n for n in snapshot}
+    observed = [merged[n.notice_id] for n in current_notices]
+    feed = build_feed(snapshot,generated_at=stamp)
     try:
         write_feed(snapshot, generated_at=stamp, output_dir=public_dir)
     except Exception:
@@ -160,5 +183,9 @@ def run_pipeline(
         store.save_scraper_status(statuses)
         raise
     store.save_scraper_status(statuses)
+    _atomic_json(store.data_dir/'analysis_diagnostics.json',dict(
+        metrics_phase='FINAL',collection_status='PARTIAL' if registry.errors else 'SUCCESS',
+        prefilter_status='SUCCESS',publication_status='SUCCESS',**queue_statistics(snapshot,now),gemini=analyzer.metrics))
     return PipelineResult(tuple(snapshot), tuple(observed), tuple(sorted(registry.errors)),
-                          tuple(sorted(analyzer.errors)), tuple(registry.skipped), len(feed['notices']))
+                          tuple(sorted(analyzer.errors)), tuple(registry.skipped), len(feed['notices']),
+                          queue_statistics(snapshot,now)['analysis_status'] != 'SUCCESS')

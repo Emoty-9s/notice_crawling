@@ -3,11 +3,24 @@
 Storage is observation history; these rules only select work queues and views.
 """
 import re
+import hashlib
+import json
+from pathlib import Path
+from functools import lru_cache
 from datetime import date, datetime
 from .retention import KST, retention_date
 
 ANALYSIS_POLICY = 'patent-firm-participation-v2'
 PUBLIC_SCHEMA_VERSION = 2
+LEGACY_SCHEMA_FINGERPRINT = '75a521c34b60419a509b634441ab77350872cc3b118658de7a831ffe7a6fdef3'
+
+
+@lru_cache(maxsize=1)
+def analysis_schema_fingerprint():
+    # Only central Notice analysis uses this. Local feed consumers import date
+    # helpers without loading Gemini policy files (including in frozen builds).
+    schema = json.loads((Path(__file__).resolve().parents[2]/'config/relevance_policy.yaml').read_text(encoding='utf-8'))['output_schema']
+    return hashlib.sha256(json.dumps(schema,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 
 
 def deadline_date(value):
@@ -40,6 +53,7 @@ def deadline_state(apply_end, *, today=None, title='', content=''):
 def current_analysis(notice):
     result = notice.gemini
     return (result.status == 'SUCCESS' and result.analysis_policy == ANALYSIS_POLICY
+            and (notice.analysis.result_schema_fingerprint or LEGACY_SCHEMA_FINGERPRINT) == analysis_schema_fingerprint()
             and result.analyzed_content_hash == notice.content_hash
             and type(result.relevant) is bool
             and all(getattr(result, field) is not None for field in

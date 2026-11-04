@@ -64,10 +64,22 @@ docs/progress/       마일스톤 결과와 인계 상태
 현재 유효한 공고만 포함합니다. 확정 마감일은 한국 날짜 기준 당일까지 유효하며,
 마감일 미상/상시 공고는 명백한 종료 근거가 없으면 유지합니다.
 이전 policy의 성공 결과는 재분석하고 마감 공고는 Gemini 호출 전에 제외합니다.
-실행당 기본 60회, 실제 provider 요청은 최소 6초 간격이며 429 이후 해당 run의 호출을 중단합니다.
+실행당 기본 HTTP 요청 12회(재시도 포함)·고유 공고 60건·입력 토큰 보수 추정 120,000·분석 600초로 제한합니다.
+일반 generateContent 요청에 기본 5건(최대 10건)을 묶고 실제 provider 요청은 최소 6초 간격입니다.
+429 이후 해당 run의 추가 요청을 중단하며 Retry-After/일일 제한 reset 이후 자동 재개합니다.
 NEW는 현재 중앙 run에서 발견한 신규 공고의 `is_new`이며 로컬 확인 이력과 독립적입니다.
 로컬은 동기화/오프라인 로딩/1분 주기 갱신에서 유효 공고를 표시하며 producer cache를 보존합니다.
 7개 operational source의 수집 범위는 최신 최대 3페이지이며 checked-in 설정은 비활성으로 유지합니다.
+
+사전 필터 `config/prefilter_policy.json`은 CANDIDATE/REVIEW만 분석 대상으로 넘기며
+명백한 무관 공고도 history에 보존합니다. 관련·무관 신호 혼재와 부족한 본문은 REVIEW로 유지합니다.
+사전 필터 버전+설정 digest+입력 fingerprint, 분석 상태·attempts·lease·next_retry_at은
+Notice 내부 `analysis`에 저장하여 history와 함께 원자적으로 checkpoint합니다.
+503/timeout은 제한된 지수 backoff+jitter 및 circuit breaker를 적용합니다.
+누락/잘못된 개별 결과는 성공 처리하지 않으며 5→2→1 축소와 단건 fallback을 지원합니다.
+이미 유효한 성공 결과는 재사용하고 다른 묶음 실패에도 계속 공개합니다.
+환경변수, 영구 대기 상태, 실제 244건 읽기 전용 감사와 복구 범위는
+[중앙 묶음 분석 운영 안내](docs/operations/BATCH_ANALYSIS.md)를 참고하세요.
 파일별 atomic write이며 여러 파일 전체 transaction이나 동시 writer 병합은 제공하지 않습니다.
 M11 daily/수동 Actions 및 Pages 배포 workflow를 추가했습니다. 실제 저장소 연결·배포는 미검증입니다.
 GitHub의 Secret/Variable, 사이트 활성화, Pages 설정, 최초 state bootstrap은

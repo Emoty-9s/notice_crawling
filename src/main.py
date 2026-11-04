@@ -40,6 +40,9 @@ def main(argv=None) -> int:
           f'NEW={counts["NEW"]} UPDATED={counts["UPDATED"]} EXISTING={counts["EXISTING"]} '
           f'stored={len(result.notices)} feed={result.feed_count} '
           f'scraper_failures={len(result.scraper_failures)} analysis_failures={len(result.analysis_failures)}')
+    print('STAGES: COLLECTION='+('PARTIAL' if result.scraper_failures else 'SUCCESS')+
+          ' PREFILTER=SUCCESS ANALYSIS='+('PARTIAL' if result.analysis_incomplete else 'SUCCESS')+
+          ' PUBLICATION=SUCCESS')
     return 1 if result.degraded else 0
 
 

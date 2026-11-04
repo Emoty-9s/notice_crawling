@@ -13,6 +13,18 @@
           "required": false,
           "default": false,
           "type": "boolean"
+        },
+        "analysis_max_requests": {
+          "description": "Bound real Gemini HTTP requests including retries (scheduled default: 12)",
+          "required": false,
+          "default": "3",
+          "type": "choice",
+          "options": [
+            "1",
+            "3",
+            "6",
+            "12"
+          ]
         }
       }
     }
@@ -26,7 +38,12 @@
   },
   "env": {
     "PYTHONUNBUFFERED": "1",
-    "PYTHONUTF8": "1"
+    "PYTHONUTF8": "1",
+    "ANALYSIS_MAX_API_REQUESTS_PER_RUN": "${{ inputs.analysis_max_requests || vars.ANALYSIS_MAX_API_REQUESTS_PER_RUN || '12' }}",
+    "ANALYSIS_BATCH_SIZE": "${{ vars.ANALYSIS_BATCH_SIZE || '5' }}",
+    "ANALYSIS_MAX_NOTICES_PER_RUN": "${{ vars.ANALYSIS_MAX_NOTICES_PER_RUN || '60' }}",
+    "ANALYSIS_MAX_INPUT_TOKENS_PER_RUN": "${{ vars.ANALYSIS_MAX_INPUT_TOKENS_PER_RUN || '120000' }}",
+    "ANALYSIS_MAX_RUN_SECONDS": "${{ vars.ANALYSIS_MAX_RUN_SECONDS || '600' }}"
   },
   "jobs": {
     "build": {
@@ -107,6 +124,13 @@
           "run": "set +e\npython -m src.main --config .run/sites.yaml --data-dir .run/data --public-dir .run/public\ncode=$?\nset -e\necho \"exit_code=$code\" >> \"$GITHUB_OUTPUT\"\necho \"Pipeline exit code: $code (0=PASS, 1=PARTIAL, 2=fatal/configuration)\" >> \"$GITHUB_STEP_SUMMARY\"\nif [ \"$code\" -gt 1 ]; then\n  echo \"::error::Central pipeline failed (exit $code); check the named step and safe diagnostics\"\n  exit \"$code\"\nfi\nif [ \"$code\" -eq 1 ]; then\n  echo \"::warning::Partial collection/analysis; validated feed and state will still be published\"\nfi"
         },
         {
+          "name": "Validate durable checkpoint even after interrupted analysis",
+          "id": "checkpoint",
+          "if": "${{ always() }}",
+          "shell": "bash",
+          "run": "if python -m tools.actions_support validate-state; then\n  echo \"valid=true\" >> \"$GITHUB_OUTPUT\"\nelse\n  echo \"valid=false\" >> \"$GITHUB_OUTPUT\"\nfi"
+        },
+        {
           "name": "Validate and stage allowlisted public feed and minimal source health",
           "run": "python -m tools.actions_support stage"
         },
@@ -115,12 +139,13 @@
           "uses": "actions/upload-artifact@v7",
           "with": {
             "name": "central-state-v1",
-            "path": ".run/data/notices.json\n.run/data/scraper_status.json",
+            "path": ".run/data/notices.json\n.run/data/scraper_status.json\n.run/data/analysis_diagnostics.json",
             "if-no-files-found": "error",
             "retention-days": 90,
             "overwrite": true,
             "include-hidden-files": true
-          }
+          },
+          "if": "${{ always() && steps.checkpoint.outputs.valid == 'true' }}"
         },
         {
           "name": "Upload validated Pages artifact",

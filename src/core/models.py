@@ -13,6 +13,7 @@ import math
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Protocol, Self
+from .analysis_state import AnalysisState
 
 
 class NoticeStatus(StrEnum):
@@ -143,6 +144,7 @@ class Notice(_JsonModel):
     apply_end: str | None = None
     status: NoticeStatus = NoticeStatus.NEW
     gemini: GeminiResult = field(default_factory=GeminiResult)
+    analysis: AnalysisState = field(default_factory=AnalysisState)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "status", NoticeStatus(self.status))
@@ -156,11 +158,14 @@ class Notice(_JsonModel):
             _text(name, getattr(self, name), optional=True)
         if not isinstance(self.gemini, GeminiResult):
             raise TypeError("gemini must be a GeminiResult")
+        if not isinstance(self.analysis, AnalysisState):
+            raise TypeError('analysis must be an AnalysisState')
 
     def to_dict(self) -> dict:
         data = asdict(self)
         data["status"] = self.status.value
         data["gemini"] = self.gemini.to_dict()
+        data['analysis'] = self.analysis.to_dict()
         return data
 
     @classmethod
@@ -170,4 +175,6 @@ class Notice(_JsonModel):
         values = dict(data)
         if "gemini" in values:
             values["gemini"] = GeminiResult.from_dict(values["gemini"])
+        if 'analysis' in values:
+            values['analysis'] = AnalysisState(**values['analysis'])
         return cls(**values)

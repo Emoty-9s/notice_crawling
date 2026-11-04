@@ -9,11 +9,13 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import time
 from dataclasses import fields
 from pathlib import Path
 from typing import TextIO
 
 from src.core.models import GeminiResult, Notice
+from src.core.analysis_state import AnalysisState
 
 
 class StorageError(Exception):
@@ -69,9 +71,12 @@ def _notice_records(data: object) -> list[Notice]:
     legacy_gemini_keys = gemini_keys - {'participation_type', 'keywords'}
     notices = []
     for index, record in enumerate(data):
-        if not isinstance(record, dict) or set(record) != notice_keys:
+        if not isinstance(record, dict) or set(record) not in (notice_keys, notice_keys - {'analysis'}):
             raise StorageSchemaError(f'notice[{index}]: incomplete/unknown Notice fields')
         gemini = record['gemini']
+        if 'analysis' in record and (not isinstance(record['analysis'],dict)
+                or set(record['analysis']) != {f.name for f in fields(AnalysisState)}):
+            raise StorageSchemaError(f'notice[{index}]: incomplete/unknown analysis work state')
         if not isinstance(gemini, dict) or set(gemini) not in (gemini_keys, previous_gemini_keys,
                 legacy_gemini_keys, previous_gemini_keys - {'participation_type', 'keywords'}):
             raise StorageSchemaError(f'notice[{index}]: incomplete/unknown Gemini fields')
@@ -138,7 +143,17 @@ def _atomic_json(path: Path, data: object) -> None:
             temporary = Path(handle.name)
             _write_and_sync(handle, text)
         # Commit point: file is closed before replacement (also required on Windows).
-        os.replace(temporary, path)
+        # Windows readers/AV scanners can briefly hold a destination open.
+        # Retry only native sharing/access errors, preserving the same complete
+        # temporary file and old snapshot; all other I/O errors remain fatal.
+        for attempt in range(5):
+            try:
+                os.replace(temporary, path)
+                break
+            except PermissionError as error:
+                if getattr(error,'winerror',None) not in (5,32,33) or attempt == 4:
+                    raise
+                time.sleep(.02*2**attempt)
     except OSError as error:
         raise StorageIOError(f'{path}: atomic save failed') from error
     finally:

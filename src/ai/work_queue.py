@@ -260,10 +260,10 @@ class BatchSession:
                                        and callable(getattr(type(self.client),'generate',None)))
                     if self.batch_capable and not single_fallback:
                         text = self.client.generate_batch(records_payload)
-                        decisions = parse_batch(text,[n.notice_id for n in group],getattr(self.client,'policy',None))
+                        decisions = parse_batch(text,[n.notice_id for n in group],self.client.policy['output_schema'])
                     else:
                         text = self.client.generate({k:v for k,v in records_payload[0].items() if k!='notice_id'})
-                        decisions = {group[0].notice_id:parse_decision(text,self.client.policy if self.batch_capable else None)}
+                        decisions = {group[0].notice_id:parse_decision(text,self.client.policy['output_schema'] if self.batch_capable else None)}
                 except GeminiError as caught: error = caught; decisions = {}
                 except (TimeoutError,ConnectionError,OSError):
                     error = GeminiError('NETWORK_OR_TIMEOUT',retryable=True); decisions = {}

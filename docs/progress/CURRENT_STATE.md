@@ -1,6 +1,7 @@
 # Current State
 
-Final batch/recovery local validation: 633 unittest PASS (218.170 seconds),
+Final batch/recovery local validation: 635 unittest PASS (223.065 seconds,
+manual workflow request-budget environment),
 projection/feed/local-sync smoke PASS, freshly built frozen EXE synthetic
 selection/management/offline-AI/restart checks PASS with external calls 0.
 

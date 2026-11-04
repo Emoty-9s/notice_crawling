@@ -17,6 +17,7 @@ from _site_cases import (CLOCK, CONFIGS, SPECS, body_container, fixture_context,
 from src.core.diff import DiffConflictError
 from src.core.models import GeminiStatus, NoticeStatus
 from src.core.storage import JsonStorage, StorageFormatError, StorageIOError
+from src.ai.work_queue import RunLimits
 from src.main import main
 from src.pipeline import MVP_SOURCES, PipelineConfigError, load_site_configs, run_pipeline
 from src.scrapers._html import parse_html
@@ -29,6 +30,11 @@ def decision(relevant=True):
 
 class PipelineTests(unittest.TestCase):
     def setUp(self):
+        # Operational request budgets must not change this fixture's defaults.
+        limits_env = patch.dict('os.environ', {'ANALYSIS_'+key.upper(): str(value)
+                                             for key,value in vars(RunLimits()).items()})
+        limits_env.start()
+        self.addCleanup(limits_env.stop)
         tests_root = Path(__file__).resolve().parent
         temp = tempfile.TemporaryDirectory(dir=tests_root, prefix='pipeline-test-')
         self.root = Path(temp.name).resolve()
@@ -69,6 +75,16 @@ class PipelineTests(unittest.TestCase):
 
     def feed(self):
         return json.loads((self.public/'notices.json').read_text(encoding='utf-8'))
+
+    def test_environment_request_budget_defers_remaining_history(self):
+        with patch.dict('os.environ', {'ANALYSIS_MAX_API_REQUESTS_PER_RUN': '1'}):
+            result = self.run_pipeline()
+        self.assertTrue(result.degraded)
+        self.assertEqual(self.client.generate.call_count, 1)
+        self.assertEqual(len(result.notices), 5)
+        self.assertEqual(result.feed_count, 1)
+        self.assertEqual(len(result.analysis_failures), 3)
+        self.assertEqual(self.storage.load_notices(), list(result.notices))
 
     def test_first_run_new_analyzed_saved_and_public(self):
         result = self.run_pipeline()

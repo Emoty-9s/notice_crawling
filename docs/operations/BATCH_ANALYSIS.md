@@ -201,9 +201,17 @@ into Pages or public metadata.
 
 ## Validation
 
-Final local regression: 633 unittest tests PASS, failures 0, errors 0,
-218.170 seconds. Projection/feed/local-sync smoke and frozen EXE synthetic
+Final local regression: 635 unittest tests PASS, failures 0, errors 0,
+223.065 seconds with ANALYSIS_MAX_API_REQUESTS_PER_RUN=3, matching the manual
+workflow environment. Projection/feed/local-sync smoke and frozen EXE synthetic
 import/management/restart checks PASS; no company data or provider calls used.
+
+The first capped verification run 41759157113 stopped before collection: the
+manual three-request limit leaked into legacy fixture expectations. Fixture
+defaults are now isolated, with a separate regression proving that operational
+environment budgets really defer remaining history. No provider requests or
+state uploads occurred in that failed run. Queue parsing also passes the actual
+output_schema to the validator so configured enums are enforced end to end.
 
 The dedicated no-provider suite covers related/unrelated/mixed/insufficient-body
 prefiltering, IP boundaries, version/hash changes, five/ten groups, missing/

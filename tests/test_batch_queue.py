@@ -150,6 +150,15 @@ class QueueTests(unittest.TestCase):
         result,session=self.run_queue(result,client)
         self.assertEqual(len(client.requests),1);self.assertEqual(session.metrics['cache_hits'],5)
 
+    def test_queue_enforces_configured_output_schema_enum(self):
+        client=FakeBatch()
+        client.policy=copy.deepcopy(load_policy())
+        client.policy['output_schema']['properties']['category']['enum']=['ALLOWED_ONLY']
+        result,session=self.run_queue([notice()],client,max_api_requests_per_run=1)
+        self.assertEqual(result[0].analysis.analysis_status,'RETRY_WAIT')
+        self.assertNotEqual(result[0].gemini.status,'SUCCESS')
+        self.assertEqual(session.metrics['successful_notices'],0)
+
     def test_partial_missing_only_missing_is_pending_when_budget_ends(self):
         client=FakeBatch([{'results':[decision(str(i)) for i in range(4)]}])
         result,session=self.run_queue([notice(str(i)) for i in range(5)],client,max_api_requests_per_run=1)

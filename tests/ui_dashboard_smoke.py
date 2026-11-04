@@ -30,11 +30,23 @@ def main():
         before_db, before_cache = db.read_bytes(), cache.read_bytes()
         root = tk.Tk()
         root.withdraw()
+        callback_errors = []
+        root.report_callback_exception = lambda *error: callback_errors.append(error)
         try:
             window = DashboardWindow(root, cache_path=cache, database_path=db, base_url=BASE, auto_sync=False)
             root.update()
             assert len(window.notice_cards) == 2
             assert window.reference_year.get() == ''
+            # A destroyed wrapping label must remove its parent resize binding.
+            holder = tk.Frame(root)
+            holder.pack()
+            wrapped = window.label(holder, 'temporary', wrap=100)
+            wrapped.pack()
+            wrapped.destroy()
+            holder.event_generate('<Configure>', width=300, height=100)
+            root.update()
+            holder.destroy()
+            assert not callback_errors
             first = window.visible_notices[0]
             assert all(notice_badge(n, window._seen) == 'NEW' for n in window.visible_notices)
             assert not seen_path(cache).exists()  # Loading/syncing never acknowledges.
@@ -115,6 +127,7 @@ def main():
             assert all(n['notice_id'] in restarted._seen for n in restarted.visible_notices)
             assert all(notice_badge(n, restarted._seen) == 'NEW' for n in restarted.visible_notices)
             restarted.close()
+            assert not callback_errors
             print('NIGHT_UI_SMOKE_PASS: cards, accordion, scores, detail/back, browser dispatch, states, privacy, shutdown')
         finally:
             root.destroy()

@@ -36,7 +36,7 @@ def check(options):
     import sys
     report = {'status': 'ERROR', 'frozen': bool(getattr(sys, 'frozen', False)),
               'verify_only': options.verify_only, 'native_picker_click_verified': False}
-    root = window = None
+    root = window = manager = None
     original_open, original_connection = OpenerDirector.open, socket.create_connection
     original_picker = filedialog.askopenfilename
     attempts = []
@@ -47,10 +47,11 @@ def check(options):
         raise RuntimeError('NETWORK_FORBIDDEN')
     def wait(predicate):
         deadline = time.monotonic() + 30
-        while not predicate() and time.monotonic() < deadline:
+        while time.monotonic() < deadline:
             root.update()
+            if predicate():
+                return
             time.sleep(.01)
-        root.update()
         if not predicate():
             raise RuntimeError('UPLOAD_TIMEOUT')
     try:
@@ -69,6 +70,11 @@ def check(options):
                                  base_url=options.smoke_base_url, reference_year=2026, auto_sync=False)
         root.update()
         report['upload_button'] = window.upload_button.cget('text') == '실적 업로드'
+        report['management_button'] = window.management_button.cget('text') == '실적 관리'
+        report['source_cards'] = len(window._source_widgets)
+        report['github_status_card'] = hasattr(window, 'github_dot')
+        from src.local_client.ui import BG
+        report['dark_night_ui'] = BG == '#0c0f14'
         report['records_before'] = len(window.data.performances) if window.data else 0
         check_ai = getattr(options, 'enrichment_check', False)
         check_management = getattr(options,'management_check',False)
@@ -192,15 +198,18 @@ def check(options):
                 report['reanalyzed_saved'] = upload.result.updated
             upload.close()
             if check_management:
+                report['phase'] = 'management_after_upload'
                 wait(lambda:not manager._busy and len(manager.rows) == report['selected_before_save'])
                 window.toggle_match(window.visible_notices[0]['notice_id'])
                 report['management_auto_refresh'] = True
                 manager.query.set('001245')
                 manager.refresh()
+                report['phase'] = 'management_search'
                 wait(lambda:not manager._busy)
                 report['management_search'] = len(manager.rows) == 1
                 manager.query.set('')
                 manager.refresh()
+                report['phase'] = 'management_clear_search'
                 wait(lambda:not manager._busy)
                 target = next(r for r in manager.rows if r.project_name == '전기자동차 배터리팩')
                 manager.tree.selection_set(target.performance_id)
@@ -210,15 +219,20 @@ def check(options):
                 editor.values['management_id'].set('000007/PRJ-UI')
                 editor.values['project_name'].set('검증용 수정 실적')
                 editor.values['client'].set('검증 고객')
+                expected_technical = {'반도체', '이차전지 / 에너지저장'}
                 for name,value in editor.technical.items():
-                    value.set(name == '이차전지 / 에너지저장')
-                editor.work.set('특허분석')
+                    value.set(name in expected_technical)
+                editor.work.set('기술사업화')
                 editor.save_button.invoke()
+                report['phase'] = 'management_edit'
                 wait(lambda:editor._closed and not manager._busy)
                 wait(lambda:any(p.performance_id == target.performance_id and p.project_name == '검증용 수정 실적' for p in window.data.performances))
                 report['matcher_edit_auto_refresh'] = any(r['performance_id'] == target.performance_id and r['project_name'] == '검증용 수정 실적' for r in window.results)
                 edited = manager.service.get(target.performance_id)
-                report['management_edit'] = edited.management_id == '000007/PRJ-UI' and edited.year == 2028 and edited.technical_field == '이차전지 / 에너지저장'
+                from src.local_client.performance_management import technical_names
+                report['management_edit'] = (edited.management_id == '000007/PRJ-UI' and edited.year == 2028
+                    and set(technical_names(edited)) == expected_technical and edited.work_type == '기술사업화')
+                report['management_two_technical_fields'] = len(technical_names(edited)) == 2
                 report['management_user_sources'] = all(edited.field_sources.get(n) == 'user' for n in ('year','management_id','project_name','client','technical_field','work_type'))
                 deleted = next(r for r in manager.rows if r.management_id == '001245')
                 manager.tree.selection_set(deleted.performance_id)
@@ -251,16 +265,24 @@ def check(options):
         report['source_unchanged'] = source.read_bytes() == original_bytes
         if check_management:
             from src.local_client.performance_management import PerformanceManagement
+            from src.local_client.performance_management import technical_names
+            from src.local_client.upload import preview_upload
             stored_managed = PerformanceManagement(db).list()
             edited_managed = [r for r in stored_managed if r.management_id == '000007/PRJ-UI']
-            report['management_persisted'] = len(stored_managed) == 3 and len(edited_managed) == 1 and edited_managed[0].technical_field == '이차전지 / 에너지저장'
+            source_rows = len(preview_upload(source).rows)
+            expected_count = source_rows - sum(i < source_rows for i in (1,3)) - 1
+            report['management_persisted'] = (len(stored_managed) == expected_count and len(edited_managed) == 1
+                and set(technical_names(edited_managed[0])) == {'반도체', '이차전지 / 에너지저장'})
             report['deleted_record_persisted_absent'] = not any(r.management_id == '001245' for r in stored_managed)
             import sqlite3
             from contextlib import closing
             with closing(sqlite3.connect(db)) as connection:
+                report['database_integrity'] = connection.execute('PRAGMA integrity_check').fetchone()[0]
+                report['foreign_key_violations'] = len(connection.execute('PRAGMA foreign_key_check').fetchall())
                 report['orphan_metadata'] = sum(connection.execute(f'SELECT count(*) FROM {table} m LEFT JOIN performances p USING(performance_id) WHERE p.performance_id IS NULL').fetchone()[0]
                     for table in ('performance_enrichment_v1','performance_uploads_v1'))
-            if not report['management_persisted'] or not report['deleted_record_persisted_absent'] or report['orphan_metadata']:
+            if (not report['management_persisted'] or not report['deleted_record_persisted_absent'] or report['orphan_metadata']
+                    or report['database_integrity'] != 'ok' or report['foreign_key_violations']):
                 raise RuntimeError('MANAGEMENT_PERSISTENCE_FAILED')
         if check_ai:
             from src.local_client.upload_store import load_enrichment_preview
@@ -293,7 +315,8 @@ def check(options):
             report['error_code'] = str(error)
         if manager is not None:
             report['management_diagnostic'] = {'busy':manager._busy,'closed':manager._closed,'rows':len(manager.rows),
-                'error_code':getattr(manager,'_last_error',None)}
+                'error_code':getattr(manager,'_last_error',None), 'events':manager._events.qsize(),
+                'poll_job':manager._job, 'pending_jobs':list(root.tk.call('after','info'))}
     finally:
         OpenerDirector.open, socket.create_connection = original_open, original_connection
         filedialog.askopenfilename = original_picker

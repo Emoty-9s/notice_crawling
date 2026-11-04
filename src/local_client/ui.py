@@ -211,7 +211,14 @@ class DashboardWindow:
             options['wraplength'] = wrap
         label = self.tk.Label(parent, **options)
         if wrap:
-            parent.bind('<Configure>', lambda event, target=label: target.configure(wraplength=max(80, event.width-48)), add='+')
+            def resize(event):
+                if label.winfo_exists():
+                    label.configure(wraplength=max(80, event.width-48))
+            binding = parent.bind('<Configure>', resize, add='+')
+            def cleanup(event):
+                if event.widget is label and parent.winfo_exists():
+                    parent.unbind('<Configure>', binding)
+            label.bind('<Destroy>', cleanup, add='+')
         return label
 
     def button(self, parent, text, command):

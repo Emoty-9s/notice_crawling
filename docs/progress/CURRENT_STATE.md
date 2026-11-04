@@ -1,5 +1,14 @@
 # Current State
 
+Latest final operations/EXE work (2026-11-04): fresh Windows build, actual frozen
+5→3 selected save→edit two fields/work type→delete→restart two-record verification PASS;
+offline AI and DB integrity/orphan metadata checks PASS, external calls 0.
+Full local 588 unittest PASS (152.065s). Actual Actions 41746660779 build/deploy
+SUCCESS, seven scrapers SUCCESS, but Gemini timeout/503/429 caused PARTIAL and
+empty schema-v2 public feed. Added root landing page for the observed 404 and
+fixed stale Tk resize callbacks. Native computer-use runtime failed initialization.
+See [FINAL_OPERATIONS_EXE_RESULT.md](FINAL_OPERATIONS_EXE_RESULT.md).
+
 Latest central eligibility resume (2026-11-04): 중앙 관측 history는 만료 후에도 삭제하지 않는다.
 공개 feed v2는 현재 `patent-firm-participation-v2`/hash SUCCESS·참여 가능·유효 공고만 projection한다.
 NEW는 현재 중앙 run의 신규 발견이며 local seen과 독립적이다. 기본 분석 예산 60회,

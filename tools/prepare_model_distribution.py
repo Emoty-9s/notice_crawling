@@ -26,7 +26,10 @@ def main():
                 path = Path(dist.locate_file(item))
                 if path.is_file():
                     target = notices/(package+'-'+hashlib.sha256(str(item).encode()).hexdigest()[:8]+'-'+name)
-                    target.write_bytes(path.read_bytes())
+                    # Preserve license text while keeping generated notices stable
+                    # under Git whitespace checks across Windows build machines.
+                    lines = [line.rstrip(b' \t\r') for line in path.read_bytes().split(b'\n')]
+                    target.write_bytes(b'\n'.join(lines).rstrip(b'\n') + b'\n')
                     found = True
         if not found and not (notices/(package+'-LICENSE.txt')).is_file():
             raise RuntimeError('PACKAGE_LICENSE_MISSING_'+package)

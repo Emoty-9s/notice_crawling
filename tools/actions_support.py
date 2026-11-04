@@ -21,6 +21,22 @@ class ActionsCheckError(ValueError):
     """Fixed safe message; do not expose arbitrary API/environment values."""
 
 
+PUBLIC_INDEX = '''<!doctype html>
+<html lang="ko"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Notice Crawling · 공개 공고 feed</title>
+<style>body{background:#0c0f14;color:#e8edf5;font:17px/1.7 system-ui;
+max-width:760px;margin:10vh auto;padding:24px}a{color:#8db9ff}</style>
+<h1>공개 공고 feed</h1>
+<p>현재 분석 정책에서 특허법인 참여가 가능하고 유효한 공고를 제공합니다.</p>
+<ul><li><a href="notices.json">공고 목록 · schema v2</a></li>
+<li><a href="metadata.json">생성 시각 및 공고 수</a></li>
+<li><a href="source_status.json">7개 기관 수집 상태</a></li></ul>
+<p>실적 업로드와 실적 관리는 Windows 앱의 로컬 DB에서 처리합니다.</p>
+</html>
+'''
+
+
 def preflight(config_path=CONFIG_PATH, *, environ=None):
     env = os.environ if environ is None else environ
     sites = load_site_configs(config_path)
@@ -74,6 +90,7 @@ def stage_public(data_dir, public_dir, stage_dir):
     _atomic_json(target/'notices.json', expected)
     _atomic_json(target/'metadata.json', expected_metadata)
     _atomic_json(target/'source_status.json', health)
+    (target/'index.html').write_text(PUBLIC_INDEX, encoding='utf-8')
     return expected_metadata
 
 

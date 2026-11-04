@@ -201,6 +201,25 @@ into Pages or public metadata.
 
 ## Validation
 
+Live evidence: scheduled run 41760195408 completed build/deploy SUCCESS. All
+seven sources succeeded; history 244, active 102, prefilter 19/64/19. Two HTTP
+attempts for five distinct notices (one timeout, then 429) confirmed the response
+quota GenerateRequestsPerDayPerProjectPerModel-FreeTier, limit 20. All 83 targets
+were persisted RETRY_WAIT until 2026-11-04T08:00:00Z; public 0 means incomplete
+analysis, not a completed determination that no notices qualify.
+
+Latest core run 41760245154 at fb5ccf1 completed build/deploy SUCCESS, Ubuntu
+635 tests PASS (64.824 seconds, optional desktop tests skipped). It restored
+artifact 13291190071, made zero provider calls and retained all 83 retry records.
+Pages root/feed/metadata HTTP 200, feed/metadata schema v2. The frozen EXE synced
+the deployed feed UPDATED then UNCHANGED, seven source cards, no company DB.
+
+Observed artifact 13290932133 was created later than 13291190071 despite its
+lower ID. Restore selection now orders by created_at before the ID tie-breaker.
+The actual GitHub-script body passed two local Node mock-response cases with
+reversed IDs/input order and a newer non-main artifact; Actions focused suite
+21 PASS. No additional manual dispatch was made for this selection-only follow-up.
+
 Final local regression: 635 unittest tests PASS, failures 0, errors 0,
 223.065 seconds with ANALYSIS_MAX_API_REQUESTS_PER_RUN=3, matching the manual
 workflow environment. Projection/feed/local-sync smoke and frozen EXE synthetic

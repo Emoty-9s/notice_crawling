@@ -34,7 +34,7 @@ from tools.m16_smoke import probe
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / 'tests/fixtures/m16_live'
 CONFIGS = json.loads((ROOT / 'config/sites.yaml').read_text(encoding='utf-8'))['sites']
-CLOCK = datetime(2026, 11, 2, tzinfo=timezone.utc)
+CLOCK = datetime(2026, 4, 2, tzinfo=timezone.utc)
 
 
 def html(site, name):
@@ -344,6 +344,8 @@ class LiveFixtureTests(unittest.TestCase):
         self.network.assert_not_called()
 
     def test_real_details_pipeline_with_derived_ripc_json_and_kista_subset(self):
+        # Captured RIPC closes April 2; exercise it while participation is open.
+        retained_clock = CLOCK.replace(month=4, day=2)
         with tempfile.TemporaryDirectory(dir=ROOT / 'tests', prefix='m16-live-test-') as folder:
             root = Path(folder)
             settings = [{**deepcopy(c), 'enabled': c['source_id'] in ('ripc_pms', 'kista_ippro'), 'max_pages': 1} for c in CONFIGS]
@@ -360,17 +362,18 @@ class LiveFixtureTests(unittest.TestCase):
             store = JsonStorage(root / 'data')
             result = run_pipeline(config_path=path, storage=store, public_dir=root / 'public', client=client,
                                   transport_factory=lambda source: {'ripc_pms': ripc, 'kista_ippro': kista}.get(source, Mock()),
-                                  clock=lambda: CLOCK, logger=Mock())
+                                  clock=lambda: retained_clock, logger=Mock())
             self.assertFalse(result.degraded)
             self.assertEqual(result.feed_count, 2)
             self.assertEqual(store.load_notices(), list(result.notices))
             sync = FeedClient('https://example.test/', cache_dir=root / 'cache',
+                              clock=lambda: retained_clock,
                               transport=lambda url, timeout: (root / 'public' / url.rsplit('/', 1)[-1]).read_bytes())
             self.assertEqual(sync.sync().status, 'UPDATED')
             performances = PerformanceStore(root / 'performance.db')
             performances.create(Performance(performance_id='p1', project_name='한글 특허', keywords=['특허'], year=2025))
             cache_bytes, db_bytes = sync.cache_path.read_bytes(), performances.path.read_bytes()
-            data = load_dashboard(sync.cache_path, performances.path)
+            data = load_dashboard(sync.cache_path, performances.path, clock=lambda: retained_clock)
             rows = notice_rows(data)
             self.assertEqual(len(rows), 2)
             for row in rows:

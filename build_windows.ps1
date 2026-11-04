@@ -14,6 +14,9 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Build dependency installation failed. Install requirements-build.txt into this .venv from an online PowerShell or an offline wheel folder, then retry.'
 }
 
+& $pythonExe (Join-Path $projectRoot 'tools\prepare_model_distribution.py')
+if ($LASTEXITCODE -ne 0) { throw 'Offline model resources or license notices are missing. Run the explicit build-time model fetch first.' }
+
 $distribution = Join-Path $projectRoot 'dist\notice_crawling'
 $workPath = Join-Path $projectRoot 'build\notice_crawling'
 $specPath = Join-Path $projectRoot 'build\windows_spec'
@@ -49,6 +52,10 @@ $buildArguments = @(
     '--specpath', $specPath, '--paths', $projectRoot,
     '--exclude-module', 'unittest', '--exclude-module', 'tests',
     '--exclude-module', 'tkinter.test',
+    '--exclude-module', 'torch', '--exclude-module', 'transformers',
+    '--exclude-module', 'huggingface_hub', '--exclude-module', 'hf_xet',
+    '--exclude-module', 'onnxruntime.tools', '--exclude-module', 'onnxruntime.quantization',
+    '--add-data', ((Join-Path $projectRoot 'resources\models\performance_classifier') + ';models\performance_classifier'),
     (Join-Path $projectRoot 'tools\windows_entry.py')
 )
 Push-Location -LiteralPath $projectRoot

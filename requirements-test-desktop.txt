@@ -1,0 +1,3 @@
+-r requirements-desktop.txt
+# Only generates synthetic legacy .xls fixtures inside tests.
+xlwt==1.3.0

@@ -61,6 +61,8 @@ def smoke_check(report_path, feed_url, *, database_path=None):
             report['source_cards'] = len(window._source_widgets)
             report['source_status_available'] = window._source_document is not None
             report['notice_cards'] = len(window.notice_cards)
+            report['active_projection'] = True
+            report['local_seen_state'] = not window._seen_error
             if window.visible_notices:
                 notice = window.visible_notices[0]
                 window.toggle_match(notice['notice_id'])
@@ -68,6 +70,12 @@ def smoke_check(report_path, feed_url, *, database_path=None):
                 report['matching_count'] = len(window.results)
                 window.show_detail(notice)
                 report['detail'] = window.detail_notice['notice_id'] == notice['notice_id']
+                from src.local_client.monitor import notice_badge
+                from src.local_client.seen import SeenStore, seen_path
+                persisted = SeenStore(seen_path(client.cache_path), feed_url).load()
+                report['seen_persisted'] = persisted.get(notice['notice_id']) == notice['updated_at']
+                report['central_new_preserved'] = (notice_badge(notice, persisted) ==
+                                                   ('NEW' if notice['is_new'] else 'EXISTING'))
                 window.show_list()
                 report['back'] = window.detail_notice is None
             report['removed_recommendation_selection'] = not hasattr(window, 'result_tree')
@@ -90,6 +98,18 @@ def smoke_check(report_path, feed_url, *, database_path=None):
 
 def entry(argv=None):
     args = list(sys.argv[1:] if argv is None else argv)
+    if '--upload-smoke-report' in args:
+        parser = argparse.ArgumentParser(description='Explicit local-only upload runtime check (writes the selected DB)')
+        parser.add_argument('--upload-smoke-report', required=True)
+        parser.add_argument('--upload-file', required=True)
+        parser.add_argument('--smoke-db', required=True)
+        parser.add_argument('--smoke-cache', required=True)
+        parser.add_argument('--smoke-base-url', required=True)
+        parser.add_argument('--verify-only', action='store_true')
+        parser.add_argument('--enrichment-check', action='store_true')
+        parser.add_argument('--management-check', action='store_true')
+        from tools.windows_upload_smoke import check
+        return check(parser.parse_args(args))
     if '--smoke-report' in args:
         parser = argparse.ArgumentParser(description='Opt-in isolated packaged UI/feed check')
         parser.add_argument('--smoke-report', required=True)
@@ -103,4 +123,6 @@ def entry(argv=None):
 
 
 if __name__ == '__main__':
+    import multiprocessing
+    multiprocessing.freeze_support()
     raise SystemExit(entry())

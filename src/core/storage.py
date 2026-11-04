@@ -65,13 +65,15 @@ def _notice_records(data: object) -> list[Notice]:
         raise StorageSchemaError('notices must be a JSON array')
     notice_keys = {f.name for f in fields(Notice)}
     gemini_keys = {f.name for f in fields(GeminiResult)}
+    previous_gemini_keys = gemini_keys - {'analysis_policy'}
     legacy_gemini_keys = gemini_keys - {'participation_type', 'keywords'}
     notices = []
     for index, record in enumerate(data):
         if not isinstance(record, dict) or set(record) != notice_keys:
             raise StorageSchemaError(f'notice[{index}]: incomplete/unknown Notice fields')
         gemini = record['gemini']
-        if not isinstance(gemini, dict) or set(gemini) not in (gemini_keys, legacy_gemini_keys):
+        if not isinstance(gemini, dict) or set(gemini) not in (gemini_keys, previous_gemini_keys,
+                legacy_gemini_keys, previous_gemini_keys - {'participation_type', 'keywords'}):
             raise StorageSchemaError(f'notice[{index}]: incomplete/unknown Gemini fields')
         try:
             notices.append(Notice.from_dict(record))

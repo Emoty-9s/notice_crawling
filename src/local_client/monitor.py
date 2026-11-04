@@ -2,14 +2,16 @@
 import copy
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 from http.client import HTTPException
 
-from .dashboard import DashboardData, DashboardError, _load_cache, _load_performances
+from .dashboard import DashboardData, DashboardError, _load_performances
 from .sync import FeedClient, SyncError, download, _parse, _atomic_snapshot
 from src.renderer.source_status import SOURCES, validate_source_status, timestamp
+from .seen import seen_path
+from src.core.eligibility import deadline_date
 
 DEFAULT_FEED_URL = 'https://emoty-9s.github.io/notice_crawling/'
 
@@ -26,10 +28,13 @@ class MonitorResult:
 
 
 def read_local(cache_path, database_path, base_url):
+    if Path(database_path).resolve() in (Path(cache_path).resolve(), seen_path(cache_path).resolve(),
+                                       Path(str(cache_path) + '.sources.json').resolve()):
+        return None
     try:
-        snapshot = _load_cache(cache_path)
-        if snapshot['base_url'] != FeedClient(base_url).base_url:
-            return None
+        client = FeedClient(base_url)
+        client.cache_path = Path(cache_path)
+        snapshot = client.load_cache()
     except (DashboardError, SyncError):
         return None
     records, error = read_database(database_path)
@@ -45,7 +50,7 @@ def read_database(path):
 
 def sync_monitor(base_url, cache_path, database_path, *, transport=None):
     cache = Path(cache_path).resolve()
-    if Path(database_path).resolve() in (cache, cache.with_name(cache.name + '.sources.json')):
+    if Path(database_path).resolve() in (cache, cache.with_name(cache.name + '.sources.json'), seen_path(cache).resolve()):
         return MonitorResult('ERROR', None, error_code='PATH_COLLISION')
     client = FeedClient(base_url, cache_dir=Path(cache_path).parent, timeout=15, transport=transport)
     client.cache_path = Path(cache_path)  # Preserve an explicit arbitrary cache filename.
@@ -88,18 +93,33 @@ def read_sources(base_url, cache_path, *, transport=None):
             return None, False
 
 
-def notice_badge(notice, baseline):
-    old = baseline.get(notice['notice_id'])
-    if old is None:
-        return 'NEW'
-    return 'UPDATED' if old != notice['updated_at'] else 'EXISTING'
+def notice_badge(notice, seen=None, *, generated_at=None):
+    # Local acknowledgement never changes a central-run discovery badge.
+    return 'NEW' if notice.get('is_new') is True else 'EXISTING'
 
 
-def ordered_notices(notices, baseline):
+def ordered_notices(notices, seen=None, *, generated_at=None):
     rows = copy.deepcopy(notices)
-    rows.sort(key=lambda row: timestamp(row['updated_at']), reverse=True)
-    rows.sort(key=lambda row: {'NEW': 0, 'UPDATED': 1, 'EXISTING': 2}[notice_badge(row, baseline)])
+    rows.sort(key=lambda row: (notice_badge(row, generated_at=generated_at) != 'NEW',
+                              deadline_date(row['apply_end']) or date.max,
+                              row['source_id'], row['notice_id']))
     return rows
+
+
+SOURCE_LIST_URLS = {
+    'khidi_business': 'https://www.khidi.or.kr/board?menuId=MENU01108',
+    'kised_bid_public': 'https://www.kised.or.kr/board.es?bid=0005&mid=a10303000000',
+    'rda_bid': 'https://www.rda.go.kr/board/board.do?mode=list&prgId=bid_bidancmEntry',
+    'seoul_rnd_notice': 'https://seoul.rnbd.kr/client/c030200/c030200_00.jsp',
+    'kipa_bid': 'https://www.kipa.org/kipa/notice/kw_0402.jsp',
+    'kista_ippro': 'https://biz.kista.re.kr/ippro//com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac',
+    'ripc_pms': 'https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do',
+}
+
+
+def source_list_url(source):
+    url = SOURCE_LIST_URLS.get(source)
+    return url if url and safe_original_url(url) else None
 
 
 def safe_original_url(url):

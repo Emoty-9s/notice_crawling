@@ -1,0 +1,90 @@
+{
+  "version": "performance-taxonomy-4",
+  "technical_policy": {
+    "version": "closed-taxonomy-multilabel-1",
+    "strong_cosine": 0.84,
+    "secondary_cosine": 0.86,
+    "phrase_cosine": 0.89,
+    "nontechnical_lead": 0.025,
+    "max_fields": 3,
+    "max_tags": 3
+  },
+  "technical_examples": {
+    "소부장": ["기능성 소재", "산업용 소재", "방수 시트", "단열 시트", "보호 필름", "산업용 필름", "특수 코팅 소재", "금속 소재", "복합 소재", "산업용 부품", "기계 부품", "정밀 부품", "체결 부품", "너트", "볼트", "베어링", "브라켓", "하우징", "플레이트", "기어", "밸브", "커넥터", "제조 장비", "산업 장비", "생산 장비", "공정 장비", "조립 장비", "검사 장비", "산업용 장치", "기계 장치", "제조용 장치", "부품", "증착장비", "양극재", "반도체 제조 장비", "의료용 부품", "정밀 가공 부품", "금속 체결부품", "범용 검사장치", "Materials, components and industrial equipment", "functional sheets and protective films", "fasteners nuts bolts and bearings", "industrial valves and machinery components"],
+    "AI / 소프트웨어": ["AI 인공지능", "머신러닝 딥러닝 모델", "생성형 AI", "컴퓨터 비전", "소프트웨어 알고리즘"],
+    "데이터 / 클라우드": ["클라우드 컴퓨팅", "데이터베이스", "빅데이터 처리", "분산 데이터 플랫폼", "데이터센터"],
+    "반도체": ["반도체", "반도체 패키징", "웨이퍼 공정", "메모리 반도체", "집적회로 설계"],
+    "전기 / 전자": ["전자회로", "전자부품", "센서", "광학 센서", "OLED 디스플레이"],
+    "통신 / 네트워크": ["무선 통신", "이동통신 5G 6G", "광통신", "네트워크 프로토콜", "안테나"],
+    "로봇 / 자동화": ["산업용 로봇", "로봇 제어", "협동 로봇", "공장 자동화", "물류 자동화"],
+    "기계 / 제조": ["제조 장비", "증착장비", "기계 설계", "정밀 가공", "산업 생산 공정"],
+    "자동차 / 모빌리티": ["자동차", "전기자동차", "전기차 EV", "자율주행", "차량 부품", "모빌리티 시스템"],
+    "이차전지 / 에너지저장": ["배터리", "배터리팩", "전고체전지", "리튬이온전지", "ESS 에너지저장", "양극재 음극재 전해질"],
+    "에너지 / 환경": ["태양광 발전", "풍력 발전", "수소 에너지", "탄소 저감", "수질 오염 처리", "자원 재활용"],
+    "소재 / 화학": ["소재", "고체전해질 소재", "고분자", "화학 합성", "촉매", "복합 재료"],
+    "바이오 / 제약": ["바이오 의약품", "항체 신약", "유전자 치료제", "세포 치료", "백신"],
+    "의료 / 의료기기": ["의료영상", "의료기기", "환자 진단", "수술 도구", "의료 진단 장치"],
+    "식품 / 농업": ["식품 가공", "농작물 재배", "스마트팜", "농업 생산", "축산"],
+    "건설 / 인프라": ["건축물", "토목 구조", "도로 인프라", "교량", "건설 공법"],
+    "항공 / 우주": ["항공기", "인공위성", "우주 발사체", "항공 엔진", "우주 탐사"],
+    "해양 / 조선": ["선박", "조선", "해양 구조물", "선박 추진", "해양 플랜트"],
+    "콘텐츠 / 미디어": ["디지털 영상 콘텐츠", "방송 미디어", "게임 콘텐츠", "가상현실", "문화 콘텐츠"],
+    "지식재산 / 특허": ["지식재산권 제도", "상표 디자인 권리", "지식재산 법률"],
+    "연구개발 / 기술사업화": ["연구개발 체계", "연구 성과 제품화", "기술사업화 정책"]
+  },
+  "technical_tags": [
+    {
+      "name": "전기자동차",
+      "category": "자동차 / 모빌리티",
+      "aliases": ["전기자동차", "전기 자동차", "전기차", "electric vehicle", "electric car", "EV"]
+    },
+    {
+      "name": "배터리",
+      "category": "이차전지 / 에너지저장",
+      "aliases": ["배터리", "이차전지", "2차전지", "battery", "batteries"]
+    }
+  ],
+  "min_cosine": 0.79,
+  "min_margin": 0.010,
+  "auto_cosine": 0.84,
+  "auto_margin": 0.035,
+  "technical": [
+    ["AI / 소프트웨어", "인공지능 및 소프트웨어 기술. 머신러닝 모델, 생성형 AI, 컴퓨터 비전, 프로그램 개발. Artificial intelligence and software engineering."],
+    ["데이터 / 클라우드", "데이터 및 클라우드 기술. 데이터베이스, 데이터 분석 플랫폼과 클라우드 컴퓨팅 인프라. Data engineering and cloud computing."],
+    ["반도체", "반도체 기술. 메모리 칩과 집적회로 설계, 웨이퍼 제조 공정 및 반도체 장비. Semiconductor chips, integrated circuits and wafer fabrication."],
+    ["전기 / 전자", "전기 및 전자 기술. 전자회로, 전자부품, 센서와 전기장치. Electrical and electronic circuits, components and sensors."],
+    ["통신 / 네트워크", "통신 및 네트워크 기술. 이동통신, 무선통신, 광통신과 네트워크 프로토콜. Telecommunications and computer networks."],
+    ["로봇 / 자동화", "로봇과 산업 자동화 기술. 자율 로봇, 로봇 제어, 공장 자동화. Robotics, robot control and industrial automation."],
+    ["기계 / 제조", "기계 및 제조 기술. 기계설계, 가공 장비, 산업 생산 공정. Mechanical engineering and manufacturing processes."],
+    ["자동차 / 모빌리티", "자동차 및 모빌리티 기술. 자율주행 자동차, 차량 부품과 운송 시스템. Automotive technology, autonomous driving and mobility."],
+    ["이차전지 / 에너지저장", "이차전지 및 에너지 저장 기술. 리튬이온 배터리, 전극과 전해질, 충방전 수명. Rechargeable batteries and energy storage."],
+    ["에너지 / 환경", "에너지 및 환경 기술. 재생에너지 발전, 수소, 탄소 저감, 오염 처리와 자원 순환. Renewable energy and environmental engineering."],
+    ["소재 / 화학", "소재 및 화학 기술. 고분자 소재, 화학 합성, 촉매와 기능성 재료. Advanced materials and chemical engineering."],
+    ["바이오 / 제약", "바이오 및 제약 기술. 신약, 항체, 유전자, 세포 치료와 의약품 개발. Biotechnology, pharmaceutical drugs and biological therapeutics."],
+    ["의료 / 의료기기", "의료 및 의료기기 기술. 의료영상 진단, 수술 도구, 환자 모니터링 장치. Medical imaging, clinical diagnosis and medical devices."],
+    ["식품 / 농업", "식품 및 농업 기술. 농작물 재배, 식품 가공, 축산과 농업 생산. Food science, crop cultivation and agriculture."],
+    ["건설 / 인프라", "건설 및 인프라 기술. 건축물, 토목 구조, 도로와 기반 시설. Building construction and civil infrastructure."],
+    ["항공 / 우주", "항공 및 우주 기술. 항공기, 인공위성, 우주 발사체와 비행 시스템. Aerospace engineering, aircraft and satellites."],
+    ["해양 / 조선", "해양 및 조선 기술. 선박 설계, 해양 구조물, 선박 추진과 조선 공정. Marine engineering and shipbuilding."],
+    ["콘텐츠 / 미디어", "콘텐츠 및 미디어 기술. 디지털 영상, 방송, 게임, 가상현실과 문화 콘텐츠. Digital content, media production and games."],
+    ["지식재산 / 특허", "지식재산 및 특허 업무 일반. 특허 포트폴리오, 지식재산 권리와 상표 디자인. General intellectual property and patent rights."],
+    ["연구개발 / 기술사업화", "연구개발 및 기술사업화 일반. 연구 성과의 제품화, 기술이전과 사업화 전략. Research commercialization and technology transfer."],
+    ["소부장", "소재 부품 장비. 산업에서 사용하는 기능성 시트 필름 패널 코팅 소재, 정밀 가공 및 체결 부품, 제조 공정 검사 장비와 산업용 기계장치. Industrial materials, mechanical components, manufacturing and process equipment."]
+  ],
+  "work": [
+    ["특허분석", "특허분석 업무. 특허동향조사, 선행기술 조사, 특허맵, IP-R&D 연구 및 특허 전략 수립. Patent landscape analysis and technology trend research."],
+    ["기술사업화", "기술사업화 업무. 기술이전 협상, 기술 가치평가, 연구 성과 사업화와 사업 전략. Technology transfer, valuation and commercialization."],
+    ["특허출원", "특허출원 업무. 특허 명세서 작성, 국내 및 해외 출원, 심사 대응과 등록 권리화. Patent drafting, prosecution, filing and registration."],
+    ["분쟁대응", "특허분쟁 대응 업무. 침해 분석, 무효 조사, 분쟁과 소송 지원. Patent litigation, infringement analysis and invalidity search."]
+  ],
+  "unknown": [
+    "일반 사무행정. 회의 일정, 사내 안내와 단순 문서 정리. Routine office administration and meeting schedules.",
+    "정보가 없는 불완전한 기록. 제목과 설명을 알 수 없음. Incomplete record with no meaningful information.",
+    "일상적인 인사말과 개인적인 대화. Greetings and casual conversation.",
+    "식대와 출장 경비의 정산, 청구서와 구매 영수증 관리. Travel expense reimbursement and invoices.",
+    "서류 정리와 일반 사무 행정",
+    "회의 일정과 사내 공지 안내",
+    "출장 여비와 회계 정산 영수증",
+    "추후 입력 예정 정보 없음"
+  ]
+}

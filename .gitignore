@@ -43,3 +43,11 @@ Thumbs.db
 # Local business source files
 *.xlsb
 
+# Generated, synthetic desktop upload runtime verification only.
+/tests/fixtures/performance_upload/runtime/
+/resources/models/performance_classifier/*.onnx
+/resources/models/performance_classifier/*.download
+/resources/models/performance_classifier/tokenizer.json
+/resources/models/performance_classifier/README.md
+/tests/fixtures/performance_enrichment/runtime/
+

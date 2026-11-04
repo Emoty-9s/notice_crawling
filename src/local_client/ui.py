@@ -9,9 +9,10 @@ from pathlib import Path
 
 from .dashboard import DashboardError, notice_rows, recommendation_rows, recommendation_details
 from .monitor import (DEFAULT_FEED_URL, MonitorResult, notice_badge, ordered_notices,
-                      read_local, read_sources, safe_original_url, sync_monitor)
+                      read_local, read_sources, safe_original_url, sync_monitor, source_list_url)
 from .performance import DEFAULT_DB_PATH
-from .sync import DEFAULT_CACHE_DIR
+from .sync import DEFAULT_CACHE_DIR, SyncError
+from .seen import SeenStore, SeenStateError, seen_path
 from src.renderer.source_status import SOURCES
 
 BG = '#0c0f14'
@@ -51,13 +52,15 @@ class DashboardWindow:
         self.tk, self.ttk, self.root = tk, ttk, root
         self.data = None
         self.visible_notices = []
+        self.eligible_active_notices = []
         self.notice_cards = {}
         self.expanded = set()
         self.matches = {}
         self.results = []
         self.selected_notice_id = None
         self.detail_notice = None
-        self._baseline = None
+        self._seen = {}
+        self._seen_error = False
         self._closed = False
         self._busy = False
         self._generation = 0
@@ -73,6 +76,7 @@ class DashboardWindow:
         self.cache_path = tk.StringVar(root, str(cache_path))
         self.database_path = tk.StringVar(root, str(database_path))
         self.base_url = tk.StringVar(root, base_url)
+        self._load_seen()
         self.reference_year = tk.StringVar(root, str(reference_year))
         self.top_n = tk.StringVar(root, str(top_n))
         self.query = tk.StringVar(root)
@@ -81,6 +85,8 @@ class DashboardWindow:
         self.github_detail = tk.StringVar(root, '앱을 준비했습니다. GitHub 중앙 feed 확인을 시작합니다.')
         self.count_text = tk.StringVar(root, '공고를 불러오는 중')
         self.db_text = tk.StringVar(root, '실적 DB 확인 중')
+        self._upload_dialog = None
+        self._management_dialog = None
         root.title('Notice · 업무 모니터링 대시보드')
         root.geometry('1380x940')
         root.minsize(1040, 760)
@@ -132,12 +138,18 @@ class DashboardWindow:
             stamp = self.label(card, '마지막 중앙 수집', size=8, color='#687586')
             stamp.pack(anchor='w', padx=12, pady=(0, 13))
             self._source_widgets[source] = (dot, label, stamp)
+            def link_widgets(widget, source=source):
+                widget.configure(cursor='hand2')
+                widget.bind('<Button-1>', lambda event, s=source: self.open_source(s))
+                for child in widget.winfo_children():
+                    link_widgets(child, source)
+            link_widgets(card)
 
         heading = tk.Frame(self.shell, bg=BG)
         heading.grid(row=3, column=0, sticky='ew', pady=(0, 12))
-        self.label(heading, '신규 공고', bg=BG, size=22, bold=True).pack(side='left')
+        self.label(heading, '지원가능 공고', bg=BG, size=22, bold=True).pack(side='left')
         self.label(heading, variable=self.count_text, bg=BG, size=10, color=MUTED).pack(side='left', padx=16)
-        self.label(heading, '이번 실행에서 확인한 신규 · 변경 우선', bg=BG, size=9, color='#687586').pack(side='right')
+        self.label(heading, '특허법인 참여 가능 · 현재 유효', bg=BG, size=9, color='#687586').pack(side='right')
 
         self.content = tk.Frame(self.shell, bg=BG)
         self.content.grid(row=4, column=0, sticky='nsew')
@@ -153,6 +165,10 @@ class DashboardWindow:
         self.entry(toolbar, self.reference_year, width=6).pack(side='left', padx=(8, 14), ipady=5)
         self.label(toolbar, 'TOP N', bg=BG, size=9, color=MUTED).pack(side='left')
         self.entry(toolbar, self.top_n, width=4).pack(side='left', padx=8, ipady=5)
+        self.upload_button = self.button(toolbar, '실적 업로드', self.open_upload)
+        self.upload_button.pack(side='left', padx=(12, 0))
+        self.management_button = self.button(toolbar,'실적 관리',self.open_management)
+        self.management_button.pack(side='left',padx=(8,0))
         self.label(toolbar, variable=self.db_text, bg=BG, size=9, color=MUTED).pack(side='right')
         self.canvas = tk.Canvas(self.content, bg=BG, highlightthickness=0, bd=0)
         self.canvas.grid(row=1, column=0, sticky='nsew')
@@ -171,6 +187,7 @@ class DashboardWindow:
         self._render_list()
         self._schedule(80, self._pulse)
         self._schedule(100, self._poll)
+        self._schedule(60000, self._retention_tick)
         if auto_sync:
             self._schedule(60, self.start_sync)
         else:
@@ -301,16 +318,22 @@ class DashboardWindow:
                 elif kind == 'sources':
                     self._source_document, self._source_cached = result
                     self._render_sources()
+                elif kind == 'retained' and result is not None:
+                    if self.data is None or result.data.snapshot != self.data.snapshot:
+                        self._apply_data(result)
+                elif kind == 'performances':
+                    self._apply_performances(*result)
                 elif kind == 'done':
                     self._busy = False
                     self.sync_button.configure(state='normal')
+                    if getattr(self, '_performance_reload_pending', False):
+                        self._performance_reload_pending = False
+                        self.reload_performances(self.database_path.get())
         except queue.Empty:
             pass
         self._schedule(100, self._poll)
 
     def _apply_local(self, result):
-        if self._baseline is None:
-            self._baseline = {n['notice_id']: n['updated_at'] for n in result.data.snapshot['feed']['notices']} if result else {}
         if result:
             self._apply_data(result)
             if not self._busy:
@@ -362,29 +385,35 @@ class DashboardWindow:
         for source, (dot, label, stamp) in self._source_widgets.items():
             row = records.get(source)
             state = row['status'] if row else 'UNKNOWN'
-            color, text = {'SUCCESS': (GREEN, '정상'), 'ERROR': (RED, '수집 오류')}.get(state, (MUTED, '상태 정보 없음'))
+            color, text = {'SUCCESS': (GREEN, '수집 정상'), 'ERROR': (RED, '수집 오류')}.get(state, (MUTED, '상태 정보 없음'))
             dot.light_color = color
-            count = f" · {row['notices_found']}건" if row and row['notices_found'] is not None and state == 'SUCCESS' else ''
-            label.configure(text=text + (' · 저장 상태' if self._source_cached else count), fg=color)
-            stamp.configure(text=display_stamp(row['checked_at']) if row else '마지막 중앙 수집 미제공')
+            count = sum(n['source_id'] == source for n in self.eligible_active_notices)
+            label.configure(text=text + (' · 저장 상태' if self._source_cached else ''), fg=color)
+            stamp.configure(text=f'지원가능 {count}건')
 
     def _invalidate_matches(self, *args):
         self.matches.clear()
         self.results = []
         if self.detail_notice:
-            self.show_detail(self.detail_notice)
+            self.show_detail(self.detail_notice, mark_seen=False)
         else:
             self._render_list()
 
     def filter_notices(self):
         if self.data:
-            self.visible_notices = ordered_notices(notice_rows(self.data, query=self.query.get()), self._baseline or {})
+            self.eligible_active_notices = notice_rows(self.data)
+            query = self.query.get().strip().casefold()
+            filtered = [n for n in self.eligible_active_notices if not query or query in
+                        ' '.join(str(n[k] or '') for k in ('title','institution','category','participation_type','summary','keywords')).casefold()]
+            self.visible_notices = ordered_notices(filtered, generated_at=self.data.snapshot['feed']['generated_at'])
         else:
+            self.eligible_active_notices = []
             self.visible_notices = []
+        self._render_sources()
         if self.detail_notice:
             notice = next((n for n in self.data.snapshot['feed']['notices'] if n['notice_id'] == self.detail_notice['notice_id']), None) if self.data else None
             if notice:
-                self.show_detail(notice)
+                self.show_detail(notice, mark_seen=False)
             else:
                 self.show_list()
         else:
@@ -397,8 +426,8 @@ class DashboardWindow:
 
     def _render_list(self):
         self._clear_body()
-        new = sum(notice_badge(n, self._baseline or {}) == 'NEW' for n in self.visible_notices)
-        self.count_text.set(f'{len(self.visible_notices):,}건  /  NEW {new:,}')
+        self.count_text.set(f'총 {len(self.eligible_active_notices):,}건' +
+                            (f'  /  검색 결과 {len(self.visible_notices):,}건' if self.query.get().strip() else ''))
         if not self.visible_notices:
             card = self.card(self.body)
             card.pack(fill='x', pady=(0, 10))
@@ -410,25 +439,31 @@ class DashboardWindow:
         for notice in self.visible_notices:
             self._notice_card(notice)
         self.status.set('공고 제목을 눌러 상세 보기  ·  실적 매칭은 로컬 PC에서만 계산합니다.')
+        if self._seen_error:
+            self.status.set('확인 이력을 읽거나 저장하지 못했습니다. 확인 상태가 재실행 후 유지되지 않을 수 있습니다.')
 
     def _notice_card(self, notice):
         card = self.card(self.body)
-        card.pack(fill='x', pady=(0, 12))
-        badge = notice_badge(notice, self._baseline or {})
+        card.pack(fill='x', pady=(0, 6))
+        badge = notice_badge(notice, generated_at=self.data.snapshot['feed']['generated_at'])
         top = self.tk.Frame(card, bg=CARD)
-        top.pack(fill='x', padx=22, pady=(16, 8))
-        self.label(top, {'EXISTING': 'SAVED'}.get(badge, badge), size=8,
-                   color=ORANGE if badge == 'NEW' else MUTED, bold=True).pack(side='left', padx=(0, 12))
+        top.pack(fill='x', padx=16, pady=(6, 1))
+        if badge == 'NEW':
+            self.label(top, 'NEW', size=8, color=ORANGE, bold=True).pack(side='left', padx=(0, 8))
         self.label(top, notice['institution'], size=10, color=MUTED).pack(side='left')
         self.label(top, notice.get('participation_type') or '참여 형태 미제공', size=9, color=MUTED).pack(side='right')
-        title = self.label(card, notice['title'], size=14, bold=True, wrap=1100)
-        title.pack(anchor='w', fill='x', padx=22, pady=(0, 10))
+        title = self.label(card, notice['title'], size=13, bold=True, wrap=1100)
+        title.pack(anchor='w', fill='x', padx=16, pady=(0, 1))
         title.configure(cursor='hand2')
         title.bind('<Button-1>', lambda event, n=notice: self.show_detail(n))
         card.bind('<Button-1>', lambda event, n=notice: self.show_detail(n))
         footer = self.tk.Frame(card, bg=CARD)
-        footer.pack(fill='x', padx=22, pady=(0, 15))
-        self.label(footer, self.period(notice) + '    ·    ' + notice['category'], size=10, color=MUTED).pack(side='left')
+        footer.pack(fill='x', padx=16, pady=(0, 5))
+        from src.core.eligibility import deadline_date
+        end = deadline_date(notice.get('apply_end'))
+        deadline = f'마감 {end.isoformat()}' if end else '마감 미확인'
+        reason = notice['relevance_reason'].replace('\n', ' ')[:90]
+        self.label(footer, deadline + ' · ' + reason, size=9, color=MUTED).pack(side='left')
         button = self.button(footer, '실적 매칭 펼쳐보기  ▾', lambda n=notice: self.toggle_match(n['notice_id']))
         button.pack(side='right')
         panel = self.tk.Frame(card, bg=INNER)
@@ -463,7 +498,11 @@ class DashboardWindow:
             child.destroy()
         self.label(parent, '우리 실적 매칭', bg=INNER, size=11, bold=True).pack(anchor='w', padx=22, pady=(17, 5))
         if self.database_error:
-            self.label(parent, '실적 DB를 연결하면 이 공고의 추천 순위와 점수 근거가 여기에 표시됩니다.',
+            self.label(parent, '실적 DB 미연결 또는 읽기 실패 · 실적 업로드로 추가하거나 설정에서 기존 DB를 연결하세요.',
+                       bg=INNER, color=MUTED).pack(anchor='w', padx=22, pady=(3, 20))
+            return
+        if not self.data.performances:
+            self.label(parent, '등록된 실적이 없습니다.\n실적 업로드를 통해 데이터를 추가하세요.',
                        bg=INNER, color=MUTED).pack(anchor='w', padx=22, pady=(3, 20))
             return
         try:
@@ -479,7 +518,9 @@ class DashboardWindow:
         if notice['notice_id'] in self.notice_cards:
             self.notice_cards[notice['notice_id']]['button'].configure(text=f'실적 매칭 접기 · {len(rows)}건  ▴')
         if not rows:
-            self.label(parent, '매칭 결과 없음 · 실적 DB가 비어 있거나 TOP N이 0입니다.', bg=INNER, color=MUTED).pack(anchor='w', padx=22, pady=(3, 20))
+            text = ('등록된 실적이 없습니다.\n실적 업로드를 통해 데이터를 추가하세요.' if not self.data.performances
+                    else '매칭 결과 없음 · TOP N이 0입니다.')
+            self.label(parent, text, bg=INNER, color=MUTED).pack(anchor='w', padx=22, pady=(3, 20))
         for row in rows:
             block = self.tk.Frame(parent, bg=INNER)
             block.pack(fill='x', padx=22, pady=(8, 12))
@@ -493,7 +534,49 @@ class DashboardWindow:
             self.label(block, '\n'.join(explanation), bg=INNER, size=9, color=MUTED, wrap=1080).pack(anchor='w')
         self.status.set(f"이 공고의 매칭 {len(rows)}건  ·  기준 연도 {self.reference_year.get()}  ·  계산 방식은 기존 matcher와 동일합니다.")
 
-    def show_detail(self, notice):
+    def _load_seen(self):
+        try:
+            path = seen_path(self.cache_path.get())
+            if path.resolve() == Path(self.database_path.get()).resolve():
+                raise SeenStateError('PATH_COLLISION')
+            self._seen_store = SeenStore(path, self.base_url.get())
+            self._seen = self._seen_store.load()
+            self._seen_error = False
+        except (SeenStateError, ValueError, OSError, SyncError):
+            self._seen = {}
+            self._seen_error = True
+            self._seen_store = None
+
+    def mark_seen(self, notice, *, refresh=True):
+        try:
+            if self._seen_store is None:
+                raise SeenStateError('SEEN_UNAVAILABLE')
+            self._seen = self._seen_store.mark(notice)
+            self._seen_error = False
+
+        except SeenStateError:
+            self._seen_error = True
+        if refresh:
+            self.filter_notices()
+
+    def _retention_tick(self):
+        # Pruning shares the sync worker; no disk/network wait on the Tk thread.
+        if not self._busy:
+            self._busy = True
+            self.sync_button.configure(state='disabled')
+            token = self._generation
+            cache, database, base = self.cache_path.get(), self.database_path.get(), self.base_url.get()
+            def work():
+                try:
+                    self._events.put((token, 'retained', read_local(cache, database, base)))
+                finally:
+                    self._events.put((token, 'done', None))
+            threading.Thread(target=work, name='notice-retention', daemon=True).start()
+        self._schedule(60000, self._retention_tick)
+
+    def show_detail(self, notice, *, mark_seen=True):
+        if mark_seen:
+            self.mark_seen(notice, refresh=False)
         self.detail_notice = notice
         self.selected_notice_id = notice['notice_id']
         self._clear_body()
@@ -516,16 +599,66 @@ class DashboardWindow:
         matches.pack(fill='x', pady=(0, 12))
         self._render_matches(matches, notice)
         self.canvas.yview_moveto(0)
+        if self._seen_error:
+            self.status.set('확인 상태를 저장하지 못했습니다. 저장 경로와 권한을 확인해 주세요.')
 
     def show_list(self):
         self.detail_notice = None
         self.selected_notice_id = None
-        self._render_list()
+        self.filter_notices()
         self.canvas.yview_moveto(0)
 
     def open_original(self, notice):
         if safe_original_url(notice['url']):
             webbrowser.open(notice['url'], new=2)
+
+    def open_source(self, source):
+        url = source_list_url(source)
+        if url:
+            webbrowser.open(url, new=2)
+
+    def open_upload(self):
+        from .upload_ui import UploadDialog
+        if self._upload_dialog is not None and not self._upload_dialog._closed:
+            self._upload_dialog.dialog.lift()
+            return
+        self._upload_dialog = UploadDialog(self)
+        self._upload_dialog.choose_file()
+
+    def reload_performances(self, database_path):
+        from .monitor import read_database
+        database_path = Path(database_path).resolve()
+        token = self._generation
+        if self._busy:
+            self._performance_reload_pending = True
+        def work():
+            records, error = read_database(database_path)
+            self._events.put((token, 'performances', (database_path, records, error)))
+        threading.Thread(target=work, name='local-performance-reload', daemon=True).start()
+
+    def open_management(self):
+        from .performance_management_ui import PerformanceManagementDialog
+        if self._management_dialog is not None and not self._management_dialog._closed:
+            self._management_dialog.dialog.lift()
+            self._management_dialog.refresh()
+            return
+        self._management_dialog = PerformanceManagementDialog(self)
+
+    def _apply_performances(self, database_path, records, error):
+        from .dashboard import DashboardData
+        if Path(self.database_path.get()).resolve() != Path(database_path).resolve():
+            self.status.set('실적 변경 완료 · 저장한 DB는 현재 설정과 다릅니다. 설정에서 해당 DB를 연결하세요.')
+            return
+        self.database_error = error
+        self.db_text.set('실적 DB 읽기 실패 · 설정에서 확인' if error else f'로컬 실적 {len(records):,}건 연결')
+        if self.data is not None:
+            self.data = DashboardData(self.data.snapshot, records)
+            self.matches.clear()
+            self.results = []
+            self.filter_notices()
+        self.status.set('실적 변경 반영 · 로컬 매칭 데이터를 갱신했습니다.' if not error else '변경 후 DB를 읽지 못했습니다.')
+        if self._management_dialog is not None and not self._management_dialog._closed and self._management_dialog.database_path == Path(database_path).resolve():
+            self._management_dialog.refresh()
 
     def open_settings(self):
         dialog = self.tk.Toplevel(self.root)
@@ -548,7 +681,7 @@ class DashboardWindow:
             for current, value in zip((self.base_url, self.cache_path, self.database_path), fields):
                 current.set(value.get().strip())
             self.data = None
-            self._baseline = None
+            self._load_seen()
             self.expanded.clear()
             self.matches.clear()
             self._source_document = None

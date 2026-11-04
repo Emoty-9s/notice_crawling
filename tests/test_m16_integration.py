@@ -16,6 +16,9 @@ from src.local_client.sync import FeedClient
 from src.pipeline import PipelineConfigError, load_site_configs, run_pipeline
 from src.scrapers.registry import build_registry
 
+# RIPC fixture closes April 2; exercise current eligibility on its last day.
+CLOCK = CLOCK.replace(month=4, day=2)
+
 
 class M16IntegrationTests(unittest.TestCase):
     def setUp(self):
@@ -72,7 +75,7 @@ class M16IntegrationTests(unittest.TestCase):
         self.assertEqual(self.store.load_notices(), list(result.notices))
         def fetch(url, timeout):
             return (self.public/('metadata.json' if url.endswith('metadata.json') else 'notices.json')).read_bytes()
-        client = FeedClient('https://example.test/', cache_dir=self.root/'cache', transport=fetch)
+        client = FeedClient('https://example.test/', cache_dir=self.root/'cache', transport=fetch, clock=lambda: CLOCK)
         self.assertEqual(client.sync().status, 'UPDATED')
         self.assertEqual(client.sync().status, 'UNCHANGED')
         self.assertEqual({row['source_id'] for row in client.load_cache()['feed']['notices']}, set(ADAPTERS))
@@ -97,11 +100,12 @@ class M16IntegrationTests(unittest.TestCase):
         self.run_pipeline()
         cache = self.root/'cache'
         client = FeedClient('https://example.test/', cache_dir=cache,
+                            clock=lambda: CLOCK,
                             transport=lambda url, timeout: (self.public/url.rsplit('/', 1)[-1]).read_bytes())
         client.sync()
         store = PerformanceStore(self.root/'performance.db')
         store.create(Performance(performance_id='P1', project_name='IP-R&D 특허분석', keywords=['IP-R&D'], year=2025))
-        data = load_dashboard(client.cache_path, store.path)
+        data = load_dashboard(client.cache_path, store.path, clock=lambda: CLOCK)
         rows = notice_rows(data)
         self.assertEqual(len(rows), 2)
         for notice in rows:

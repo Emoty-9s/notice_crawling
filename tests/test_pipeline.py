@@ -99,7 +99,9 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(before.updated_at, after.updated_at)
             self.assertNotEqual(before.last_seen_at, after.last_seen_at)
             self.assertEqual(before.gemini, after.gemini)
-        self.assertEqual(before_feed, self.feed()['notices'])
+        self.assertTrue(all(n['is_new'] for n in before_feed))
+        self.assertFalse(any(n['is_new'] for n in self.feed()['notices']))
+        self.assertEqual([dict(n,is_new=False) for n in before_feed],self.feed()['notices'])
 
     def test_pending_backlog_drains_across_runs_with_call_cap(self):
         first = self.run_pipeline(analysis_max_calls=2)
@@ -172,7 +174,7 @@ class PipelineTests(unittest.TestCase):
         self.assertTrue(result.degraded)
         self.assertEqual(result.scraper_failures, ('khidi_business',))
         self.assertEqual(len(result.observed), 4)
-        self.assertEqual(next(n for n in result.notices if n.source_id == 'khidi_business'), old)
+        self.assertEqual(next(n for n in result.notices if n.source_id == 'khidi_business'), replace(old, status='EXISTING'))
         self.assertEqual(result.feed_count, 5)
         status = self.storage.load_scraper_status()['khidi_business']
         self.assertEqual(status['status'], 'ERROR')
@@ -234,7 +236,7 @@ class PipelineTests(unittest.TestCase):
         self.empty_lists()
         self.now += timedelta(days=1)
         second = self.run_pipeline()
-        self.assertEqual(second.notices, first.notices)
+        self.assertEqual(second.notices, tuple(replace(n, status='EXISTING') for n in first.notices))
         self.assertEqual(second.observed, ())
         self.assertEqual(second.feed_count, 5)
         self.assertEqual(self.client.generate.call_count, 5)
@@ -244,7 +246,7 @@ class PipelineTests(unittest.TestCase):
         for source in self.html:
             self.html[source] = ('<html>broken</html>', '')
         result = self.run_pipeline()
-        self.assertEqual(result.notices, first.notices)
+        self.assertEqual(result.notices, tuple(replace(n, status='EXISTING') for n in first.notices))
         self.assertEqual(len(result.scraper_failures), 5)
         self.assertEqual(result.feed_count, 5)
 
@@ -258,7 +260,7 @@ class PipelineTests(unittest.TestCase):
         result = self.run_pipeline()
         self.assertEqual(result.skipped, ('kipa_bid',))
         self.transports['kipa_bid'].get.assert_not_called()
-        self.assertEqual(next(n for n in result.notices if n.source_id == 'kipa_bid'), old)
+        self.assertEqual(next(n for n in result.notices if n.source_id == 'kipa_bid'), replace(old, status='EXISTING'))
         status = self.storage.load_scraper_status()['kipa_bid']
         self.assertEqual(status['status'], 'WARNING')
         self.assertEqual(status['error_type'], 'DISABLED')

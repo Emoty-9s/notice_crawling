@@ -62,7 +62,7 @@ def load_policy(path: str | Path = POLICY_PATH) -> dict:
     """Policy is JSON syntax (valid YAML 1.2), avoiding a YAML dependency."""
     try:
         policy = strict_json(Path(path).read_text(encoding='utf-8'))
-        if (not isinstance(policy, dict) or policy.get('version') != 1
+        if (not isinstance(policy, dict) or policy.get('version') != 2
             or tuple(policy['input_fields']) != INPUT_FIELDS
             or not isinstance(policy['question'], str) or not policy['question'].strip()
             or not isinstance(policy['rules'], list) or not policy['rules']

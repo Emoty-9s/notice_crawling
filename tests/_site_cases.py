@@ -65,6 +65,9 @@ def sample_list_html(scraper, list_html, sample):
         for a in row.find('a'))]
     assert len(selected) == 1
     container.children = selected
+    for anchor in root.find('a'):
+        if anchor.text().strip().isdecimal():
+            anchor.attrs.pop('href', None)
     return root.html()
 
 
@@ -143,6 +146,9 @@ class SiteCases:
     def test_empty_list_preserves_actual_headers(self):
         root = parse_html(self.list_html)
         list_container(self.scraper, root).children = []
+        for anchor in root.find('a'):
+            if anchor.text().strip().isdecimal():
+                anchor.attrs.pop('href', None)
         self.assertEqual(self.scraper.parse_list(root.html()), [])
         self.scraper.transport.get.return_value = root.html()
         self.assertEqual(self.scraper.run(), [])

@@ -38,7 +38,7 @@ class MvpRegistryTests(unittest.TestCase):
         registry, transports = self.build(bad='khidi_business')
         self.assertEqual(len(registry.run()), 4)
         self.assertEqual(set(registry.errors), {'khidi_business'})
-        self.assertEqual(registry.errors['khidi_business'].stage, 'parse_list')
+        self.assertEqual(registry.errors['khidi_business'].stage, 'fetch_list')
 
     def test_disabled_config_is_preserved(self):
         registry, transports = self.build(enabled=False)

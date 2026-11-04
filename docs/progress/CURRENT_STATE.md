@@ -1,5 +1,60 @@
 # Current State
 
+Latest central eligibility resume (2026-11-04): 중앙 관측 history는 만료 후에도 삭제하지 않는다.
+공개 feed v2는 현재 `patent-firm-participation-v2`/hash SUCCESS·참여 가능·유효 공고만 projection한다.
+NEW는 현재 중앙 run의 신규 발견이며 local seen과 독립적이다. 기본 분석 예산 60회,
+실 provider 간격 6초, 429 이후 run 호출 중단. 7개 operational source는 최대 3페이지,
+KISTA/RIPC POST/AJAX 유지, checked-in enabled 설정 유지.
+재개 최종 검증: 전체 588 tests PASS (144.260초), 공식 7개 source 각 3페이지 PASS,
+합성 중앙/feed/local/publication 및 실제 Tk smoke PASS. 상세는
+[CENTRAL_ELIGIBILITY_RESUME_RESULT.md](CENTRAL_ELIGIBILITY_RESUME_RESULT.md).
+아래 retention +90일 삭제와 local seen 기반 NEW 설명은 이전 정책 이력이다.
+
+Latest selection/management work (2026-11-03): 업로드 미리보기 왼쪽 체크, 기본 전체 선택,
+전체/해제/반전·페이지 이동·선택 건수와 선택 행만 저장을 지원한다. 실적 관리 창에서 실제 DB
+전체 조회/검색/정렬·6개 필드 수정·확인 후 단건/복수 삭제, user provenance·metadata cleanup·
+matcher 자동 갱신을 지원한다. 전체 586 unittest와 실제 EXE 선택저장/관리/재실행 자동 검증 PASS,
+외부 호출 및 orphan metadata 0. 상세는 [PERFORMANCE_MANAGEMENT_RESULT.md](PERFORMANCE_MANAGEMENT_RESULT.md).
+
+Latest closed-taxonomy work (2026-11-03): 기존 technical 후보 20개 + 소부장만 허용한다.
+technical_field/technical_fields는 후보명만 최대 3개 저장·표시하며 원문 세부어는 evidence/keywords에만 보존한다.
+사용자 선택·insert·중복 수정·재분석 저장 경계에서 후보를 검증한다. 전체 572 unittest 및
+실제 EXE 후보명/소부장 3분야 표시·저장·재실행·외부 호출 0 자동검증 PASS.
+최신 결과는 [CLOSED_TECHNICAL_TAXONOMY_RESULT.md](CLOSED_TECHNICAL_TAXONOMY_RESULT.md)를 확인한다.
+아래 세부 태그 우선 표시 설명은 이전 구현 이력이다.
+
+Latest phrase/multilabel work (2026-11-03): 제목/독립 기술어/설명 phrase를 각각 분류하고
+기술분야 margin 탈락을 제거했다. broad 분야와 상세 태그를 각각 최대 3개 보존하며,
+기존 업무유형/사용자값/원문/matcher 점수는 유지한다. 진단 도구는 제목을 로컬 창에서만 표시하고
+파일에는 통계만 남긴다. 실제 사용자 DB는 기본 경로에서 발견되지 않아 실데이터 전후 통계는 미측정이다.
+최신 검증 범위와 남은 사항은 [PHRASE_MULTILABEL_RESULT.md](PHRASE_MULTILABEL_RESULT.md)를 확인한다.
+
+Latest preview/tag fix (2026-11-03): 실적 미리보기는 번호·연도·관리번호·실적명·고객·기술분야·업무유형만 표시.
+기존 taxonomy에 전기자동차/배터리 세부 태그를 추가하고 원문 명시 태그를 독립 판정한다.
+`전기자동차 배터리팩`은 `전기자동차 · 배터리`로 표시·보존하며 모델 margin으로 미분류 처리하지 않는다.
+최신 EXE 검증과 배포 정보는 [PERFORMANCE_TAG_FIX_RESULT.md](PERFORMANCE_TAG_FIX_RESULT.md)를 확인한다.
+
+Latest local AI work (2026-11-03): 공식 MIT multilingual-e5-small INT8 ONNX/CPU 모델과
+tokenizer/라이선스 동봉. 모델 resource 약 136.69MB, 기존 deterministic matcher 유지.
+원본·사용자값 우선, 기술분야/업무유형/추출 키워드 보조, provenance/cosine/margin 저장,
+미분류 분석/사용자 수정 보호/취소/fallback 지원. 파싱·추론은 별도 로컬 프로세스에서만 수행.
+실제 EXE HTTP 차단 검증에서 외부 호출·추출형 필드 hallucination 0건, 재실행 유지 PASS.
+최신 모델·품질·성능·EXE 측정은 [LOCAL_AI_ENRICHMENT_RESULT.md](LOCAL_AI_ENRICHMENT_RESULT.md)를 확인한다.
+
+Latest local upload work (2026-11-03): `실적 업로드` toolbar 버튼, xlsx/xls/csv 로컬 reader,
+다중 sheet/header/alias/heuristic 미리보기, 확인 후 기존 DB 저장·중복 유지·즉시 matcher 재연결.
+중앙 scraper/Actions/Gemini/Pages/feed 및 matcher 계산 방식은 이 작업에서 변경하지 않았다.
+전체 520 unittest와 실제 EXE 업로드/재실행 자동 검증 PASS. 네이티브 파일 선택창의
+실제 클릭·육안 검증은 Computer Use native pipe 연결 오류로 미실시.
+상세 근거는 [PERFORMANCE_UPLOAD_RESULT.md](PERFORMANCE_UPLOAD_RESULT.md)를 확인한다.
+
+Historical retention/NEW work (2026-11-03; superseded above): 활성·마감일 미상 공고 유지,
+확정 마감일 +90일 포함 보존, +91일부터 중앙/state/feed/cache 현재 snapshot에서 archive 없이 삭제.
+미확인 공고는 재실행/동기화 후에도 NEW 유지, 상세 열기/확인 처리 이력은 로컬 sidecar에 저장.
+중앙 Notice/Gemini/matcher/DB schema와 Actions 복원 계약은 유지한다.
+최신 작업 검증은 [RETENTION_SEEN_RESULT.md](RETENTION_SEEN_RESULT.md)를 확인한다.
+아래 자동 만료 없음/실행 전 cache 기반 NEW 설명은 이 정책 이전의 이력이다.
+
 Latest UI work: Dark Night 업무 모니터링 대시보드. 상태 카드 / 비동기 GitHub 동기화 /
 공고별 매칭 accordion / 앱 내부 상세 페이지로 전면 개편. 최신 검증과 배포 상태는
 [DARK_NIGHT_UI_RESULT.md](DARK_NIGHT_UI_RESULT.md)를 확인한다. 아래 milestone 이력과 당시

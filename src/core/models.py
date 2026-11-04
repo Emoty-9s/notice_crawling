@@ -89,6 +89,7 @@ class GeminiResult(_JsonModel):
     analyzed_content_hash: str | None = None
     participation_type: str | None = None
     keywords: tuple[str, ...] | None = None
+    analysis_policy: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "status", GeminiStatus(self.status))
@@ -99,7 +100,7 @@ class GeminiResult(_JsonModel):
                 raise TypeError("score must be a number or None")
             if isinstance(self.score, float) and not math.isfinite(self.score):
                 raise ValueError("score must be finite")
-        for name in ("reason", "category", "analyzed_at", "analyzed_content_hash", "participation_type"):
+        for name in ("reason", "category", "analyzed_at", "analyzed_content_hash", "participation_type", "analysis_policy"):
             _text(name, getattr(self, name), optional=True)
         if self.keywords is not None:
             if not isinstance(self.keywords, (list, tuple)):

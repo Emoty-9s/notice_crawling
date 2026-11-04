@@ -75,9 +75,6 @@ class PortalScraper(BoardScraper):
 
     def __init__(self, site_config, **kwargs):
         super().__init__(site_config, **kwargs)
-        self.max_pages = self.config.get('max_pages', 3)
-        if type(self.max_pages) is not int or not 1 <= self.max_pages <= 20:
-            raise ValueError('max_pages must be an integer from 1 to 20')
         self._robots = None
         parts = urlsplit(normalize_url(self.config['list_url']))
         self.origin = (parts.scheme, parts.netloc)

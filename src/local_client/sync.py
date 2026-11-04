@@ -13,6 +13,8 @@ from pathlib import Path
 from urllib.error import URLError
 from urllib.parse import urlsplit, urlunsplit
 from urllib.request import Request, urlopen
+from src.core.retention import retention_date
+from src.core.eligibility import PUBLIC_SCHEMA_VERSION, deadline_state
 
 
 DEFAULT_CACHE_DIR = Path(__file__).resolve().parents[2] / 'local' / 'cache'
@@ -20,7 +22,7 @@ MAX_DOWNLOAD_BYTES = 16 * 1024 * 1024
 NOTICE_FIELDS = frozenset({
     'notice_id', 'source_id', 'institution', 'title', 'category', 'participation_type',
     'published_at', 'apply_start', 'apply_end', 'url', 'summary', 'keywords',
-    'relevance_reason', 'first_seen_at', 'updated_at',
+    'relevance_reason', 'first_seen_at', 'updated_at', 'is_new',
 })
 
 
@@ -75,7 +77,7 @@ def _stamp(value):
 def _version(document):
     if not isinstance(document, dict):
         raise SyncError('INVALID_FEED')
-    if type(document.get('schema_version')) is not int or document['schema_version'] != 1:
+    if type(document.get('schema_version')) is not int or document['schema_version'] != PUBLIC_SCHEMA_VERSION:
         raise SyncError('UNSUPPORTED_SCHEMA')
 
 
@@ -101,7 +103,9 @@ def validate_pair(feed, metadata):
     for notice in feed['notices']:
         if not isinstance(notice, dict) or set(notice) != NOTICE_FIELDS:
             raise SyncError('INVALID_FEED')
-        for field in NOTICE_FIELDS - dates - {'keywords'}:
+        if type(notice['is_new']) is not bool:
+            raise SyncError('INVALID_FEED')
+        for field in NOTICE_FIELDS - dates - {'keywords', 'is_new'}:
             value = notice[field]
             if not isinstance(value, str) or (field != 'summary' and not value.strip()):
                 raise SyncError('INVALID_FEED')
@@ -147,6 +151,17 @@ def _atomic_snapshot(path, snapshot):
                 pass
 
 
+def retained_snapshot(snapshot, *, today=None):
+    """Project active v2 rows while preserving the producer snapshot on disk."""
+    today = retention_date(today)
+    notices = [n for n in snapshot['feed']['notices']
+               if deadline_state(n['apply_end'], today=today, title=n['title'], content=n['summary']) != 'EXPIRED']
+    if len(notices) == len(snapshot['feed']['notices']):
+        return snapshot
+    return {**snapshot, 'feed': {**snapshot['feed'], 'notices': notices},
+            'metadata': {**snapshot['metadata'], 'notice_count': len(notices)}}
+
+
 class FeedClient:
     """Single writer. Both public documents commit in one os.replace.
 
@@ -154,7 +169,7 @@ class FeedClient:
     A cache is usable only after validation and for the same normalized base URL.
     """
 
-    def __init__(self, base_url, *, cache_dir=None, timeout=30, transport=None):
+    def __init__(self, base_url, *, cache_dir=None, timeout=30, transport=None, clock=None):
         try:
             parts = urlsplit(base_url)
             if (parts.scheme not in ('https', 'http') or not parts.hostname or parts.username is not None
@@ -171,6 +186,7 @@ class FeedClient:
         self.timeout = timeout
         self.cache_path = Path(cache_dir if cache_dir is not None else DEFAULT_CACHE_DIR) / 'snapshot.json'
         self.transport = transport if transport is not None else download
+        self.clock = clock
 
     def load_cache(self):
         try:
@@ -181,7 +197,8 @@ class FeedClient:
                 or snapshot['base_url'] != self.base_url):
             raise SyncError('CACHE_SOURCE_MISMATCH')
         validate_pair(snapshot['feed'], snapshot['metadata'])
-        return snapshot
+        retained = retained_snapshot(snapshot, today=self.clock() if self.clock else None)
+        return retained
 
     def _fetch(self, filename):
         try:
@@ -209,10 +226,11 @@ class FeedClient:
             feed = self._fetch('notices.json')
             validate_pair(feed, metadata)
             snapshot = {'base_url': self.base_url, 'feed': feed, 'metadata': metadata}
-            if snapshot == cached:
-                return SyncResult('UNCHANGED', feed, metadata)
-            _atomic_snapshot(self.cache_path, snapshot)
-            return SyncResult('UPDATED', feed, metadata)
+            projection = retained_snapshot(snapshot, today=self.clock() if self.clock else None)
+            status = 'UNCHANGED' if projection == cached else 'UPDATED'
+            if status != 'UNCHANGED':
+                _atomic_snapshot(self.cache_path, snapshot)  # Preserve validated producer pair.
+            return SyncResult(status, projection['feed'], projection['metadata'])
         except SyncError as error:
             if cached is not None:
                 return SyncResult('FALLBACK', cached['feed'], cached['metadata'], error.code)

@@ -89,13 +89,13 @@ class MonitorTests(unittest.TestCase):
     def test_new_then_updated_then_existing_without_mutating_feed(self):
         rows = copy.deepcopy(self.snapshot['feed']['notices'])
         new = copy.deepcopy(rows[0]); new['notice_id'] = 'NEW'
-        existing = rows[0]
-        updated = rows[1]
+        existing = rows[0]; existing['is_new'] = False
+        updated = rows[1]; updated['is_new'] = False
         baseline = {existing['notice_id']: existing['updated_at'], updated['notice_id']: '2026-10-01T00:00:00Z'}
         inputs = [existing, updated, new]
         before = copy.deepcopy(inputs)
         result = ordered_notices(inputs, baseline)
-        self.assertEqual([notice_badge(row, baseline) for row in result], ['NEW', 'UPDATED', 'EXISTING'])
+        self.assertEqual([notice_badge(row, baseline) for row in result], ['NEW', 'EXISTING', 'EXISTING'])
         self.assertEqual(inputs, before)
 
     def test_original_link_accepts_only_http_without_credentials(self):

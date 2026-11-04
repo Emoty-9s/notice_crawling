@@ -42,7 +42,7 @@ class ActionsSupportTests(unittest.TestCase):
             notice_id='one', source_id='kipa_bid', institution='한국발명진흥회', title='특허 용역 입찰',
             url='https://example.test/1', content_text='본문 ' * 200, content_hash='hash',
             first_seen_at=STAMP, last_seen_at=STAMP, updated_at=STAMP,
-            gemini=GeminiResult(status='SUCCESS', relevant=True, category='IP', participation_type='입찰 참여자',
+            gemini=GeminiResult(status='SUCCESS', analysis_policy='patent-firm-participation-v2', relevant=True, category='IP', participation_type='입찰 참여자',
                                 keywords=['특허'], reason='수행 주체 참여 가능', analyzed_content_hash='hash', analyzed_at=STAMP))
 
     def save(self, notices=None):
@@ -114,10 +114,12 @@ class ActionsSupportTests(unittest.TestCase):
     def test_stale_or_extra_private_content_in_public_feed_is_rejected(self):
         self.save()
         original = json.loads((self.public/'notices.json').read_text(encoding='utf-8'))
-        for mutation in ('extra', 'stale'):
+        for mutation in ('extra', 'stale', 'integer_new'):
             modified = json.loads(json.dumps(original))
             if mutation == 'extra':
                 modified['notices'][0]['content_text'] = SECRET
+            elif mutation == 'integer_new':
+                modified['notices'][0]['is_new'] = int(modified['notices'][0]['is_new'])
             else:
                 modified['notices'] = []
             (self.public/'notices.json').write_text(json.dumps(modified), encoding='utf-8')

@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
 from src.ai.relevance import RelevanceAnalyzer
+from src.ai.gemini import GeminiClient
 from src.core.diff import compare_batch
-from src.core.models import Notice, GeminiStatus
+from src.core.models import Notice, GeminiStatus, NoticeStatus
 from src.core.storage import JsonStorage
+from src.core.eligibility import deadline_state, current_analysis
 from src.renderer.feed import PUBLIC_DIR, build_feed, write_feed
 from src.scrapers.registry import build_mvp_registry, build_registry
 
@@ -18,7 +20,7 @@ from src.scrapers.registry import build_mvp_registry, build_registry
 CONFIG_PATH = Path(__file__).resolve().parents[1] / 'config' / 'sites.yaml'
 MVP_SOURCES = frozenset({'khidi_business', 'kised_bid_public', 'rda_bid', 'seoul_rnd_notice', 'kipa_bid'})
 SUPPORTED_SOURCES = MVP_SOURCES | {'ripc_pms', 'kista_ippro'}
-ANALYSIS_MAX_CALLS_PER_RUN = 10
+ANALYSIS_MAX_CALLS_PER_RUN = 60
 
 
 class PipelineConfigError(ValueError):
@@ -81,7 +83,7 @@ def run_pipeline(
     *, client, config_path=CONFIG_PATH, storage=None, public_dir=None,
     clock=None, transport_factory=None, logger=None, analysis_max_calls=ANALYSIS_MAX_CALLS_PER_RUN,
 ) -> PipelineResult:
-    """One central run. No implicit deletion; bounded enabled-source backlog.
+    """One central run. Preserved history and bounded enabled-source backlog.
 
     Scrapers already normalize through M04/M05 and M03, so do not regenerate
     identity or normalize a second time here. A fresh analyzer scopes attempts
@@ -94,7 +96,8 @@ def run_pipeline(
     stamp = now.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
     analyzer = RelevanceAnalyzer(client, clock=lambda: now, logger=logger,
                                  retry_existing=True, max_calls=analysis_max_calls,
-                                 stop_on_rate_limit=True)
+                                 stop_on_rate_limit=True,
+                                 min_call_interval=6 if isinstance(client, GeminiClient) else 0)
     store = storage if storage is not None else JsonStorage()
     public_root = Path(public_dir) if public_dir is not None else PUBLIC_DIR
     protected = {store.notices_path.resolve(), store.scraper_status_path.resolve()}
@@ -110,21 +113,20 @@ def run_pipeline(
                                   clock=lambda: now, logger=logger)
     collected = registry.run()  # fetch/parse/normalize, with source isolation
     compared = compare_batch(collected, previous, observed_at=stamp)
+    # Always retain complete observation history, including expired records.
+    # Clear last run's transient lifecycle status even when a source fails.
+    current_notices = compared.notices
+    merged = {n.notice_id: replace(n, status=NoticeStatus.EXISTING) for n in previous}
+    merged.update({n.notice_id: n for n in current_notices})
     enabled = {c['source_id'] for c in configs if c.get('enabled', False)}
-    current = {n.notice_id: n for n in compared.notices}
-    # Retained backlog may have moved off the first list page or its scraper
-    # may temporarily fail. Retry only enabled sources; keep observation times.
-    backlog = [n for n in previous if n.notice_id not in current and n.source_id in enabled
-               and n.gemini.status in (GeminiStatus.PENDING, GeminiStatus.NOT_ANALYZED)]
-    queue = backlog + list(current.values())
-    # Old pending work goes first; stable ordering lets successful items drain
-    # out of the queue on the next run, without a separate mutable queue file.
-    queue.sort(key=lambda n: (n.gemini.status not in (GeminiStatus.PENDING, GeminiStatus.NOT_ANALYZED),
-                             n.first_seen_at, n.notice_id))
+    queue = [n for n in merged.values() if n.source_id in enabled and not current_analysis(n)
+             and deadline_state(n.apply_end, today=now, title=n.title, content=n.content_text) != 'EXPIRED']
+    queue.sort(key=lambda n: ({NoticeStatus.NEW: 0, NoticeStatus.UPDATED: 1}.get(n.status,
+                              2 if deadline_state(n.apply_end, today=now) == 'ACTIVE' else 3),
+                              n.first_seen_at, n.notice_id))
     analyzed = {n.notice_id: n for n in analyzer.analyze_batch(queue)}
-    observed = [analyzed[n.notice_id] for n in compared.notices]
-    merged = {notice.notice_id: notice for notice in previous}
     merged.update(analyzed)
+    observed = [merged[n.notice_id] for n in current_notices]
     snapshot = sorted(merged.values(), key=lambda notice: (notice.source_id, notice.notice_id))
     # Validate the complete public projection before committing the new storage.
     feed = build_feed(snapshot, generated_at=stamp)

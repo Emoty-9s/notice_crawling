@@ -113,12 +113,12 @@ class DiffTests(unittest.TestCase):
                     self.assertEqual(result.notice.gemini.analyzed_content_hash, 'old-body')
 
     def test_new_caller_supplied_gemini_is_not_reset(self):
-        gemini = GeminiResult(status='SUCCESS', relevant=False, score=0)
+        gemini = GeminiResult(status='SUCCESS', analysis_policy='patent-firm-participation-v2', relevant=False, score=0)
         result = compare_notice(notice(gemini=gemini), observed_at=NOW)
         self.assertIs(result.notice.gemini, gemini)
 
     def test_status_gemini_and_timestamps_do_not_trigger_updated(self):
-        old = notice(gemini=GeminiResult(status='SUCCESS', relevant=True))
+        old = notice(gemini=GeminiResult(status='SUCCESS', analysis_policy='patent-firm-participation-v2', relevant=True))
         current = notice(status='NEW', first_seen_at=NOW, last_seen_at=NOW, updated_at=NOW)
         self.assertIs(compare_notice(current, old, observed_at=NOW).notice.status, NoticeStatus.EXISTING)
 
@@ -131,7 +131,7 @@ class DiffTests(unittest.TestCase):
         self.assertEqual(result.results[1].changed_fields, ('title',))
 
     def test_equivalent_duplicates_are_compared_once_against_stored(self):
-        old = notice(gemini=GeminiResult(status='SUCCESS', reason='보존'))
+        old = notice(gemini=GeminiResult(status='SUCCESS', analysis_policy='patent-firm-participation-v2', reason='보존'))
         current = notice(title='변경 제목')
         duplicate = replace(current, title=' 변경\n제목 ', last_seen_at=NOW, status='EXISTING')
         result = compare_batch([current, duplicate, current], [old], observed_at=NOW)

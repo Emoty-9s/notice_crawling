@@ -57,12 +57,13 @@ def stage_public(data_dir, public_dir, stage_dir):
     if not isinstance(feed, dict) or not isinstance(metadata, dict):
         raise ActionsCheckError('INVALID_FEED: expected two JSON objects')
     expected = build_feed(notices, generated_at=feed.get('generated_at'))
-    expected_metadata = {'schema_version': 1, 'generated_at': expected['generated_at'],
+    expected_metadata = {'schema_version': expected['schema_version'], 'generated_at': expected['generated_at'],
                          'notice_count': len(expected['notices'])}
     # JSON equality also compares number/bool as equal: explicitly retain schema/count types.
     if (feed != expected or metadata != expected_metadata
         or type(feed.get('schema_version')) is not int
         or type(metadata.get('schema_version')) is not int
+        or any(type(row.get('is_new')) is not bool for row in feed.get('notices', []))
         or type(metadata.get('notice_count')) is not int):
         raise ActionsCheckError('FEED_SNAPSHOT_MISMATCH: refuse stale or inconsistent publication')
     health = public_source_status(statuses, expected['generated_at'])

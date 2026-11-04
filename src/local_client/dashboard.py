@@ -1,4 +1,4 @@
-"""M15 read-only local data loading and testable presentation of M14 results."""
+"""M15 read-only performance loading, retained cache and M14 presentation."""
 
 import copy
 import json
@@ -10,7 +10,7 @@ from pathlib import Path
 
 from . import matcher
 from .performance import APPLICATION_ID, COLUMNS, SCHEMA_VERSION, Performance, PerformanceValidationError
-from .sync import FeedClient, SyncError, validate_pair
+from .sync import FeedClient, SyncError, validate_pair, retained_snapshot
 
 
 RULE_LABELS = {
@@ -36,7 +36,7 @@ def _constant(value):
     raise ValueError('nonstandard JSON constant')
 
 
-def _load_cache(path):
+def _load_cache(path, *, today=None):
     try:
         snapshot = json.loads(Path(path).read_text(encoding='utf-8'), object_pairs_hook=_pairs, parse_constant=_constant)
         json.dumps(snapshot, ensure_ascii=False, allow_nan=False).encode('utf-8')
@@ -46,7 +46,8 @@ def _load_cache(path):
         if FeedClient(snapshot['base_url']).base_url != snapshot['base_url']:
             raise ValueError('noncanonical cache source')
         validate_pair(snapshot['feed'], snapshot['metadata'])
-        return snapshot
+        retained = retained_snapshot(snapshot, today=today)
+        return retained
     except (OSError, ValueError, TypeError, UnicodeError, RecursionError, SyncError):
         raise DashboardError('INVALID_OR_MISSING_CACHE') from None
 
@@ -82,9 +83,9 @@ class DashboardData:
     performances: tuple[Performance, ...]
 
 
-def load_dashboard(cache_path, database_path):
-    """Load a validated cache + local database; no HTTP, initialization or saves."""
-    snapshot = _load_cache(cache_path)
+def load_dashboard(cache_path, database_path, *, clock=None):
+    """Load local data and project active rows without rewriting the cache."""
+    snapshot = _load_cache(cache_path, today=clock() if clock else None)
     performances = _load_performances(database_path)
     return DashboardData(snapshot, performances)
 

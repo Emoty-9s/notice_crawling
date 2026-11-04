@@ -42,13 +42,13 @@ class DashboardTests(unittest.TestCase):
             notice_id='N1', source_id='s1', institution='가상기관', title='반도체 IP-R&D 특허분석 협력기관 모집',
             content_text='특허분석 수행기관 모집', content_hash='hash', url='https://example.test/notice/1',
             first_seen_at=STAMP, last_seen_at=STAMP, updated_at=STAMP,
-            gemini=GeminiResult(status='SUCCESS', relevant=True, category='IP-R&D', participation_type='협력기관',
+            gemini=GeminiResult(status='SUCCESS', analysis_policy='patent-firm-participation-v2', relevant=True, category='IP-R&D', participation_type='협력기관',
                                 keywords=['반도체', 'IP-R&D', '특허분석'], reason='가상 선별 근거',
                                 analyzed_at=STAMP, analyzed_content_hash='hash'))
         second = replace(first, notice_id='N2', source_id='s2', institution='다른기관', title='건축 설계 공고',
                          gemini=replace(first.gemini, category='건축', keywords=['건축']))
         self.snapshot = {'base_url': 'https://example.test/', 'feed': build_feed([first, second], generated_at=STAMP),
-                         'metadata': {'schema_version': 1, 'generated_at': STAMP, 'notice_count': 2}}
+                         'metadata': {'schema_version': 2, 'generated_at': STAMP, 'notice_count': 2}}
         self.write_cache()
         for target in ('urllib.request.OpenerDirector.open', 'socket.create_connection',
                        'src.ai.gemini.GeminiClient.generate', 'src.local_client.sync.FeedClient.sync',
@@ -218,7 +218,7 @@ class DashboardTests(unittest.TestCase):
     def test_malformed_and_unsupported_cache_is_not_rewritten(self):
         cases = [b'{', b'\xff', b'NaN', b'{"base_url":"a","base_url":"b"}']
         unsupported = copy.deepcopy(self.snapshot)
-        unsupported['metadata']['schema_version'] = 2
+        unsupported['metadata']['schema_version'] = 99
         cases.append(json.dumps(unsupported).encode())
         mismatch = copy.deepcopy(self.snapshot)
         mismatch['metadata']['notice_count'] = 99

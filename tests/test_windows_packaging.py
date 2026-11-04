@@ -22,6 +22,15 @@ class WindowsPackagingTests(unittest.TestCase):
         smoke.assert_called_once_with('report.json', 'https://example.test/')
         main.assert_not_called()
 
+    def test_upload_check_is_explicit_and_does_not_replace_normal_launch(self):
+        with patch('tools.windows_upload_smoke.check', return_value=0) as check, patch('tools.windows_entry.main') as main:
+            self.assertEqual(entry(['--upload-smoke-report', 'report.json', '--upload-file', 'input.xlsx',
+                                    '--smoke-db', 'private.db', '--smoke-cache', 'snapshot.json',
+                                    '--smoke-base-url', 'https://example.test/', '--verify-only']), 0)
+        self.assertTrue(check.call_args.args[0].verify_only)
+        self.assertEqual(check.call_args.args[0].upload_file, 'input.xlsx')
+        main.assert_not_called()
+
     def test_development_arguments_unchanged(self):
         args = ['--cache', 'relative.json', '--top-n', '1']
         with patch('sys.frozen', False, create=True):

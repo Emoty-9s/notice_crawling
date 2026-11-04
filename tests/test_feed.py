@@ -16,7 +16,7 @@ STAMP = '2026-10-30T07:19:33Z'
 PUBLIC_FIELDS = {
     'notice_id', 'source_id', 'institution', 'title', 'category', 'participation_type',
     'published_at', 'apply_start', 'apply_end', 'url', 'summary', 'keywords',
-    'relevance_reason', 'first_seen_at', 'updated_at',
+    'relevance_reason', 'first_seen_at', 'updated_at', 'is_new',
 }
 
 
@@ -28,7 +28,7 @@ def notice(identifier='one', **overrides):
         content_text='특허법인  대상\n협력기관 모집', content_hash='body-hash',
         first_seen_at=STAMP, last_seen_at=STAMP, updated_at=STAMP,
         gemini=GeminiResult(
-            status='SUCCESS', relevant=True, category='IP-R&D', participation_type='협력기관',
+            status='SUCCESS', analysis_policy='patent-firm-participation-v2', relevant=True, category='IP-R&D', participation_type='협력기관',
             keywords=['특허분석', '반도체'], reason='특허법인이 협력기관으로 참여 가능',
             analyzed_at=STAMP, analyzed_content_hash='body-hash',
         ),
@@ -48,7 +48,7 @@ class FeedTests(unittest.TestCase):
         self.assertEqual([record['notice_id'] for record in feed['notices']], ['one'])
 
     def test_empty_result_schema(self):
-        expected = {'schema_version': 1, 'generated_at': STAMP, 'notices': []}
+        expected = {'schema_version': 2, 'generated_at': STAMP, 'notices': []}
         self.assertEqual(build_feed([], generated_at=STAMP), expected)
         excluded = replace(notice(), gemini=GeminiResult(status='FAILED', relevant=True))
         self.assertEqual(build_feed([excluded], generated_at=STAMP), expected)
@@ -100,7 +100,10 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(forward, backward)
         self.assertEqual([r['notice_id'] for r in forward['notices']], ['a', 'z', 'b-z'])
         later = build_feed(values, generated_at='2026-10-31T00:00:00Z')
-        self.assertEqual(forward['notices'], later['notices'])
+        self.assertTrue(all(n['is_new'] for n in forward['notices']))
+        self.assertFalse(any(n['is_new'] for n in later['notices']))
+        self.assertEqual([{k:v for k,v in n.items() if k != 'is_new'} for n in forward['notices']],
+                         [{k:v for k,v in n.items() if k != 'is_new'} for n in later['notices']])
         self.assertNotEqual(forward['generated_at'], later['generated_at'])
 
     def test_generated_at_is_injected_and_canonical_utc(self):
@@ -158,7 +161,7 @@ class FeedFileTests(unittest.TestCase):
         self.assertEqual([p.name for p in paths], ['notices.json', 'metadata.json'])
         feed, metadata = [json.loads(p.read_text(encoding='utf-8')) for p in paths]
         self.assertEqual(set(feed), {'schema_version', 'generated_at', 'notices'})
-        self.assertEqual(metadata, {'schema_version': 1, 'generated_at': STAMP, 'notice_count': 1})
+        self.assertEqual(metadata, {'schema_version': 2, 'generated_at': STAMP, 'notice_count': 1})
         self.assertEqual(set(feed['notices'][0]), PUBLIC_FIELDS)
 
     def test_empty_files_and_count_after_filtering_and_dedup(self):

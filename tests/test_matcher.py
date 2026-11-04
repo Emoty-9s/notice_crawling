@@ -236,11 +236,11 @@ class MatcherIntegrationTests(unittest.TestCase):
             notice_id='N1', source_id='S1', institution='기관', title=NOTICE['title'],
             content_text=NOTICE['summary'], content_hash='hash', url='https://example.test/1',
             first_seen_at=stamp, last_seen_at=stamp, updated_at=stamp,
-            gemini=GeminiResult(status='SUCCESS', relevant=True, category=NOTICE['category'],
+            gemini=GeminiResult(status='SUCCESS', analysis_policy='patent-firm-participation-v2', relevant=True, category=NOTICE['category'],
                                 participation_type=NOTICE['participation_type'], keywords=NOTICE['keywords'],
                                 reason='수행 가능', analyzed_at=stamp, analyzed_content_hash='hash'))
         feed = build_feed([internal], generated_at=stamp)
-        metadata = {'schema_version': 1, 'generated_at': stamp, 'notice_count': 1}
+        metadata = {'schema_version': 2, 'generated_at': stamp, 'notice_count': 1}
         client = FeedClient('https://example.test/', cache_dir=self.root/'cache',
                             transport=lambda url, timeout: json.dumps(metadata if url.endswith('metadata.json') else feed).encode())
         client.sync()

@@ -202,14 +202,14 @@ class RelevanceTests(unittest.TestCase):
             self.assertIs(result.gemini.status, GeminiStatus.PENDING if status == GeminiStatus.NOT_ANALYZED else status)
             client.generate.assert_not_called()
 
-    def test_central_opt_in_retries_pending_but_preserves_existing_failed(self):
+    def test_central_opt_in_retries_incomplete_existing_analysis(self):
         for status in (GeminiStatus.PENDING, GeminiStatus.NOT_ANALYZED, GeminiStatus.FAILED):
             client = Mock()
             client.generate.return_value = json.dumps(decision())
             analyzer = RelevanceAnalyzer(client, clock=lambda: NOW, retry_existing=True, max_calls=2)
             result = analyzer.analyze(notice(status='EXISTING', gemini=GeminiResult(status=status)))
-            self.assertEqual(client.generate.call_count, int(status != GeminiStatus.FAILED))
-            self.assertEqual(result.gemini.status, GeminiStatus.FAILED if status == GeminiStatus.FAILED else GeminiStatus.SUCCESS)
+            self.assertEqual(client.generate.call_count, 1)
+            self.assertEqual(result.gemini.status, GeminiStatus.SUCCESS)
 
     def test_rate_limit_stops_managed_session_and_next_session_can_progress(self):
         client = Mock()
@@ -231,6 +231,26 @@ class RelevanceTests(unittest.TestCase):
         for value in (0, -1, True, 1.5):
             with self.assertRaises(ValueError):
                 RelevanceAnalyzer(Mock(), max_calls=value)
+
+    def test_managed_throttle_uses_injected_time_without_real_sleep(self):
+        elapsed = [0.0]
+        starts = []
+        sleeps = []
+        client = Mock()
+        def generate(payload):
+            starts.append(elapsed[0])
+            elapsed[0] += 1
+            return json.dumps(decision())
+        def sleep(seconds):
+            sleeps.append(seconds)
+            elapsed[0] += seconds
+        client.generate.side_effect = generate
+        analyzer = RelevanceAnalyzer(client, clock=lambda: NOW, max_calls=3,
+                                     min_call_interval=6, monotonic=lambda: elapsed[0], sleep=sleep)
+        analyzer.analyze_batch([notice(str(i)) for i in range(4)])
+        self.assertEqual(starts, [0, 6, 12])
+        self.assertEqual(sleeps, [5, 5])
+        self.assertEqual(analyzer.calls, 3)
 
     def test_118_persisted_pending_progress_with_ten_call_budget(self):
         client = Mock()

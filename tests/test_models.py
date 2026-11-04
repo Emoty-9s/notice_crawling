@@ -39,7 +39,7 @@ class NoticeModelTests(unittest.TestCase):
         self.assertEqual(set(data["gemini"]), {
             "status", "relevant", "score", "reason", "category", "analyzed_at",
             "analyzed_content_hash",
-            "participation_type", "keywords",
+            "participation_type", "keywords", "analysis_policy",
         })
         self.assertIs(make_notice().gemini.status, GeminiStatus.NOT_ANALYZED)
         for name, value in data["gemini"].items():

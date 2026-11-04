@@ -1,18 +1,21 @@
-"""Central industry relevance only: hash cache and per-Notice failure isolation."""
+"""Patent-firm participation eligibility, versioned cache, isolated failures."""
 
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import replace
 from datetime import datetime, timezone
 
 from src.ai.gemini import GeminiClient, GeminiError, notice_payload, parse_decision
 from src.core.models import GeminiResult, GeminiStatus, Notice, NoticeStatus
+from src.core.eligibility import ANALYSIS_POLICY, current_analysis
 
 
 def _complete_success(result: GeminiResult, content_hash: str) -> bool:
     return (
-        result.status == GeminiStatus.SUCCESS and result.analyzed_content_hash == content_hash
+        result.status == GeminiStatus.SUCCESS and result.analysis_policy == ANALYSIS_POLICY
+        and result.analyzed_content_hash == content_hash
         and type(result.relevant) is bool and result.category is not None
         and result.participation_type is not None and result.reason is not None
         and result.keywords is not None
@@ -29,7 +32,8 @@ class RelevanceAnalyzer:
     and a session pause on HTTP 429. No immediate retry/backoff loops here.
     """
     def __init__(self, client: GeminiClient, *, clock=None, logger=None,
-                 retry_existing=False, max_calls=None, stop_on_rate_limit=False):
+                 retry_existing=False, max_calls=None, stop_on_rate_limit=False,
+                 min_call_interval=0, sleep=time.sleep, monotonic=time.monotonic):
         if max_calls is not None and (type(max_calls) is not int or max_calls < 1):
             raise ValueError('max_calls must be a positive integer')
         self.client = client
@@ -37,6 +41,8 @@ class RelevanceAnalyzer:
         self.max_calls = max_calls
         self.stop_on_rate_limit = stop_on_rate_limit
         self.calls = 0
+        self.min_call_interval = min_call_interval
+        self._sleep, self._monotonic, self._last_call = sleep, monotonic, None
         self.paused = False
         self.clock = clock if clock is not None else lambda: datetime.now(timezone.utc)
         self.logger = logger if logger is not None else logging.getLogger(__name__)
@@ -54,7 +60,7 @@ class RelevanceAnalyzer:
         if key in self._cache:
             return replace(notice, gemini=self._cache[key])
         if notice.status == NoticeStatus.EXISTING and not (
-            self.retry_existing and notice.gemini.status in (GeminiStatus.PENDING, GeminiStatus.NOT_ANALYZED)
+            self.retry_existing and not current_analysis(notice)
         ):
             # Preserve previous results exactly; no API call even if historical
             # data lacks a complete M08 analysis. Unknown work remains pending.
@@ -67,6 +73,11 @@ class RelevanceAnalyzer:
             self._cache[key] = result
             return replace(notice, gemini=result)
         try:
+            if self._last_call is not None and self.min_call_interval:
+                delay = self.min_call_interval - (self._monotonic() - self._last_call)
+                if delay > 0:
+                    self._sleep(delay)
+            self._last_call = self._monotonic()
             now = self.clock()
             if now.tzinfo is None or now.utcoffset() is None:
                 raise ValueError('clock must be timezone aware')
@@ -77,6 +88,7 @@ class RelevanceAnalyzer:
                 category=decision['category'], participation_type=decision['participation_type'],
                 reason=decision['reason'], keywords=decision['keywords'],
                 analyzed_at=now.isoformat(), analyzed_content_hash=notice.content_hash,
+                analysis_policy=ANALYSIS_POLICY,
             )
             self.errors.pop(notice.notice_id, None)
         except Exception as error:

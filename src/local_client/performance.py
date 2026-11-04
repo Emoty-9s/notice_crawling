@@ -138,12 +138,16 @@ class PerformanceStore:
     full record for its immutable ID; use dataclasses.replace for partial edits.
     """
 
-    def __init__(self, path=None, *, timeout=5):
+    def __init__(self, path=None, *, timeout=5, create=True):
         if (isinstance(timeout, bool) or not isinstance(timeout, (int, float))
                 or not math.isfinite(timeout) or timeout < 0):
             raise PerformanceValidationError('INVALID_DATABASE_TIMEOUT')
         self.path = Path(path if path is not None else DEFAULT_DB_PATH).resolve()
         self.timeout = timeout
+        if not create:
+            with self._connection():
+                pass
+            return
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             with self._connection(initialize=True) as connection:
@@ -169,6 +173,7 @@ class PerformanceStore:
             target = str(self.path) if initialize else self.path.as_uri() + '?mode=rw'
             connection = sqlite3.connect(target, timeout=self.timeout, uri=not initialize)
             connection.row_factory = sqlite3.Row
+            connection.execute('PRAGMA foreign_keys = ON')
             connection.create_function('casefold', 1, lambda value: str(value).casefold(), deterministic=True)
             with connection:
                 if not initialize:

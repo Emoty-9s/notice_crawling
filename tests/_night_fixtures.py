@@ -27,13 +27,13 @@ def create_demo(folder):
                    content_text='협력기관의 반도체 특허분석 수행을 위한 모집 공고입니다.', content_hash='demo-hash',
                    published_at='2026-11-02', apply_start='2026-11-02', apply_end='2026-11-15',
                    url='https://example.test/notice/1', first_seen_at=STAMP, last_seen_at=STAMP, updated_at=STAMP,
-                   gemini=GeminiResult(status='SUCCESS', relevant=True, category='IP-R&D', participation_type='협력기관',
+                   gemini=GeminiResult(status='SUCCESS', analysis_policy='patent-firm-participation-v2', relevant=True, category='IP-R&D', participation_type='협력기관',
                                        keywords=['반도체', 'IP-R&D', '특허분석'], reason='특허분석 수행기관으로 참여할 수 있습니다.',
                                        analyzed_at=STAMP, analyzed_content_hash='demo-hash'))
     second = replace(first, notice_id='DEMO-N2', institution='한국특허전략개발원', source_id='kista_ippro',
                      title='AI 분야 지식재산 전략 지원 전문기관 공고')
     feed = build_feed([first, second], generated_at=STAMP)
-    metadata = dict(schema_version=1, generated_at=STAMP, notice_count=len(feed['notices']))
+    metadata = dict(schema_version=2, generated_at=STAMP, notice_count=len(feed['notices']))
     snapshot = dict(base_url=BASE, feed=feed, metadata=metadata)
     cache = folder / 'snapshot.json'
     cache.write_text(json.dumps(snapshot, ensure_ascii=False), encoding='utf-8')

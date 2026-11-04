@@ -1,0 +1,8 @@
+# Local-only company workbook readers. No API clients or external services.
+openpyxl==3.1.5
+xlrd==2.0.2
+defusedxml==0.7.1
+# Offline CPU embedding inference; no torch/transformers/hub clients.
+onnxruntime==1.23.2
+tokenizers==0.22.2
+numpy==2.2.6

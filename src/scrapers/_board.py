@@ -16,6 +16,7 @@ from src.core.normalizer import (
 )
 from src.scrapers.base import BaseScraper
 from src.scrapers._html import Node, StructureError, parse_html
+from src.scrapers.pagination import collection_pages
 
 
 @dataclass(frozen=True)
@@ -67,6 +68,72 @@ class BoardScraper(BaseScraper[NoticeLink, ParsedNotice]):
         if self.source_id != self.source:
             raise ValueError('wrong site config for scraper')
         self.clock = clock if clock is not None else lambda: datetime.now(timezone.utc)
+        self.max_pages = collection_pages(self.config)
+
+    def page_links(self, html):
+        """Follow literal numeric pager hrefs, never synthesize a URL.
+
+        Parameter names come from audited config. Origin/path/board filters
+        must match the canonical monitoring list. JS navigation fails closed.
+        """
+        from urllib.parse import parse_qsl
+        pagination = self.config.get('pagination', {})
+        parameter = pagination.get('parameter')
+        if not parameter:
+            return []
+        origin = urlsplit(normalize_url(self.config['list_url']))
+        expected = dict(parse_qsl(origin.query))
+        links = []
+        for anchor in parse_html(html).find('a'):
+            if not anchor.text().strip().isdecimal():
+                continue
+            href = anchor.attrs.get('href', '')
+            if not href or href.lower().startswith(('#', 'javascript:')):
+                continue  # Active page has no navigation target.
+            try:
+                target = normalize_url(urljoin(self.config['list_url'], href))
+            except ValueError:
+                continue  # Unrelated numeric navigation is not a list pager.
+            parts = urlsplit(target)
+            query = parse_qs(parts.query)
+            if (parts.scheme, parts.netloc, parts.path) != (origin.scheme, origin.netloc, origin.path):
+                continue
+            if parameter not in query:
+                continue
+            if len(query[parameter]) != 1 or not query[parameter][0].isdecimal():
+                raise StructureError('INVALID_OBSERVED_PAGE')
+            if any(query.get(k) != [v] for k, v in expected.items() if k != parameter):
+                raise StructureError('UNEXPECTED_PAGINATION_BOARD')
+            if target not in links:
+                links.append(target)
+        return sorted(links, key=lambda u: int(parse_qs(urlsplit(u).query)[parameter][0]))
+
+    def fetch_list(self):
+        first = self.config['list_url']
+        pages = [self.request_text(first)]
+        parameter = self.config.get('pagination', {}).get('parameter')
+        visited = {int(parse_qs(urlsplit(first).query).get(parameter, ['0' if parameter == 'pager.offset' else '1'])[0])}
+        for html in pages:
+            self.parse_list(html)  # Unknown structure fails inside this source.
+            for target in self.page_links(html):
+                page = int(parse_qs(urlsplit(target).query)[parameter][0])
+                if page in visited:
+                    continue
+                if len(pages) >= self.max_pages:
+                    return pages
+                pages.append(self.request_text(target))
+                visited.add(page)
+        return pages
+
+    def _parse_items(self, response):
+        if not isinstance(response, list):
+            return super()._parse_items(response)
+        records = {}
+        for html in response:
+            for item in self.parse_list(html):
+                # Pinned notices recur on later pages; preserve first/newest.
+                records.setdefault(item.source_notice_id, item)
+        return list(records.values())
 
     def build_detail_url(self, href: str) -> str:
         url = normalize_url(urljoin(self.config['list_url'], href))

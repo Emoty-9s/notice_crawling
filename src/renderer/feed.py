@@ -9,9 +9,10 @@ from pathlib import Path
 from src.core.models import GeminiStatus, Notice
 from src.core.normalizer import clean_content_text
 from src.core.storage import _atomic_json
+from src.core.eligibility import PUBLIC_SCHEMA_VERSION, eligible_active_notices, current_analysis
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = PUBLIC_SCHEMA_VERSION
 SUMMARY_LIMIT = 300
 PUBLIC_DIR = Path(__file__).resolve().parents[2] / 'public'
 
@@ -37,7 +38,7 @@ def _publishable(notice: Notice) -> bool:
     # M08 keeps historical results, including legacy successes. Publish only a
     # complete success for this body, not a stale or incomplete old judgment.
     return (
-        result.status == GeminiStatus.SUCCESS and result.relevant is True
+        current_analysis(notice) and result.relevant is True
         and bool(notice.content_hash) and result.analyzed_content_hash == notice.content_hash
         and result.category is not None and result.participation_type is not None
         and result.reason is not None and result.keywords is not None
@@ -80,12 +81,16 @@ def build_feed(notices: Iterable[Notice], *, generated_at: str) -> dict:
     """
     timestamp = _timestamp(generated_at)
     records = {}
-    for notice in notices:
+    values = list(notices)
+    if any(not isinstance(n, Notice) for n in values):
+        raise FeedInputError('build_feed requires an iterable of Notice')
+    for notice in eligible_active_notices(values, today=datetime.fromisoformat(timestamp)):
         if not isinstance(notice, Notice):
             raise FeedInputError('build_feed requires an iterable of Notice')
         if not _publishable(notice):
             continue
         record = _public_notice(notice)
+        record['is_new'] = (notice.status == 'NEW' and _timestamp(notice.first_seen_at) == timestamp)
         if notice.notice_id in records and records[notice.notice_id] != record:
             raise FeedInputError('conflicting public records for the same notice_id')
         records[notice.notice_id] = record

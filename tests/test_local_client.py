@@ -34,10 +34,10 @@ class LocalClientTests(unittest.TestCase):
         notice = Notice(
             notice_id='n1', source_id='s1', institution='기관', title='공고', url='https://example.test/notice',
             content_hash='hash', content_text='공개 요약', first_seen_at=STAMP, last_seen_at=STAMP, updated_at=STAMP,
-            gemini=GeminiResult(status='SUCCESS', relevant=True, category='IP', participation_type='협력기관',
+            gemini=GeminiResult(status='SUCCESS', analysis_policy='patent-firm-participation-v2', relevant=True, category='IP', participation_type='협력기관',
                                 reason='참여 가능', keywords=['특허'], analyzed_content_hash='hash', analyzed_at=STAMP))
         self.feed = build_feed([notice], generated_at=STAMP)
-        self.metadata = {'schema_version': 1, 'generated_at': STAMP, 'notice_count': 1}
+        self.metadata = {'schema_version': 2, 'generated_at': STAMP, 'notice_count': 1}
         self.transport = Mock(side_effect=self.serve)
         self.client = FeedClient(BASE, cache_dir=self.root/'cache', timeout=7, transport=self.transport)
         # Any accidental real HTTP, including from central code, fails this suite.
@@ -126,12 +126,12 @@ class LocalClientTests(unittest.TestCase):
     def test_unsupported_schema_in_both_documents_including_bool_and_float(self):
         self.seed()
         for document in (self.feed, self.metadata):
-            for version in (2, True, 1.0, '1', None):
+            for version in (1, 3, True, 2.0, '2', None):
                 document['schema_version'] = version
                 with self.subTest(version=version):
                     result = self.client.sync()
                     self.assertEqual((result.status, result.error_code), ('FALLBACK', 'UNSUPPORTED_SCHEMA'))
-            document['schema_version'] = 1
+            document['schema_version'] = 2
 
     def test_invalid_metadata_stops_before_feed_download(self):
         self.metadata['notice_count'] = True

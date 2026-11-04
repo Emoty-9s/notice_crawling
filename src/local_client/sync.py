@@ -172,14 +172,11 @@ def _atomic_snapshot(path, snapshot):
 
 
 def retained_snapshot(snapshot, *, today=None):
-    """Project active v2 rows while preserving the producer snapshot on disk."""
-    today = retention_date(today)
-    notices = [n for n in snapshot['feed']['notices']
-               if deadline_state(n['apply_end'], today=today, title=n['title'], content=n['summary']) != 'EXPIRED']
-    if len(notices) == len(snapshot['feed']['notices']):
-        return snapshot
-    return {**snapshot, 'feed': {**snapshot['feed'], 'notices': notices},
-            'metadata': {**snapshot['metadata'], 'notice_count': len(notices)}}
+    """Preserve the complete validated pair; local views own deadline filtering.
+
+    In particular a user must be able to extend an expired official deadline.
+    """
+    return snapshot
 
 
 class FeedClient:

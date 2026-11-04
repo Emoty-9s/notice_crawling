@@ -60,8 +60,8 @@ def current_analysis(notice):
                     ('category', 'participation_type', 'reason', 'keywords')))
 
 
-def eligible_active_notices(notices, *, today=None):
+def eligible_active_notices(notices, *, today=None, include_expired=False):
     from src.ai.prefilter import Prefilter
     prefilter = Prefilter()
     return [n for n in notices if prefilter.classify(n)[0] in {'CANDIDATE','REVIEW'}
-            and deadline_state(n.apply_end, today=today, title=n.title, content=n.content_text) != 'EXPIRED']
+            and (include_expired or deadline_state(n.apply_end, today=today, title=n.title, content=n.content_text) != 'EXPIRED')]

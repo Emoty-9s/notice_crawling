@@ -47,12 +47,12 @@ class HistoryTests(unittest.TestCase):
 
     def test_all_history_retained_even_disabled_and_expired_over_90_days(self):
         result=self.pipeline([notice('old','2020-01-01'),notice('today','2026-11-03'),notice('unknown')],[])
-        self.assertEqual(len(result.notices),3);self.assertEqual(result.feed_count,2)
+        self.assertEqual(len(result.notices),3);self.assertEqual(result.feed_count,3)
 
-    def test_expired_new_preserved_without_ai_or_publication(self):
+    def test_expired_new_preserved_without_ai_and_available_for_local_override(self):
         result=self.pipeline([],[replace(notice(deadline='2020-01-01'),gemini=GeminiResult())])
         self.assertEqual(len(result.notices),1);self.assertEqual(len(result.observed),1)
-        self.assertEqual(result.feed_count,0)
+        self.assertEqual(result.feed_count,1)
 
     def test_deadline_correction_preserves_identity(self):
         old=notice(deadline='2020-01-01')
@@ -66,7 +66,7 @@ class HistoryTests(unittest.TestCase):
         client=FeedClient(BASE,cache_dir=self.root,clock=lambda:NOW)
         client.cache_path.write_text(json.dumps(snapshot),encoding='utf-8');before=client.cache_path.read_bytes()
         view=client.load_cache();validate_pair(view['feed'],view['metadata'])
-        self.assertEqual([n['notice_id'] for n in view['feed']['notices']],['today'])
+        self.assertEqual([n['notice_id'] for n in view['feed']['notices']],['expired','today'])
         self.assertEqual(client.cache_path.read_bytes(),before)
 
     def test_new_is_unaffected_by_user_ack_and_updated_has_no_badge(self):

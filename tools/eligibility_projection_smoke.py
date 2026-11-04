@@ -61,12 +61,12 @@ def main():
             metadata = json.loads((public/'metadata.json').read_text(encoding='utf-8'))
             validate_pair(feed, metadata)
             assert feed['schema_version'] == metadata['schema_version'] == 3
-            assert {n['notice_id'] for n in feed['notices']} == {'cached','old','missing','new'}
+            assert {n['notice_id'] for n in feed['notices']} == {'cached','old','missing','new','expired'}
             return feed, metadata
         with patch('src.pipeline.build_mvp_registry', return_value=registry):
             first = run_pipeline(client=client, config_path=config, storage=store,
                                  public_dir=public, clock=lambda:now)
-            assert len(first.notices) == 6 and first.feed_count == 4
+            assert len(first.notices) == 6 and first.feed_count == 5
             assert client.generate.call_count == 0
             assert next(n for n in first.notices if n.notice_id=='new').gemini.status=='NOT_ANALYZED'
             feed, metadata = load_pair()
@@ -78,7 +78,11 @@ def main():
             seen = SeenStore(root/'seen.json', base)
             row = next(n for n in feed['notices'] if n['is_new'])
             assert notice_badge(row, seen.mark(row)) == 'NEW'
-            assert len(notice_rows(DashboardData(sync.load_cache(), ()))) == 4
+            assert len(notice_rows(DashboardData(sync.load_cache(), ()))) == 5
+            from src.local_client.notice_settings import effective_deadline
+            closed=next(n for n in feed['notices'] if n['notice_id']=='expired')
+            assert effective_deadline(closed,today=now)['state']=='EXPIRED'
+            assert effective_deadline(closed,dict(user_deadline='2099-01-01'),today=now)['state']=='ACTIVE'
             stage_public(store.data_dir, public, root/'stage-first')
             second = run_pipeline(client=client, config_path=config, storage=store,
                                   public_dir=public, clock=lambda:now+timedelta(minutes=1))

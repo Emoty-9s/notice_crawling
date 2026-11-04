@@ -85,8 +85,13 @@ def smoke_check(report_path, feed_url, *, database_path=None):
             toggle.invoke();root.update()
             report['excluded_toggle_count']=len(window.visible_notices)
             report['excluded_reasons_available']=all(window._work_text(n) for n in window.visible_notices)
-            if len(window.visible_notices)!=len(first.feed['notices']):
+            current_ids={n['notice_id'] for n in window.visible_notices}
+            window.list_view.set('마감된 공고');window.view_selector.event_generate('<<ComboboxSelected>>');root.update()
+            closed_ids={n['notice_id'] for n in window.visible_notices}
+            report['closed_including_excluded']=len(closed_ids)
+            if current_ids & closed_ids or len(current_ids|closed_ids)!=len(first.feed['notices']):
                 raise RuntimeError('excluded toggle lost public notices')
+            window.list_view.set('현재 공고');window.view_selector.event_generate('<<ComboboxSelected>>');root.update()
             toggle.invoke();root.update()
             report['active_projection'] = True
             report['local_seen_state'] = not window._seen_error
@@ -125,6 +130,11 @@ def smoke_check(report_path, feed_url, *, database_path=None):
 
 def entry(argv=None):
     args = list(sys.argv[1:] if argv is None else argv)
+    if '--notice-settings-smoke-report' in args:
+        parser=argparse.ArgumentParser(description='Synthetic local deadline/delete/restore Tk check')
+        parser.add_argument('--notice-settings-smoke-report',required=True)
+        from tools.notice_settings_smoke import check
+        return check(parser.parse_args(args).notice_settings_smoke_report)
     if '--local-analysis-smoke-report' in args:
         parser=argparse.ArgumentParser(description='Synthetic offline Tk/ONNX A/B check; no company DB')
         parser.add_argument('--local-analysis-smoke-report',required=True)

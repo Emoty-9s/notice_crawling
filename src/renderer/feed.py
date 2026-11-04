@@ -80,7 +80,9 @@ def build_feed(notices: Iterable[Notice], *, generated_at: str) -> dict:
     values = list(notices)
     if any(not isinstance(n, Notice) for n in values):
         raise FeedInputError('build_feed requires an iterable of Notice')
-    for notice in eligible_active_notices(values, today=datetime.fromisoformat(timestamp)):
+    # Expiration is a user-local view: keep rows available for date overrides,
+    # closed-notice browsing and restoration without changing the v3 schema.
+    for notice in eligible_active_notices(values, today=datetime.fromisoformat(timestamp), include_expired=True):
         if not isinstance(notice, Notice):
             raise FeedInputError('build_feed requires an iterable of Notice')
         if not _publishable(notice):

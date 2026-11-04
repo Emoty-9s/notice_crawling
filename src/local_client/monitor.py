@@ -11,6 +11,7 @@ from .dashboard import DashboardData, DashboardError, _load_performances
 from .sync import FeedClient, SyncError, download, _parse, _atomic_snapshot
 from src.renderer.source_status import SOURCES, validate_source_status, timestamp
 from .seen import seen_path
+from .notice_settings import settings_path
 from src.core.eligibility import deadline_date
 
 DEFAULT_FEED_URL = 'https://emoty-9s.github.io/notice_crawling/'
@@ -28,7 +29,7 @@ class MonitorResult:
 
 
 def read_local(cache_path, database_path, base_url):
-    if Path(database_path).resolve() in (Path(cache_path).resolve(), seen_path(cache_path).resolve(),
+    if Path(database_path).resolve() in (Path(cache_path).resolve(), seen_path(cache_path).resolve(), settings_path(cache_path).resolve(),
                                        Path(str(cache_path) + '.sources.json').resolve(),
                                        Path(str(cache_path)+'.work.json').resolve(),
                                        Path(str(cache_path)+'.technical.json').resolve()):
@@ -52,7 +53,7 @@ def read_database(path):
 
 def sync_monitor(base_url, cache_path, database_path, *, transport=None):
     cache = Path(cache_path).resolve()
-    if Path(database_path).resolve() in (cache, cache.with_name(cache.name + '.sources.json'), seen_path(cache).resolve(),
+    if Path(database_path).resolve() in (cache, cache.with_name(cache.name + '.sources.json'), seen_path(cache).resolve(), settings_path(cache).resolve(),
                                        Path(str(cache)+'.work.json'),Path(str(cache)+'.technical.json')):
         return MonitorResult('ERROR', None, error_code='PATH_COLLISION')
     client = FeedClient(base_url, cache_dir=Path(cache_path).parent, timeout=15, transport=transport)

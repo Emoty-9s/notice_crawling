@@ -111,7 +111,7 @@ class EligibilityTests(unittest.TestCase):
             self.assertEqual(records['z-active'].gemini.status, 'NOT_ANALYZED')
             self.assertEqual(records['a-backlog'].gemini.status, 'NOT_ANALYZED')
             self.assertEqual(records['expired'].gemini.status, 'NOT_ANALYZED')
-            self.assertEqual(result.feed_count, 2)
+            self.assertEqual(result.feed_count, 3)  # Closed rows remain available for local date overrides.
 
 class PaginationTests(unittest.TestCase):
     def test_seven_share_cap(self):

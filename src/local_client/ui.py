@@ -13,6 +13,8 @@ from .monitor import (DEFAULT_FEED_URL, MonitorResult, notice_badge, ordered_not
 from .performance import DEFAULT_DB_PATH
 from .sync import DEFAULT_CACHE_DIR, SyncError
 from .seen import SeenStore, SeenStateError, seen_path
+from .notice_settings import (NoticeSettingsStore, NoticeSettingsError, settings_path,
+                              effective_deadline, in_view)
 from src.renderer.source_status import SOURCES
 from .notice_analysis import LocalNoticeAnalysis, public_only, digest, performance_input, adapt_notice
 from src.core.public_text import public_hash
@@ -84,6 +86,7 @@ class DashboardWindow:
         self.database_path = tk.StringVar(root, str(database_path))
         self.base_url = tk.StringVar(root, base_url)
         self._load_seen()
+        self._load_notice_settings()
         self.reference_year = tk.StringVar(root, str(reference_year))
         self.top_n = tk.StringVar(root, str(top_n))
         self.query = tk.StringVar(root)
@@ -171,6 +174,11 @@ class DashboardWindow:
         self.show_excluded = tk.BooleanVar(root,False)
         tk.Checkbutton(toolbar,text='제외된 공고 보기',variable=self.show_excluded,command=self.filter_notices,
                        bg=BG,fg=TEXT,selectcolor=CARD,activebackground=BG,activeforeground=TEXT).pack(side='left')
+        self.list_view=tk.StringVar(root,'현재 공고')
+        self.view_selector=ttk.Combobox(toolbar,textvariable=self.list_view,state='readonly',width=13,
+                                      values=('현재 공고','마감된 공고','삭제한 공고'))
+        self.view_selector.pack(side='left',padx=8)
+        self.view_selector.bind('<<ComboboxSelected>>',lambda event:self.filter_notices())
         self.label(toolbar, '매칭 기준 연도', bg=BG, size=9, color=MUTED).pack(side='left')
         self.entry(toolbar, self.reference_year, width=6).pack(side='left', padx=(8, 14), ipady=5)
         self.label(toolbar, 'TOP N', bg=BG, size=9, color=MUTED).pack(side='left')
@@ -487,11 +495,10 @@ class DashboardWindow:
 
     def filter_notices(self):
         if self.data:
-            self.eligible_active_notices = notice_rows(self.data)
-            if not self.show_excluded.get():
-                from .work_opportunity import is_displayable
-                self.eligible_active_notices=[n for n in self.eligible_active_notices
-                    if is_displayable(self.work_results.get(n['notice_id']))]
+            self.eligible_active_notices=[n for n in notice_rows(self.data)
+                if in_view(n,self._notice_settings.get(n['notice_id'],{}),self.work_results.get(n['notice_id']),
+                           view=self.list_view.get(),include_excluded=self.show_excluded.get())]
+            if self._notice_settings_error:self.eligible_active_notices=[]
             query = self.query.get().strip().casefold()
             filtered = [n for n in self.eligible_active_notices if not query or query in
                         ' '.join(str(n[k] or '') for k in ('title','institution','category','participation_type','summary','keywords')).casefold()]
@@ -531,6 +538,8 @@ class DashboardWindow:
         self.status.set('공고 제목을 눌러 상세 보기  ·  실적 매칭은 로컬 PC에서만 계산합니다.')
         if self._seen_error:
             self.status.set('확인 이력을 읽거나 저장하지 못했습니다. 확인 상태가 재실행 후 유지되지 않을 수 있습니다.')
+        if self._notice_settings_error:
+            self.status.set('공고 사용자 설정을 읽지 못했습니다. 기존 파일은 보존하며 변경을 차단합니다.')
 
     def _notice_card(self, notice):
         card = self.card(self.body)
@@ -550,13 +559,15 @@ class DashboardWindow:
         card.bind('<Button-1>', lambda event, n=notice: self.show_detail(n))
         footer = self.tk.Frame(card, bg=CARD)
         footer.pack(fill='x', padx=16, pady=(0, 5))
-        from src.core.eligibility import deadline_date
-        end = deadline_date(notice.get('apply_end'))
-        deadline = f'마감 {end.isoformat()}' if end else '마감 미확인'
+        deadline = self.deadline_text(notice)
         reason = '지원 자격은 원문 확인 · 유사도는 적격 확률이 아닙니다'
-        self.label(footer, deadline + ' · ' + reason, size=9, color=MUTED).pack(side='left')
+        self.label(footer, deadline + '\n' + reason, size=9, color=MUTED,wrap=460).pack(side='left',fill='x',expand=True)
         button = self.button(footer, '실적 매칭 펼쳐보기  ▾', lambda n=notice: self.toggle_match(n['notice_id']))
         button.pack(side='right')
+        self.button(footer,'마감일 설정',lambda n=notice:self.open_deadline(n)).pack(side='right',padx=5)
+        deleted=self._notice_settings.get(notice['notice_id'],{}).get('deleted_from_list',False)
+        self.button(footer,'복원' if deleted else '목록에서 삭제',
+                    lambda n=notice,d=deleted:self.set_notice_preference(n,deleted_from_list=not d)).pack(side='right',padx=5)
         panel = self.tk.Frame(card, bg=INNER)
         self.notice_cards[notice['notice_id']] = dict(card=card, panel=panel, button=button, notice=notice)
         if notice['notice_id'] in self.expanded:
@@ -565,9 +576,58 @@ class DashboardWindow:
             button.configure(text='실적 매칭 접기  ▴')
             self._render_matches(panel, notice)
 
-    @staticmethod
-    def period(notice):
-        return f"접수  {notice.get('apply_start') or '시작일 미제공'}  —  {notice.get('apply_end') or '마감일 미제공'}"
+    def deadline_text(self,notice):
+        end=effective_deadline(notice,self._notice_settings.get(notice['notice_id'],{}))
+        label={'USER':'사용자 마감일','OFFICIAL':'공식 마감일','PUBLISHED_PLUS_21':'자동 마감 시작(게시일+21일)',
+               'FIRST_SEEN_PLUS_21':'자동 마감 시작(최초 수집일+21일)','UNKNOWN_DATE':'UNKNOWN_DATE · 날짜 근거 없음'}[end['source']]
+        return f"{label} {end['date'] or ''} · {'마감' if end['state']=='EXPIRED' else '날짜 미확인' if end['state']=='UNKNOWN_DATE' else '마감 전'}"
+
+    def period(self,notice):
+        return f"접수 {notice.get('apply_start') or '시작일 미제공'} / 원본 공식 마감일 {notice.get('apply_end') or '미제공'}\n{self.deadline_text(notice)} (한국시간)"
+
+    def _load_notice_settings(self):
+        try:
+            cache=self.cache_path.get()
+            self._notice_settings_store=NoticeSettingsStore(settings_path(cache),self.base_url.get(),
+                protected_paths=(self.database_path.get(),cache,seen_path(cache),str(cache)+'.work.json',str(cache)+'.technical.json',str(cache)+'.sources.json'))
+            self._notice_settings=self._notice_settings_store.load()
+            self._notice_settings_error=False
+        except (NoticeSettingsError,ValueError,OSError,SyncError):
+            self._notice_settings_store=None;self._notice_settings={};self._notice_settings_error=True
+
+    def set_notice_preference(self,notice,**changes):
+        from tkinter import messagebox
+        try:
+            if self._notice_settings_store is None:raise NoticeSettingsError('NOTICE_SETTINGS_UNAVAILABLE')
+            self._notice_settings=self._notice_settings_store.update(notice['notice_id'],**changes)
+            self._notice_settings_error=False
+        except NoticeSettingsError as error:
+            messagebox.showerror('공고 설정 저장 실패',str(error),parent=self.root)
+            return False
+        self.filter_notices()
+        return True
+
+    def open_deadline(self,notice):
+        from tkinter import messagebox
+        dialog=self.tk.Toplevel(self.root);dialog.title('공고 마감일 설정');dialog.configure(bg=CARD)
+        dialog.transient(self.root)
+        self.label(dialog,'사용자 마감일 (YYYY-MM-DD, 당일 포함 · 한국시간)',color=MUTED).pack(padx=22,pady=12)
+        self.label(dialog,self.period(notice),size=10,wrap=570).pack(padx=22,pady=8)
+        value=self.tk.StringVar(dialog,self._notice_settings.get(notice['notice_id'],{}).get('user_deadline') or '')
+        self.entry(dialog,value,width=22).pack(padx=22,pady=8)
+        def save(clear=False):
+            date=None if clear else value.get().strip()
+            if not clear:
+                from datetime import date as iso_date
+                try:
+                    if iso_date.fromisoformat(date).isoformat()!=date:raise ValueError()
+                except ValueError:
+                    messagebox.showerror('날짜 확인','YYYY-MM-DD 형식의 실제 날짜를 입력하세요.',parent=dialog);return
+            if self.set_notice_preference(notice,user_deadline=date):dialog.destroy()
+        self.button(dialog,'저장',save).pack(side='left',padx=15,pady=14)
+        self.button(dialog,'사용자 마감일 해제',lambda:save(True)).pack(side='left',padx=15,pady=14)
+        self.button(dialog,'닫기',dialog.destroy).pack(side='left',padx=15,pady=14)
+        return dialog
 
     def toggle_match(self, notice_id):
         row = self.notice_cards[notice_id]
@@ -661,7 +721,7 @@ class DashboardWindow:
             self.filter_notices()
 
     def _retention_tick(self):
-        # Pruning shares the sync worker; no disk/network wait on the Tk thread.
+        # Reload public data then refresh local KST views, without deleting rows.
         if not self._busy:
             self._busy = True
             self.sync_button.configure(state='disabled')
@@ -686,6 +746,10 @@ class DashboardWindow:
         top.pack(fill='x', pady=(0, 12))
         self.button(top, '← 공고 목록으로', self.show_list).pack(side='left')
         self.button(top, '원문 보기 ↗', lambda: self.open_original(notice)).pack(side='right')
+        self.button(top,'마감일 설정',lambda:self.open_deadline(notice)).pack(side='right',padx=8)
+        deleted=self._notice_settings.get(notice['notice_id'],{}).get('deleted_from_list',False)
+        self.button(top,'복원' if deleted else '목록에서 삭제',
+                    lambda:self.set_notice_preference(notice,deleted_from_list=not deleted)).pack(side='right',padx=8)
         card = self.card(self.body)
         card.pack(fill='x', pady=(0, 14))
         self.label(card, notice['institution'], color=MUTED, size=11).pack(anchor='w', padx=24, pady=(23, 8))
@@ -797,6 +861,7 @@ class DashboardWindow:
                 current.set(value.get().strip())
             self.data = None
             self._load_seen()
+            self._load_notice_settings()
             self.expanded.clear()
             self.matches.clear()
             self._source_document = None

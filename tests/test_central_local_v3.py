@@ -23,7 +23,7 @@ def notice(identity='n',**changes):
     data.update(changes);return Notice(**data)
 
 class CentralV3Tests(unittest.TestCase):
-    def test_active_candidate_review_published_and_unrelated_expired_hidden(self):
+    def test_candidate_review_and_expired_retained_for_local_override_unrelated_hidden(self):
         records=[notice(),notice('review',title='전문 용역 모집',content_text=''),
                  notice('unrelated',title='청소 용역 계약',content_text='청소 용역 계약의 시설 청소 세부 작업 사항입니다.'),
                  notice('expired',apply_end='2020-01-01')]
@@ -32,9 +32,9 @@ class CentralV3Tests(unittest.TestCase):
             feed=build_feed(records,generated_at=STAMP)
         self.assertEqual(feed['schema_version'],3)
         self.assertEqual({n['prefilter_status'] for n in feed['notices']},{'CANDIDATE','REVIEW'})
-        self.assertEqual({n['notice_id'] for n in feed['notices']},{'n','review'})
+        self.assertEqual({n['notice_id'] for n in feed['notices']},{'n','review','expired'})
         self.assertEqual([n.to_dict() for n in records],before)
-        validate_pair(feed,dict(schema_version=3,generated_at=STAMP,notice_count=2))
+        validate_pair(feed,dict(schema_version=3,generated_at=STAMP,notice_count=3))
 
     def test_legacy_success_false_and_retry_future_do_not_control_publication(self):
         historical=notice(gemini=GeminiResult(status='SUCCESS',relevant=False,analysis_policy='old'),

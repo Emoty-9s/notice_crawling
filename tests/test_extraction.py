@@ -89,6 +89,19 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual(len(links),1)
         self.assertIn('/fileDownLoadDw.do?boardId=bidancm&dataNo=100&sortNo=0',links[0])
 
+    def test_pre_ocr_central_history_loads_without_reset_or_lost_fields(self):
+        from src.core.storage import JsonStorage, _atomic_json
+        store=JsonStorage(Path(self.tmp.name)/'legacy')
+        original=notice().to_dict()
+        original.pop('extraction')
+        _atomic_json(store.notices_path,[original])
+        loaded=store.load_notices()[0]
+        self.assertEqual(loaded.extraction,{})
+        self.assertEqual({k:v for k,v in loaded.to_dict().items() if k!='extraction'},original)
+        original.pop('analysis')
+        _atomic_json(store.notices_path,[original])
+        self.assertEqual(store.load_notices()[0].notice_id,original['notice_id'])
+
     def test_ocr_cannot_override_direct_qualification_exclusion(self):
         result = self.extract.enrich(notice(content_text='특허법인은 참가 불가. 특허분석 수행기관 모집'),[Resource('a')])
         decision = classify(result.to_dict())

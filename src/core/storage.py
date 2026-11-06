@@ -71,7 +71,9 @@ def _notice_records(data: object) -> list[Notice]:
     legacy_gemini_keys = gemini_keys - {'participation_type', 'keywords'}
     notices = []
     for index, record in enumerate(data):
-        if not isinstance(record, dict) or set(record) not in (notice_keys, notice_keys - {'analysis'}):
+        compatible_notice_keys = (notice_keys, notice_keys - {'analysis'},
+                                  notice_keys - {'extraction'}, notice_keys - {'analysis','extraction'})
+        if not isinstance(record, dict) or set(record) not in compatible_notice_keys:
             raise StorageSchemaError(f'notice[{index}]: incomplete/unknown Notice fields')
         gemini = record['gemini']
         if 'analysis' in record and (not isinstance(record['analysis'],dict)

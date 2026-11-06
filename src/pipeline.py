@@ -133,6 +133,7 @@ def _run_pipeline(
     queue = ExtractionQueue()
     registry.set_extractor(queue)
     collected = registry.run()  # fetch/parse/normalize, with source isolation
+    extractor.start_budget() # collection latency must not consume the OCR budget
     compare_batch(collected, previous, observed_at=stamp) # reject conflicting identities before scheduling
     previous_by_id = {n.notice_id:n for n in previous}
     def extraction_priority(n):

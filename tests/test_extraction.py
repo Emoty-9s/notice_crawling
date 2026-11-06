@@ -68,6 +68,15 @@ class ExtractionTests(unittest.TestCase):
         result=self.extract.enrich(notice(),[Resource('a'),Resource('b')])
         self.assertEqual([r['status'] for r in result.extraction['resources']],['DEFERRED','DEFERRED'])
 
+    def test_collection_latency_does_not_consume_the_explicit_ocr_budget(self):
+        with patch('src.core.extraction.time.monotonic',return_value=100):
+            extractor=Extractor(self.tmp.name,budget_seconds=720,ocr=self.engine)
+        with patch('src.core.extraction.time.monotonic',return_value=1000):
+            extractor.start_budget()
+            result=extractor.image(b'after-slow-collection')
+        self.assertEqual(result['status'],'SUCCESS')
+        self.engine.assert_called_once()
+
     def test_uncertain_image_and_hidden_editor_and_download_links_discovered(self):
         resources=discover('<input name="contents" value="&lt;img src=&quot;/unknown.webp&quot;&gt;">'
                            '<a href="/fileDownload?id=1">공고문</a><img src="/ambiguous.png">','https://x.test')

@@ -184,10 +184,14 @@ class Extractor:
         self.cache_dir = Path(cache_dir) / VERSION
         self.ocr = ocr or Tesseract()
         self.fetch = fetch or download
-        self.deadline = time.monotonic() + budget_seconds
+        self.budget_seconds = budget_seconds
+        self.start_budget()
         self.pages_per_run = pages_per_run
         self.metrics = {}
         self.isolated = isolated
+
+    def start_budget(self):
+        self.deadline = time.monotonic() + self.budget_seconds
 
     def _read(self, key):
         import json

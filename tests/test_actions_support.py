@@ -253,7 +253,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertEqual(pages['with']['path'], '.run/pages')
         self.assertLess(self.steps.index(stage), self.steps.index(pages))
         state = next(s for s in self.steps if s.get('with', {}).get('name') == 'central-state-v1')
-        self.assertEqual(set(state['with']['path'].splitlines()), {'.run/data/notices.json', '.run/data/scraper_status.json', '.run/data/analysis_diagnostics.json', '.run/data/ocr_cache', '.run/data/ocr_diagnostics.json'})
+        self.assertEqual(set(state['with']['path'].splitlines()), {'.run/data/notices.json', '.run/data/scraper_status.json', '.run/data/analysis_diagnostics.json', '.run/data/ocr_cache', '.run/data/ocr_diagnostics.json', '.run/data/crawl_state.json', '.run/data/crawl_diagnostics.json', '.run/data/crawl_state_recovery'})
         self.assertIn('always()',state['if'])
         self.assertIn('checkpoint.outputs.valid',state['if'])
         self.assertEqual(state['with']['retention-days'], 90)

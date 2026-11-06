@@ -98,16 +98,21 @@ class PortalScraper(BoardScraper):
 
     def _fetch_pages(self, first, first_html):
         pages, queue, visited = [first_html], [(first, first_html)], {first}
+        pending = []
         # Keep pages as separate documents; never concatenate DOMs/duplicate IDs.
         for current, html in queue:
-            self.parse_list(html)  # Fail before traversing an unknown shell.
+            items = self.parse_list(html)  # Fail before traversing an unknown shell.
+            if self.list_page_complete(items):
+                return pages
             links = self.page_links(html)
             for target in links:
-                if target in visited:
-                    continue
-                if len(pages) >= self.max_pages:
+                if target not in visited and target not in pending:
+                    pending.append(target)
+            if pending:
+                if not self.may_fetch_list_page(len(pages)):
                     self.logger.warning('pagination_window_capped source_id=%s max_pages=%d', self.source_id, self.max_pages)
                     return pages
+                target = pending.pop(0)
                 visited.add(target)
                 response = self.request_text(self._allowed(target))
                 pages.append(response)
@@ -280,3 +285,6 @@ class PortalScraper(BoardScraper):
         original = super().normalize(parsed)
         return replace(original, notice_id=generate_notice_id(source_id=self.source_id,
                        title=original.title, url=original.url))
+
+    def notice_id_for(self, item):
+        return generate_notice_id(source_id=self.source_id,title=item.title,url=item.url)

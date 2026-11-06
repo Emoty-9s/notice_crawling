@@ -118,7 +118,7 @@
           "uses": "actions/upload-artifact@v7",
           "with": {
             "name": "central-state-v1",
-            "path": ".run/data/notices.json\n.run/data/scraper_status.json\n.run/data/analysis_diagnostics.json\n.run/data/ocr_cache\n.run/data/ocr_diagnostics.json",
+            "path": ".run/data/notices.json\n.run/data/scraper_status.json\n.run/data/analysis_diagnostics.json\n.run/data/ocr_cache\n.run/data/ocr_diagnostics.json\n.run/data/crawl_state.json\n.run/data/crawl_diagnostics.json\n.run/data/crawl_state_recovery",
             "if-no-files-found": "error",
             "retention-days": 90,
             "overwrite": true,

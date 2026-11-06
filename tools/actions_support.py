@@ -115,9 +115,18 @@ def diagnostics(data_dir):
     if ocr_path.is_file():
         metrics = _read_json(ocr_path, {})
         allowed = {'targets','success','failed','partial','deferred','unsupported','cache_hits',
-                   'ocr_targets','ocr_success','ocr_failed','ocr_characters','elapsed_seconds'}
+                   'ocr_targets','ocr_success','ocr_failed','ocr_characters','elapsed_seconds','downloads','completed_reused'}
         report['ocr'] = {source:{k:v for k,v in value.items() if k in allowed and type(v) in (int,float)}
                          for source,value in metrics.items() if source in statuses and isinstance(value,dict)}
+    crawl_path = Path(data_dir)/'crawl_diagnostics.json'
+    if crawl_path.is_file():
+        metrics = _read_json(crawl_path,{})
+        allowed = {'mode','baseline_date','window_start','window_end','list_pages','list_rows',
+                   'listed_notices','detail_requests','detail_http_requests','list_http_requests','http_requests',
+                   'detail_skipped','frozen_skipped','new_notices','recent_rechecked','early_stop','ordering',
+                   'range_complete','last_successful_crawl_at'}
+        report['crawl'] = {source:{k:v for k,v in value.items() if k in allowed and type(v) in (str,int,float,bool,type(None))}
+                           for source,value in metrics.items() if source in statuses and isinstance(value,dict)}
     report['prefilter_counts'] = {s:sum(n.analysis.prefilter_status==s for n in notices)
                                   for s in ('CANDIDATE','REVIEW','CLEARLY_UNRELATED')}
     # This file is an operator-only allowlisted metrics document produced by the

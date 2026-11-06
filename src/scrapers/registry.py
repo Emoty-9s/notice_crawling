@@ -34,6 +34,10 @@ class ScraperRegistry:
         for scraper in self._scrapers.values():
             scraper.extractor = extractor
 
+    def set_incremental(self, coordinator):
+        for scraper in self._scrapers.values():
+            scraper.incremental = coordinator.for_source(scraper)
+
     def run(self) -> list[Notice]:
         self.results = {}
         self.errors = {}

@@ -114,14 +114,19 @@ class BoardScraper(BaseScraper[NoticeLink, ParsedNotice]):
         pages = [self.request_text(first)]
         parameter = self.config.get('pagination', {}).get('parameter')
         visited = {int(parse_qs(urlsplit(first).query).get(parameter, ['0' if parameter == 'pager.offset' else '1'])[0])}
+        pending = []
         for html in pages:
-            self.parse_list(html)  # Unknown structure fails inside this source.
+            items = self.parse_list(html)  # Unknown structure fails inside this source.
+            if self.list_page_complete(items):
+                return pages
             for target in self.page_links(html):
                 page = int(parse_qs(urlsplit(target).query)[parameter][0])
-                if page in visited:
-                    continue
-                if len(pages) >= self.max_pages:
+                if page not in visited and all(p != page for p,_ in pending):
+                    pending.append((page,target))
+            if pending:
+                if not self.may_fetch_list_page(len(pages)):
                     return pages
+                page,target = pending.pop(0)
                 pages.append(self.request_text(target))
                 visited.add(page)
         return pages
@@ -217,6 +222,10 @@ class BoardScraper(BaseScraper[NoticeLink, ParsedNotice]):
             url=normalize_url(item.url), content_text=content, content_hash=generate_content_hash(content_text=content),
             first_seen_at=stamp, last_seen_at=stamp, updated_at=stamp,
         )
+
+    def notice_id_for(self, item):
+        return generate_notice_id(source_id=self.source_id,title=item.title,url=item.url,
+                                  source_notice_id=item.source_notice_id)
 
 
 class TableBoardScraper(BoardScraper):

@@ -47,20 +47,25 @@ class RipcScraper(PortalScraper):
         if not parse_html(first_html).find('script', id='tmpl_noticeListRow'):
             return super()._fetch_pages(first, first_html)
         pages = []
-        for page in range(1, self.max_pages + 1):
+        page = 0
+        while True:
+            page += 1
             endpoint, data = self.ajax_request(first_html, page)
             response = self.request_form(self._allowed(endpoint), data)
             result = self.json_result(response)
             if result['currentPageNo'] != page or result['recordCountPerPage'] != 10:
                 raise StructureError('RIPC_PAGE_RESPONSE_MISMATCH')
-            self.parse_list(response)
+            items = self.parse_list(response)
             pages.append(response)
+            if self.list_page_complete(items):
+                break
             if page * 10 >= result['totalRecordCount']:
                 break
             if not result['noticeList']:
                 raise StructureError('RIPC_MISSING_PAGE_ROWS')
-            if page == self.max_pages:
+            if not self.may_fetch_list_page(len(pages)):
                 self.logger.warning('pagination_window_capped source_id=%s max_pages=%d', self.source_id, self.max_pages)
+                break
         return pages
 
     @staticmethod

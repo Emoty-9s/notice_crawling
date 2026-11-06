@@ -121,6 +121,8 @@ class BaseScraper(ABC, Generic[Item, Parsed]):
         self._sleep = sleep
         self.logger = logger if logger is not None else logging.getLogger(__name__)
         self.extractor = None
+        self.incremental = None
+        self._request_phase = 'list'
 
     def request_text(self, url: str) -> str:
         """Bounded GET retries: transient network errors, 429 and selected 5xx.
@@ -140,6 +142,8 @@ class BaseScraper(ABC, Generic[Item, Parsed]):
         options = self.http_settings
         for attempt in range(options.max_retries + 1):
             try:
+                if self.incremental is not None:
+                    self.incremental.request(self._request_phase)
                 headers = {"User-Agent": options.user_agent}
                 if data is None:
                     text = self.transport.get(url, timeout=options.timeout_seconds, headers=headers)
@@ -207,17 +211,59 @@ class BaseScraper(ABC, Generic[Item, Parsed]):
         validate_notices([notice], self.source_id)
         return notice
 
+    def notice_id_for(self, item):
+        """Adapters opt in only with the exact same identity as normalize()."""
+        return None
+
+    def list_page_complete(self, items):
+        if self.incremental is None:
+            return False
+        try:
+            return self.incremental.observe_page(items)
+        except Exception as error:
+            self.incremental.disable(type(error).__name__)
+            return False
+
+    def may_fetch_list_page(self, count):
+        return self.incremental.may_fetch_page(count) if self.incremental is not None else count < self.max_pages
+
     def run(self) -> list[Notice]:
+        from src.core.incremental import IncrementalError
+        try:
+            return self._run_once()
+        except IncrementalError as error:
+            if self.incremental is None or not self.incremental.enabled:
+                raise
+            self.incremental.disable(type(error).__name__)
+            return self._run_once()
+
+    def _run_once(self) -> list[Notice]:
         if not self.enabled:
             self.logger.info("scraper_skipped source_id=%s", self.source_id)
             return []
+        self._request_phase = 'list'
         response = self._stage("fetch_list", self.fetch_list)
         items = self._stage("parse_list", self._parse_items, response)
+        plans = [(item,None) for item in items]
+        if self.incremental is not None:
+            try:
+                plans = self.incremental.plan(items)
+            except Exception as error:
+                from src.core.incremental import IncrementalError
+                raise IncrementalError(type(error).__name__) from error
         notices: list[Notice] = []
-        for item in items:
+        for item,reused in plans:
+            if reused is not None:
+                notices.append(reused)
+                continue
+            self._request_phase = 'detail'
+            if self.incremental is not None:
+                self.incremental.metrics['detail_requests'] += 1
             detail = self._stage("fetch_detail", self.fetch_detail, item)
             parsed = self._stage("parse_detail", self.parse_detail, detail, item)
             notice = self._stage("normalize", self._normalize_notice, parsed)
+            if self.incremental is not None:
+                self.incremental.detail_succeeded(item,notice)
             if self.extractor is not None:
                 from src.core.extraction import discover, INCOMPLETE, Resource
                 from src.core.normalizer import generate_content_hash

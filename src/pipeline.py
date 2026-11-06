@@ -132,10 +132,23 @@ def _run_pipeline(
     extractor = Extractor(store.data_dir / 'ocr_cache', isolated=True)
     queue = ExtractionQueue()
     registry.set_extractor(queue)
+    from src.core.incremental import IncrementalCrawl
+    incremental = IncrementalCrawl(store.data_dir,previous,statuses,now)
+    registry.set_incremental(incremental)
     collected = registry.run()  # fetch/parse/normalize, with source isolation
     extractor.start_budget() # collection latency must not consume the OCR budget
     compare_batch(collected, previous, observed_at=stamp) # reject conflicting identities before scheduling
     previous_by_id = {n.notice_id:n for n in previous}
+    if incremental.active:
+        # Commit acquired IDs and pending resources before long OCR. A restart
+        # can skip detail downloads without stranding newly discovered images.
+        pending = [queue.pending_notice(n,previous_by_id.get(n.notice_id)) for n in collected]
+        checkpoint = {n.notice_id:replace(n,status=NoticeStatus.EXISTING) for n in previous}
+        checkpoint.update({n.notice_id:n for n in compare_batch(pending,previous,observed_at=stamp).notices})
+        store.save_notices(sorted(checkpoint.values(),key=lambda n:(n.source_id,n.notice_id)))
+        # Watermarks cannot precede the durable Notice checkpoint.
+        incremental.commit(registry.results)
+        _atomic_json(store.data_dir/'crawl_diagnostics.json',incremental.diagnostics())
     def extraction_priority(n):
         old = previous_by_id.get(n.notice_id)
         if old is None or (old.extraction.get('original_hash', old.content_hash) != n.content_hash):
@@ -152,7 +165,9 @@ def _run_pipeline(
     processed = {}
     for notice in ordered:
         if notice.notice_id in queue.resources:
-            notice = extractor.enrich(notice, queue.resources[notice.notice_id])
+            old = previous_by_id.get(notice.notice_id)
+            notice = extractor.enrich(notice, queue.resources[notice.notice_id],
+                previous_resources=old.extraction.get('resources',[]) if old else ())
         processed[notice.notice_id] = notice
     collected = [processed[n.notice_id] for n in collected]
     compared = compare_batch(collected, previous, observed_at=stamp)
@@ -162,24 +177,38 @@ def _run_pipeline(
     merged = {n.notice_id: replace(n, status=NoticeStatus.EXISTING) for n in previous}
     merged.update({n.notice_id: n for n in current_notices})
     enabled = {c['source_id'] for c in configs if c.get('enabled', False)}
-    observed_ids = {n.notice_id for n in current_notices}
-    for old in previous:
-        if (old.source_id not in enabled or old.notice_id in observed_ids or not old.extraction
-                or old.extraction.get('status') == 'SUCCESS'):
-            continue
-        resources = [Resource(r['source_url'],r.get('name',''),r.get('kind','attachment'))
-                     for r in old.extraction.get('resources',[]) if r.get('source_url')]
+    retry_candidates = [n for n in previous if n.source_id in enabled and n.notice_id not in queue.resources
+                        and n.extraction and n.extraction.get('status')!='SUCCESS']
+    retry_groups = [sorted((n for n in retry_candidates if n.source_id==source),
+                           key=lambda n:(n.extraction.get('retry_last_attempt_at') or '',n.notice_id))
+                    for source in dict.fromkeys(n.source_id for n in retry_candidates)]
+    for old in (n for row in zip_longest(*retry_groups) for n in row if n is not None):
+        records = old.extraction.get('resources',[])
+        resources = [Resource(r.get('source_url') or
+                             (('cached:' if r.get('status')=='SUCCESS' else 'unresolved:')+str(r.get('resource_id','missing'))),
+                             r.get('name',''),r.get('kind','attachment')) for r in records]
         if resources:
+            downloads_before = extractor.metrics.get(old.source_id,{}).get('downloads',0)
             retry = extractor.enrich(replace(old,content_text=old.extraction.get('original_text',''),
-                                            content_hash=old.extraction.get('original_hash',old.content_hash)),resources)
+                                            content_hash=old.extraction.get('original_hash',old.content_hash)),resources,
+                                     previous_resources=records,reuse_completed=True)
+            retry = replace(retry,extraction={**retry.extraction,'retry_last_attempt_at':
+                stamp if extractor.metrics.get(old.source_id,{}).get('downloads',0)>downloads_before
+                else old.extraction.get('retry_last_attempt_at')})
             merged[old.notice_id] = replace(retry,status=NoticeStatus.EXISTING,
                 updated_at=stamp if retry.content_hash != old.content_hash else old.updated_at)
     _atomic_json(store.data_dir / 'ocr_diagnostics.json', extractor.metrics)
+    _atomic_json(store.data_dir/'crawl_diagnostics.json',incremental.diagnostics())
+    crawl_incomplete = any(not s.range_complete for s in incremental.sessions.values())
     for source, records in registry.results.items():
+        session = incremental.sessions.get(source)
+        capped = session is not None and not session.range_complete
         statuses[source] = {
-            'status': 'SUCCESS', 'last_attempt_at': stamp, 'last_success_at': stamp,
+            'status': 'WARNING' if capped else 'SUCCESS', 'last_attempt_at': stamp,
+            'last_success_at': statuses.get(source,{}).get('last_success_at') if capped else stamp,
             'notices_found': len({notice.notice_id for notice in records}),
-            'error_type': None, 'error_message': None,
+            'error_type': 'INCREMENTAL_PAGE_LIMIT' if capped else None,
+            'error_message': 'Configured incremental page limit reached' if capped else None,
         }
     for source, failure in registry.errors.items():
         statuses[source] = {
@@ -216,7 +245,7 @@ def _run_pipeline(
         raise
     store.save_scraper_status(statuses)
     _atomic_json(store.data_dir/'analysis_diagnostics.json',dict(
-        metrics_phase='FINAL',collection_status='PARTIAL' if registry.errors else 'SUCCESS',
+        metrics_phase='FINAL',collection_status='PARTIAL' if registry.errors or crawl_incomplete else 'SUCCESS',
         prefilter_status='SUCCESS',publication_status='SUCCESS',analysis_status='LOCAL_ONLY',
         extraction_status='PARTIAL' if any(n.extraction.get('status') in {'PARTIAL','FAILED'} for n in snapshot) else 'SUCCESS',
         total_history=len(snapshot),public_eligible=len(feed['notices']),external_ai_calls=0,
@@ -224,4 +253,4 @@ def _run_pipeline(
                           for s in ('CANDIDATE','REVIEW','CLEARLY_UNRELATED')}))
     return PipelineResult(tuple(snapshot), tuple(observed), tuple(sorted(registry.errors)),
                           (), tuple(registry.skipped), len(feed['notices']),
-                          any(n.extraction.get('status') in {'PARTIAL','FAILED'} for n in snapshot))
+                          crawl_incomplete or any(n.extraction.get('status') in {'PARTIAL','FAILED'} for n in snapshot))

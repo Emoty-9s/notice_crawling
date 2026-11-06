@@ -177,6 +177,32 @@ class ExtractionQueue:
         self.resources[notice.notice_id] = list({r.url:r for r in [*previous,*resources]}.values())
         return notice
 
+    def pending_notice(self, notice, previous=None):
+        """Durable work manifest before long OCR; never lose jobs on restart."""
+        resources = self.resources.get(notice.notice_id)
+        if not resources:
+            return notice
+        prior = {r.get('resource_id'):r for r in (previous.extraction.get('resources',[]) if previous else [])}
+        records = []
+        for resource in resources:
+            key = hashlib.sha256(resource.url.encode()).hexdigest()
+            record = dict(prior.get(key,{}),resource_id=key,kind=resource.kind,name=resource.name,
+                          source_url=resource.url,status='DEFERRED')
+            if resource.url.startswith('data:') and len(resource.url)>MAX_BYTES*4//3+1024:
+                record.update(source_url=None,status='UNSUPPORTED',error_code='INLINE_IMAGE_LIMIT')
+            record.setdefault('parts',[])
+            records.append(record)
+        original = notice.content_text
+        if original.startswith('[이미지 본문:') or original == INCOMPLETE:
+            original = ''
+        text = (previous.content_text if previous and
+                previous.extraction.get('original_hash') == notice.content_hash else original)
+        if INCOMPLETE not in text:
+            text += '\n'+INCOMPLETE
+        return replace(notice,content_text=text,content_hash=generate_content_hash(content_text=text),
+            extraction=dict(version=VERSION,status='PARTIAL',original_text=original,
+                            original_hash=notice.content_hash,resources=records))
+
 
 class Extractor:
     def __init__(self, cache_dir, *, ocr=None, fetch=None, budget_seconds=720, pages_per_run=20, isolated=False):
@@ -361,7 +387,7 @@ class Extractor:
             self._save(key, result)
         return result
 
-    def enrich(self, notice, resources):
+    def enrich(self, notice, resources, *, previous_resources=(), reuse_completed=False):
         started = time.monotonic()
         records = []
         original = notice.content_text
@@ -369,25 +395,35 @@ class Extractor:
             original = ''
         chunks = [('[HTML 원문 직접 추출] ' if resources else '') + original] if original else []
         seen = set(' '.join(line.split()) for line in re.split(r'\n|(?<=[.!?])\s+', original) if line.strip())
-        metrics = self.metrics.setdefault(notice.source_id, dict(targets=0, success=0, failed=0, partial=0, deferred=0, unsupported=0, cache_hits=0, ocr_targets=0, ocr_success=0, ocr_failed=0, ocr_characters=0, elapsed_seconds=0))
+        metrics = self.metrics.setdefault(notice.source_id, dict(targets=0, success=0, failed=0, partial=0, deferred=0, unsupported=0, cache_hits=0, downloads=0, completed_reused=0, ocr_targets=0, ocr_success=0, ocr_failed=0, ocr_characters=0, elapsed_seconds=0))
+        prior = {r.get('resource_id'):r for r in previous_resources}
         for resource in resources:
             metrics['targets'] += 1
+            identity = resource.url[7:] if resource.url.startswith('cached:') else hashlib.sha256(resource.url.encode()).hexdigest()
+            old = prior.get(identity,{})
             try:
-                self._check_time()
-                if resource.url.startswith('unresolved:'):
+                if reuse_completed and old.get('status')=='SUCCESS':
+                    metrics['completed_reused'] += 1
+                    result = dict(old,cache_hit=True)
+                elif resource.url.startswith('unresolved:'):
                     result = dict(status='UNSUPPORTED',parts=[],error='UNRESOLVED_ATTACHMENT_LINK')
                 else:
+                    self._check_time()
+                    metrics['downloads'] += 1
                     data, name = self.fetch(resource)
                     result = self.document(data, name, resource.kind)
             except Exception as error:
                 result = dict(failure(error),parts=[])
+            if (result['status'] in {'FAILED','DEFERRED'} and not result.get('parts') and old.get('parts')
+                    and (not result.get('sha256') or result.get('sha256')==old.get('sha256'))):
+                result.update(parts=old['parts'],sha256=old.get('sha256'),retained_previous_parts=True)
             metrics[result['status'].lower()] += 1
             metrics['cache_hits'] += int(result.get('cache_hit', False))
             # Inline payloads stay out of Notice/history; HTTP source links are
             # retained privately for provenance and retries beyond list windows.
-            identity = hashlib.sha256(resource.url.encode()).hexdigest()
             records.append(dict(result, resource_id=identity, kind=resource.kind,
-                                source_url=resource.url if not resource.url.startswith('data:') else None,
+                                source_url=(old.get('source_url') if resource.url.startswith('cached:') else
+                                            resource.url if not resource.url.startswith('data:') or result['status']!='SUCCESS' else None),
                                 name=resource.name))
             for part in result.get('parts', []):
                 lines = []
@@ -403,7 +439,8 @@ class Extractor:
                     label = OCR_LABEL if part['method']=='OCR' else '[첨부 원문 직접 추출]'
                     source = result.get('sha256', identity)[:16]
                     location = str(part.get('page') or part.get('member') or '')
-                    chunks.append(f'{label} source={source} {location}\n' + '\n'.join(lines))
+                    retained = '[이전 추출 결과: 이번 실행 미완료] ' if result.get('retained_previous_parts') else ''
+                    chunks.append(f'{retained}{label} source={source} {location}\n' + '\n'.join(lines))
         complete = all(r['status']=='SUCCESS' for r in records) and bool(original.strip() or
             any(p.get('text','').strip() for r in records for p in r.get('parts',[])))
         if not complete:

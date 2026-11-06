@@ -112,15 +112,20 @@ class KistaScraper(PortalScraper):
             return super()._fetch_pages(first, first_html)
         endpoint = urljoin(first, '/ippro/com/iprndMain/selectBusinessAnnounceList.do')
         queue, pages, visited = [first_html], [first_html], {int(fields['pageIndex'])}
+        pending = []
         for html in queue:
-            self.parse_list(html)
+            items = self.parse_list(html)
+            if self.list_page_complete(items):
+                return pages
             form = self.list_form(parse_html(html))
             for page in self.pagination_pages(html):
-                if page in visited:
-                    continue
-                if len(pages) >= self.max_pages:
+                if page not in visited and page not in pending:
+                    pending.append(page)
+            if pending:
+                if not self.may_fetch_list_page(len(pages)):
                     self.logger.warning('pagination_window_capped source_id=%s max_pages=%d', self.source_id, self.max_pages)
                     return pages
+                page = pending.pop(0)
                 data = {**form, 'pageIndex': str(page)}
                 response = self.request_form(self._allowed(endpoint), data)
                 returned = self.list_form(parse_html(response))

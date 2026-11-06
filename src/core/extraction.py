@@ -279,6 +279,8 @@ class Extractor:
         import olefile
         parts = []
         with olefile.OleFileIO(io.BytesIO(data)) as ole:
+            if not ole.exists('FileHeader'):
+                return dict(status='UNSUPPORTED',parts=[],error_code='UNSUPPORTED_OLE_FORMAT')
             header = ole.openstream('FileHeader').read()
             flags = int.from_bytes(header[36:40], 'little')
             if flags & 2:
@@ -292,14 +294,16 @@ class Extractor:
                     raise ValueError('HWP_STREAM_LIMIT')
                 if flags & 1:
                     decoder = zlib.decompressobj(-15)
+                    decompressed = True
                     try:
                         decoded = decoder.decompress(raw, MAX_BYTES + 1)
                     except zlib.error:
                         if path[0] != 'BinData':
                             raise
                         decoded = raw # BinData can override document compression.
+                        decompressed = False
                     raw = decoded
-                    if len(raw) > MAX_BYTES or decoder.unconsumed_tail:
+                    if len(raw) > MAX_BYTES or (decompressed and decoder.unconsumed_tail):
                         raise ValueError('HWP_EXPANSION_LIMIT')
                 if path[0] == 'BinData':
                     parts.append(dict(self._unit(raw), member='/'.join(path)))

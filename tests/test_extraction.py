@@ -118,6 +118,24 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual({p['method'] for p in result['parts']},{'DIRECT','OCR'})
         self.assertIn('직접 추출 참가 자격',result['parts'][0]['text'])
 
+    def test_hwp_bindata_can_override_document_compression_without_false_size_limit(self):
+        import types,zlib
+        from unittest.mock import MagicMock
+        text='직접 참가 자격'.encode('utf-16le')
+        record=(67 | (len(text)<<20)).to_bytes(4,'little')+text
+        compressor=zlib.compressobj(wbits=-15)
+        compressed=compressor.compress(record)+compressor.flush()
+        ole=MagicMock();ole.__enter__.return_value=ole
+        ole.listdir.return_value=[['BodyText','Section0'],['BinData','BIN0001.png']]
+        streams={'FileHeader':b'\x00'*36+b'\x01\x00\x00\x00',
+                 'BodyText/Section0':compressed,'BinData/BIN0001.png':b'\x89PNG raw uncompressed BinData'}
+        ole.openstream.side_effect=lambda path:io.BytesIO(streams[path if isinstance(path,str) else '/'.join(path)])
+        with patch.dict('sys.modules',{'olefile':types.SimpleNamespace(OleFileIO=lambda data:ole)}):
+            result=self.extract.hwp(b'stub')
+        self.assertEqual(result['status'],'SUCCESS')
+        self.assertEqual(result['parts'][0]['text'],'직접 참가 자격')
+        self.engine.assert_called_once()
+
     def test_duplicate_lines_are_not_removed_when_dates_or_qualifications_differ(self):
         self.engine.return_value='공통 문장\n공통 문장\n마감일 2026.11.20\n마감일 2026.11.21'
         result=self.extract.enrich(notice(content_text='공통 문장'),[Resource('a')])

@@ -30,6 +30,10 @@ class ScraperRegistry:
             raise ValueError(f"duplicate source_id: {scraper.source_id}")
         self._scrapers[scraper.source_id] = scraper
 
+    def set_extractor(self, extractor):
+        for scraper in self._scrapers.values():
+            scraper.extractor = extractor
+
     def run(self) -> list[Notice]:
         self.results = {}
         self.errors = {}

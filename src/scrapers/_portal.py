@@ -260,9 +260,12 @@ class PortalScraper(BoardScraper):
         # No readable body is allowed by Notice. Do not synthesize eligibility
         # or turn attachment labels/navigation into the notice body.
         content = self.detail_content(root)
-        self.parse_attachments(response)  # Validate exposed links, never download.
         return ParsedNotice(replace(item, apply_start=start, apply_end=end,
-                                    category=category or None), content)
+                                    category=category or None), content, self.extraction_body(root))
+
+    def extraction_body(self, root):
+        body = metadata(root, self.body_label)
+        return body.html() if body is not None else ''
 
     def detail_scope(self, response):
         return parse_html(response)

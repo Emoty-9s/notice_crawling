@@ -118,6 +118,10 @@ class RipcScraper(PortalScraper):
             items[url] = item
         return list(items.values())
 
+    def extraction_body(self, root):
+        body = root.find(id='elem')
+        return body[0].html() if body else super().extraction_body(root)
+
     def detail_content(self, root):
         body = root.find(id='elem')
         if not body:

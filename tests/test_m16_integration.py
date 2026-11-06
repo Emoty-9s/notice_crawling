@@ -69,7 +69,9 @@ class M16IntegrationTests(unittest.TestCase):
 
     def test_pipeline_storage_public_feed_and_m12_readback(self):
         result = self.run_pipeline()
-        self.assertFalse(result.degraded)
+        self.assertTrue(result.degraded) # fixture attachments have no binary transport
+        self.assertTrue(result.analysis_incomplete)
+        self.assertEqual(result.scraper_failures, ())
         self.assertEqual(len(result.notices), 2)
         self.assertEqual(result.feed_count, 2)
         self.assertEqual(self.store.load_notices(), list(result.notices))

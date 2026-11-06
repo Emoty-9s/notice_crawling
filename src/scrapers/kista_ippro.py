@@ -162,6 +162,12 @@ class KistaScraper(PortalScraper):
         # Image-only body remains empty text; no OCR/AI/network requests.
         return html_to_content_text(unescape(inputs[0].attrs.get('value', '')))
 
+    def extraction_body(self, root):
+        inputs = root.find('input', attr={'name': 'contents'})
+        if inputs:
+            return unescape(inputs[0].attrs.get('value', ''))
+        return super().extraction_body(root)
+
     def parse_attachments(self, response):
         links = list(super().parse_attachments(response))
         root = parse_html(response)

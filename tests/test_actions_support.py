@@ -220,7 +220,10 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn('default_branch', self.workflow['jobs']['build']['if'])
         setup = next(s for s in self.steps if s.get('uses', '').startswith('actions/setup-python@'))
         self.assertEqual(setup['with']['python-version'], '3.13')
-        self.assertFalse(any('pip install' in step.get('run', '') for step in self.steps))
+        install = next(s for s in self.steps if 'pip install' in s.get('run', ''))
+        self.assertIn('requirements-ocr.txt',install['run'])
+        self.assertIn('tesseract-ocr-kor',install['run'])
+        self.assertIn('tesseract-ocr-eng',install['run'])
 
     def test_token_permissions_and_secret_scope(self):
         jobs = self.workflow['jobs']
@@ -250,7 +253,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertEqual(pages['with']['path'], '.run/pages')
         self.assertLess(self.steps.index(stage), self.steps.index(pages))
         state = next(s for s in self.steps if s.get('with', {}).get('name') == 'central-state-v1')
-        self.assertEqual(set(state['with']['path'].splitlines()), {'.run/data/notices.json', '.run/data/scraper_status.json', '.run/data/analysis_diagnostics.json'})
+        self.assertEqual(set(state['with']['path'].splitlines()), {'.run/data/notices.json', '.run/data/scraper_status.json', '.run/data/analysis_diagnostics.json', '.run/data/ocr_cache', '.run/data/ocr_diagnostics.json'})
         self.assertIn('always()',state['if'])
         self.assertIn('checkpoint.outputs.valid',state['if'])
         self.assertEqual(state['with']['retention-days'], 90)

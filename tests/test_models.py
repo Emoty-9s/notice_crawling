@@ -29,7 +29,7 @@ class NoticeModelTests(unittest.TestCase):
             "notice_id", "source_id", "institution", "title", "category",
             "published_at", "apply_start", "apply_end", "url", "content_text",
             "content_hash", "status", "gemini", "first_seen_at", "last_seen_at",
-            "updated_at", "analysis",
+        "updated_at", "analysis", "extraction",
         })
 
     def test_optional_none_serializes_as_null(self):

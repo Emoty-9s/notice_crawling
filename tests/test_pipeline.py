@@ -46,6 +46,14 @@ class PipelineTests(unittest.TestCase):
         self.client.generate.return_value = decision()
         self.logger = Mock(spec=logging.Logger)
         self.now = CLOCK
+        # These lifecycle fixtures have URL-only placeholder attachments.
+        # Binary decoding/failure behavior is covered by test_extraction.
+        for target, value in (
+            ('src.core.extraction.download', (b'fixture', 'fixture.pdf')),
+            ('src.core.extraction.Extractor.document', {'status':'SUCCESS', 'parts':[]})):
+            guard = patch(target, return_value=value)
+            guard.start()
+            self.addCleanup(guard.stop)
         self.html = {}
         for source in SPECS:
             scraper, listing, detail, _, sample = fixture_context(source)

@@ -46,6 +46,8 @@ class Prefilter:
             return 'REVIEW','MIXED_OR_BENEFICIARY'
         if positive:
             return 'CANDIDATE','PUBLIC_RELATED_WORK'
+        if '[추출 미완료:' in notice.content_text:
+            return 'REVIEW','EXTRACTION_INCOMPLETE'
         if (len(notice.content_text.strip()) < self.policy['minimum_body_chars']
                 or '[이미지 본문:' in notice.content_text):
             return 'REVIEW','INSUFFICIENT_BODY'

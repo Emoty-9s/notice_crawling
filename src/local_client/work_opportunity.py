@@ -5,7 +5,7 @@ argument to this decision. Do not reuse these rules to change legacy matching.
 """
 import re
 
-VERSION = 'strict-opportunity-v1'
+VERSION = 'strict-opportunity-v2-ocr-provenance'
 DUTY = r'(?:특허\s*(?:조사|분석|동향|맵|전략|포트폴리오|출원|컨설팅)|선행\s*기술\s*조사|IP\s*-?\s*R\s*&\s*D|IP\s*전략|지식재산(?:권)?\s*(?:전문\s*)?컨설팅|기술\s*(?:이전|거래)\s*컨설팅|기술\s*가치\s*평가|기술\s*사업화\s*전략|사업화\s*전략|권리화\s*(?:지원|용역))'
 RELATED = r'(?:특허기반\s*사업화\s*R&D|표준특허|영업비밀\s*평가|발명가.*?컨설팅|IP-IR\s*심화컨설팅|(?:특허법인|변리사)\s*전문\s*협력기관)'
 ACTOR = r'(?:수행\s*(?:기관|업체)|협력\s*기관|전문\s*(?:기관|업체|가)|컨설팅\s*(?:기관|업체)|특허법인|변리사)'
@@ -74,13 +74,36 @@ def classify(notice):
     elif ((related or duty) and span(r'나라장터|첨부|문의처',body)) or span(ACTOR+r'.{0,40}'+RECRUIT,title):
         # Missing detail is recorded for re-collection rather than guessed REVIEW.
         status='INSUFFICIENT';code='MISSING_WORK_OR_RECRUITMENT';reason='세부 전문 업무 또는 실제 수행기관 모집 근거 부족'
+    incomplete = '[추출 미완료:' in body
+    ocr_evidence = '[OCR 추출:' in body
+    if ocr_evidence:
+        # OCR prose is evidence for review, never a confirmed qualification.
+        qualification = 'CHECK_REQUIRED'
+        if status == 'HIGH' or code == 'QUALIFICATION_EXCLUSION':
+            status = 'REVIEW' if duty and provider else 'INSUFFICIENT'
+        reason += ' — OCR 날짜·자격 원문 대조 필요'
+        direct_parts, in_ocr = [], False
+        for section in re.split(r'(\[(?:OCR 추출:[^\]]*|첨부 원문 직접 추출|HTML 원문 직접 추출)\])', body):
+            if section.startswith('[OCR 추출:'):
+                in_ocr = True
+            elif section in ('[첨부 원문 직접 추출]', '[HTML 원문 직접 추출]'):
+                in_ocr = False
+            elif not in_ocr:
+                direct_parts.append(section)
+        direct = classify({**notice,'content_text':' '.join(direct_parts),'summary':'',
+                           'work_scope':'','recruitment_type':'','participation_requirements':''})
+        if direct['qualification'] == 'EXPLICIT_EXCLUSION':
+            status='EXCLUDE'; qualification='EXPLICIT_EXCLUSION'
+            code='QUALIFICATION_EXCLUSION'; reason=direct['reason']
+    if incomplete and status == 'HIGH':
+        status = 'REVIEW'
     return dict(status=status,display=status in ('HIGH','REVIEW'),qualification=qualification,
         recruitment_type=negative[0] if negative and not separate else '전문 수행기관 모집' if provider else '수행기관 모집 미확인',
         actual_work=(duty or related) if status in ('HIGH','REVIEW') else '',
         detected_work_expression=duty or related,provider_evidence=provider,qualification_evidence=explicit or allowed or exclusive,
         reason=reason,reason_code=code,original_availability=original,
-        information_status='INSUFFICIENT' if original!='TEXT_AVAILABLE' else 'AVAILABLE',
-        needs_recollection=original!='TEXT_AVAILABLE' or status=='INSUFFICIENT')
+        information_status='PARTIAL' if incomplete else 'OCR_REVIEW' if ocr_evidence else 'INSUFFICIENT' if original!='TEXT_AVAILABLE' else 'AVAILABLE',
+        needs_recollection=incomplete or original!='TEXT_AVAILABLE' or status=='INSUFFICIENT')
 
 def is_displayable(result):
     return bool(result and result.get('status') in ('HIGH','REVIEW') and result.get('display') is True

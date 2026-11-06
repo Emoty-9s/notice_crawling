@@ -134,7 +134,8 @@ def _compare(collected: Notice, previous: Notice | None, observed_at: str) -> No
     if not changes:
         # Preserve the prior representation too: whitespace/canonical variants
         # do not churn stored content or its modification timestamp.
-        return NoticeDiff(replace(previous, status=NoticeStatus.EXISTING, last_seen_at=observed_at))
+        return NoticeDiff(replace(previous, status=NoticeStatus.EXISTING, last_seen_at=observed_at,
+                                  extraction=collected.extraction))
     return NoticeDiff(replace(
         collected, status=NoticeStatus.UPDATED, first_seen_at=previous.first_seen_at,
         last_seen_at=observed_at, updated_at=observed_at, gemini=previous.gemini, analysis=previous.analysis,

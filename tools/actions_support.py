@@ -111,6 +111,13 @@ def diagnostics(data_dir):
                             for status in ('NOT_ANALYZED', 'SUCCESS', 'FAILED', 'PENDING')},
     }
     report['external_ai_calls'] = 0
+    ocr_path = Path(data_dir)/'ocr_diagnostics.json'
+    if ocr_path.is_file():
+        metrics = _read_json(ocr_path, {})
+        allowed = {'targets','success','failed','partial','deferred','unsupported','cache_hits',
+                   'ocr_targets','ocr_success','ocr_failed','ocr_characters','elapsed_seconds'}
+        report['ocr'] = {source:{k:v for k,v in value.items() if k in allowed and type(v) in (int,float)}
+                         for source,value in metrics.items() if source in statuses and isinstance(value,dict)}
     report['prefilter_counts'] = {s:sum(n.analysis.prefilter_status==s for n in notices)
                                   for s in ('CANDIDATE','REVIEW','CLEARLY_UNRELATED')}
     # This file is an operator-only allowlisted metrics document produced by the

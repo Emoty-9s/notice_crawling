@@ -363,7 +363,11 @@ class LiveFixtureTests(unittest.TestCase):
             result = run_pipeline(config_path=path, storage=store, public_dir=root / 'public', client=client,
                                   transport_factory=lambda source: {'ripc_pms': ripc, 'kista_ippro': kista}.get(source, Mock()),
                                   clock=lambda: retained_clock, logger=Mock())
-            self.assertFalse(result.degraded)
+            # Binary attachments are deliberately unavailable in this offline
+            # fixture transport. Collection succeeds; extraction stays partial.
+            self.assertTrue(result.degraded)
+            self.assertTrue(result.analysis_incomplete)
+            self.assertEqual(result.scraper_failures, ())
             self.assertEqual(result.feed_count, 2)
             self.assertEqual(store.load_notices(), list(result.notices))
             sync = FeedClient('https://example.test/', cache_dir=root / 'cache',

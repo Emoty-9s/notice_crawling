@@ -120,6 +120,7 @@ class BaseScraper(ABC, Generic[Item, Parsed]):
         self.transport = transport if transport is not None else UrllibTransport()
         self._sleep = sleep
         self.logger = logger if logger is not None else logging.getLogger(__name__)
+        self.extractor = None
 
     def request_text(self, url: str) -> str:
         """Bounded GET retries: transient network errors, 429 and selected 5xx.
@@ -216,7 +217,27 @@ class BaseScraper(ABC, Generic[Item, Parsed]):
         for item in items:
             detail = self._stage("fetch_detail", self.fetch_detail, item)
             parsed = self._stage("parse_detail", self.parse_detail, detail, item)
-            notices.append(self._stage("normalize", self._normalize_notice, parsed))
+            notice = self._stage("normalize", self._normalize_notice, parsed)
+            if self.extractor is not None:
+                from src.core.extraction import discover, INCOMPLETE, Resource
+                from src.core.normalizer import generate_content_hash
+                from dataclasses import replace
+                try:
+                    resources = discover(getattr(parsed, 'body_html', detail), notice.url)
+                    if hasattr(self, 'parse_attachments'):
+                        resources += [Resource(url) for url in self.parse_attachments(detail)]
+                    else:
+                        resources += [r for r in discover(detail, notice.url) if r.kind != 'image']
+                    resources = list({r.url:r for r in resources}.values())
+                    notice = self.extractor.enrich(notice, resources)
+                except Exception as error:
+                    # OCR/discovery failure is per notice, never a scraper error.
+                    text = notice.content_text + '\n' + INCOMPLETE
+                    notice = replace(notice, content_text=text,
+                        content_hash=generate_content_hash(content_text=text),
+                        extraction={'status':'FAILED', 'error':type(error).__name__})
+                    self.logger.error('extraction_failed source_id=%s error_type=%s', self.source_id, type(error).__name__)
+            notices.append(notice)
         self.logger.info(
             "scraper_success source_id=%s notices=%d", self.source_id, len(notices),
         )

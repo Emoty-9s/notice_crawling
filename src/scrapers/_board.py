@@ -35,6 +35,7 @@ class NoticeLink:
 class ParsedNotice:
     link: NoticeLink
     content_text: str
+    body_html: str = ''
 
 
 def date_field(text: str | None) -> str | None:
@@ -162,7 +163,7 @@ class BoardScraper(BaseScraper[NoticeLink, ParsedNotice]):
                allow_image_body=False):
         title = title_node.text()
         content = body.text()
-        if not content and allow_image_body:
+        if not content:
             # Some real notices contain only a poster. Preserve the observed
             # resource identity for hashing; never invent OCR/body prose.
             images = []
@@ -187,6 +188,9 @@ class BoardScraper(BaseScraper[NoticeLink, ParsedNotice]):
                     images.append(url)
             if images:
                 content = '[이미지 본문: 텍스트 미추출, OCR 미수행] ' + ' '.join(images)
+        if not content and self.extractor is not None:
+            # Attachment-only notices still reach the common extraction stage.
+            content = '[추출 미완료: 원문 확인 필요]'
         if not title or not content:
             raise StructureError('empty detail title/body')
         if normalize_whitespace(title) != normalize_whitespace(item.title):
@@ -196,7 +200,7 @@ class BoardScraper(BaseScraper[NoticeLink, ParsedNotice]):
             apply_start=start if start is not None else item.apply_start,
             apply_end=end if end is not None else item.apply_end,
             institution=institution or item.institution,
-        ), content)
+        ), content, body.html())
 
     def normalize(self, parsed):
         item = parsed.link

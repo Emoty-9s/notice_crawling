@@ -145,6 +145,7 @@ class Notice(_JsonModel):
     status: NoticeStatus = NoticeStatus.NEW
     gemini: GeminiResult = field(default_factory=GeminiResult)
     analysis: AnalysisState = field(default_factory=AnalysisState)
+    extraction: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "status", NoticeStatus(self.status))
@@ -160,6 +161,8 @@ class Notice(_JsonModel):
             raise TypeError("gemini must be a GeminiResult")
         if not isinstance(self.analysis, AnalysisState):
             raise TypeError('analysis must be an AnalysisState')
+        if not isinstance(self.extraction, dict):
+            raise TypeError('extraction must be a dict')
 
     def to_dict(self) -> dict:
         data = asdict(self)

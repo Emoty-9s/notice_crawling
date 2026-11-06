@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param()
+param([ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$OutputName = 'notice_crawling')
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -17,9 +17,9 @@ if ($LASTEXITCODE -ne 0) {
 & $pythonExe (Join-Path $projectRoot 'tools\prepare_model_distribution.py')
 if ($LASTEXITCODE -ne 0) { throw 'Offline model resources or license notices are missing. Run the explicit build-time model fetch first.' }
 
-$distribution = Join-Path $projectRoot 'dist\notice_crawling'
-$workPath = Join-Path $projectRoot 'build\notice_crawling'
-$specPath = Join-Path $projectRoot 'build\windows_spec'
+$distribution = Join-Path $projectRoot ('dist\' + $OutputName)
+$workPath = Join-Path $projectRoot ('build\' + $OutputName)
+$specPath = Join-Path $projectRoot ('build\windows_spec_' + $OutputName)
 $prefix = $projectRoot.TrimEnd('\') + '\'
 
 # Clean only this application's generated outputs. Validate absolute paths and
@@ -47,7 +47,7 @@ New-Item -ItemType Directory -Path $specPath -Force | Out-Null
 
 $buildArguments = @(
     '-m', 'PyInstaller', '--noconfirm', '--clean', '--onedir', '--windowed',
-    '--name', 'notice_crawling', '--noupx', '--contents-directory', '_internal',
+    '--name', $OutputName, '--noupx', '--contents-directory', '_internal',
     '--distpath', (Join-Path $projectRoot 'dist'), '--workpath', $workPath,
     '--specpath', $specPath, '--paths', $projectRoot,
     '--exclude-module', 'unittest', '--exclude-module', 'tests',
@@ -64,7 +64,7 @@ try {
     $env:PYINSTALLER_CONFIG_DIR = Join-Path $workPath 'pyinstaller-cache'
     & $pythonExe @buildArguments
     if ($LASTEXITCODE -ne 0) { throw 'PyInstaller build failed.' }
-    $executable = Join-Path $distribution 'notice_crawling.exe'
+    $executable = Join-Path $distribution ($OutputName + '.exe')
     if (-not (Test-Path -LiteralPath $executable -PathType Leaf)) { throw 'Executable was not generated.' }
     Copy-Item -LiteralPath (Join-Path $projectRoot 'tools\windows_README.txt') -Destination (Join-Path $distribution 'README.txt')
     Write-Host "Distribution: $distribution"

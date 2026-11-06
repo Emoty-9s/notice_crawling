@@ -46,11 +46,15 @@
           }
         },
         {
-          "name": "Python 3.13 (stdlib only; no pip packages)",
+          "name": "Python 3.13 CPU extraction runtime",
           "uses": "actions/setup-python@v6",
           "with": {
             "python-version": "3.13"
           }
+        },
+        {
+          "name": "Install offline OCR engine and document readers",
+          "run": "sudo apt-get update\nsudo apt-get install -y tesseract-ocr tesseract-ocr-kor tesseract-ocr-eng\npython -m pip install -r requirements-ocr.txt\ntesseract --version\ntesseract --list-langs"
         },
         {
           "name": "Offline unittest regression",
@@ -114,7 +118,7 @@
           "uses": "actions/upload-artifact@v7",
           "with": {
             "name": "central-state-v1",
-            "path": ".run/data/notices.json\n.run/data/scraper_status.json\n.run/data/analysis_diagnostics.json",
+            "path": ".run/data/notices.json\n.run/data/scraper_status.json\n.run/data/analysis_diagnostics.json\n.run/data/ocr_cache\n.run/data/ocr_diagnostics.json",
             "if-no-files-found": "error",
             "retention-days": 90,
             "overwrite": true,

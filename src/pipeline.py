@@ -128,7 +128,32 @@ def _run_pipeline(
                                    SUPPORTED_SOURCES - MVP_SOURCES for config in configs) else build_mvp_registry
     registry = builder(configs, transport_factory=transport_factory,
                                   clock=lambda: now, logger=logger)
+    from src.core.extraction import Extractor, ExtractionQueue, Resource
+    extractor = Extractor(store.data_dir / 'ocr_cache', isolated=True)
+    queue = ExtractionQueue()
+    registry.set_extractor(queue)
     collected = registry.run()  # fetch/parse/normalize, with source isolation
+    compare_batch(collected, previous, observed_at=stamp) # reject conflicting identities before scheduling
+    previous_by_id = {n.notice_id:n for n in previous}
+    def extraction_priority(n):
+        old = previous_by_id.get(n.notice_id)
+        if old is None or (old.extraction.get('original_hash', old.content_hash) != n.content_hash):
+            return 0
+        return 1 if old.extraction.get('status') != 'SUCCESS' else 2
+    # Work from all sources before filtering. Round robin within priority tiers
+    # prevents a large first source from starving other agencies every day.
+    from itertools import zip_longest
+    ordered = []
+    for priority in range(3):
+        groups = [[n for n in collected if n.source_id == source and extraction_priority(n)==priority]
+                  for source in dict.fromkeys(n.source_id for n in collected)]
+        ordered.extend(n for row in zip_longest(*groups) for n in row if n is not None)
+    processed = {}
+    for notice in ordered:
+        if notice.notice_id in queue.resources:
+            notice = extractor.enrich(notice, queue.resources[notice.notice_id])
+        processed[notice.notice_id] = notice
+    collected = [processed[n.notice_id] for n in collected]
     compared = compare_batch(collected, previous, observed_at=stamp)
     # Always retain complete observation history, including expired records.
     # Clear last run's transient lifecycle status even when a source fails.
@@ -136,6 +161,19 @@ def _run_pipeline(
     merged = {n.notice_id: replace(n, status=NoticeStatus.EXISTING) for n in previous}
     merged.update({n.notice_id: n for n in current_notices})
     enabled = {c['source_id'] for c in configs if c.get('enabled', False)}
+    observed_ids = {n.notice_id for n in current_notices}
+    for old in previous:
+        if (old.source_id not in enabled or old.notice_id in observed_ids or not old.extraction
+                or old.extraction.get('status') == 'SUCCESS'):
+            continue
+        resources = [Resource(r['source_url'],r.get('name',''),r.get('kind','attachment'))
+                     for r in old.extraction.get('resources',[]) if r.get('source_url')]
+        if resources:
+            retry = extractor.enrich(replace(old,content_text=old.extraction.get('original_text',''),
+                                            content_hash=old.extraction.get('original_hash',old.content_hash)),resources)
+            merged[old.notice_id] = replace(retry,status=NoticeStatus.EXISTING,
+                updated_at=stamp if retry.content_hash != old.content_hash else old.updated_at)
+    _atomic_json(store.data_dir / 'ocr_diagnostics.json', extractor.metrics)
     for source, records in registry.results.items():
         statuses[source] = {
             'status': 'SUCCESS', 'last_attempt_at': stamp, 'last_success_at': stamp,
@@ -179,8 +217,10 @@ def _run_pipeline(
     _atomic_json(store.data_dir/'analysis_diagnostics.json',dict(
         metrics_phase='FINAL',collection_status='PARTIAL' if registry.errors else 'SUCCESS',
         prefilter_status='SUCCESS',publication_status='SUCCESS',analysis_status='LOCAL_ONLY',
+        extraction_status='PARTIAL' if any(n.extraction.get('status') in {'PARTIAL','FAILED'} for n in snapshot) else 'SUCCESS',
         total_history=len(snapshot),public_eligible=len(feed['notices']),external_ai_calls=0,
         prefilter_counts={s:sum(n.analysis.prefilter_status==s for n in snapshot)
                           for s in ('CANDIDATE','REVIEW','CLEARLY_UNRELATED')}))
     return PipelineResult(tuple(snapshot), tuple(observed), tuple(sorted(registry.errors)),
-                          (), tuple(registry.skipped), len(feed['notices']), False)
+                          (), tuple(registry.skipped), len(feed['notices']),
+                          any(n.extraction.get('status') in {'PARTIAL','FAILED'} for n in snapshot))

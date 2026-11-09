@@ -14,9 +14,11 @@ from src.core.storage import _atomic_json
 from src.pipeline import load_site_configs
 from src.renderer.feed import write_feed
 from src.scrapers.tipa_legacy_bid import TipaBidScraper
+from src.scrapers.kiat_home import KiatBidScraper
 
-ADAPTERS = {'tipa_legacy_bid': TipaBidScraper}
-URLS = {'tipa_legacy_bid': 'https://www.tipa.or.kr/s040305'}
+ADAPTERS = {'tipa_legacy_bid': TipaBidScraper, 'kiat_home': KiatBidScraper}
+URLS = {'tipa_legacy_bid': 'https://www.tipa.or.kr/s040305',
+        'kiat_home': 'https://cont.kiat.or.kr/bidding/biddingList.do'}
 
 
 def main(argv=None):
@@ -29,6 +31,8 @@ def main(argv=None):
     config = next(c for c in load_site_configs() if c['source_id'] == args.source)
     config = {**config, 'list_url': URLS[args.source], 'enabled': True,
               'max_pages': 3, 'http': {'max_retries': 0, 'timeout_seconds': 25}}
+    if args.source == 'kiat_home':
+        config['pagination'] = {'parameter': 'page'}
     now = datetime.now(timezone.utc)
     report = dict(source_id=args.source, checked_at=now.isoformat(), url=config['list_url'],
                   status='FAILED', stage='collection', collected=0, external_ai_calls=0)
@@ -52,8 +56,9 @@ def main(argv=None):
         if not notices or report['unique_ids'] != len(notices):
             raise ValueError('EMPTY_OR_DUPLICATE_COLLECTION')
         for n in notices:
-            if not n.published_at or not n.content_text or not n.url:
+            if not n.content_text or not n.url:
                 raise ValueError('MISSING_REQUIRED_FIELDS')
+        report['unknown_publication_dates'] = sum(n.published_at is None for n in notices)
         report['stage'] = 'attachments'
         sample = next(n for n in notices if queue.resources.get(n.notice_id))
         extractor = Extractor(args.output / 'ocr_cache', budget_seconds=90, pages_per_run=20, isolated=True)

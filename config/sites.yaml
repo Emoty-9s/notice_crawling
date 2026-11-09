@@ -3336,24 +3336,22 @@
           ]
         }
       ],
-      "list_url": null,
-      "detail_url_pattern": null,
+      "list_url": "https://cont.kiat.or.kr/bidding/biddingList.do",
+      "detail_url_pattern": "/bidding/biddingView.do?seq={seq}",
       "enabled": false,
-      "access_status": "READABLE_PORTAL",
+      "access_status": "READABLE_LIST",
       "content_type": "STATIC_HTML",
-      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "classification_notes": "공개 전자입찰 3페이지 상세 45건, PDF/HWPX/HWP 샘플 추출 SUCCESS. 게시일은 공개 HTML에서 미확인(null).",
       "pagination": {
-        "type": "UNVERIFIED",
-        "parameter": null,
-        "example_url": null,
-        "second_page_verified": false,
-        "notes": "목록/페이지 이동을 검증하지 못함"
+        "type": "OBSERVED_FORM_QUERY",
+        "parameter": "page",
+        "example_url": "https://cont.kiat.or.kr/bidding/biddingList.do?page=2",
+        "second_page_verified": true
       },
       "detail": {
-        "example_url": null,
-        "reachable_without_login": null,
-        "body_available_in_html": null,
-        "notes": "미확인"
+        "example_url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=567",
+        "reachable_without_login": true,
+        "body_available_in_html": true
       },
       "html": {
         "list_visible_in_web_html": true,
@@ -3384,9 +3382,9 @@
         "level": "MEDIUM",
         "notes": "원본은 메인. 정확한 전체 목록/상세 ID/페이지 이동 미확인."
       },
-      "audit_status": "LIMITED",
-      "checked_on": "2026-10-30",
-      "blocker": "원본은 메인. 정확한 전체 목록/상세 ID/페이지 이동 미확인.",
+      "audit_status": "LIST_DETAIL_PAGINATION_ATTACHMENT_VERIFIED",
+      "checked_on": "2026-11-09",
+      "blocker": null,
       "mvp_priority": null,
       "mvp_notes": null,
       "evidence": [
@@ -3396,13 +3394,20 @@
           "result": "text/html 메인에 사업공고 제목/기간과 새소식 미리보기. 더보기/제목 URL은 도구에서 구분되지 않음."
         }
       ],
-      "mvp_status": "NOT_SELECTED",
-      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "mvp_status": "IMPLEMENTED",
+      "strategy_decision": "IMPLEMENTED_VERIFIED",
       "fallback": {
         "strategy": "MANUAL_ONLY",
         "trigger": "원본은 메인. 정확한 전체 목록/상세 ID/페이지 이동 미확인.",
         "url": "https://kiat.or.kr/front/user/main.do",
         "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      },
+      "expansion_validation": {
+        "list_pages": 3,
+        "detail_count": 45,
+        "attachment_sample": "SUCCESS",
+        "publication_date": "UNKNOWN_NOT_RECEIPT_START",
+        "evidence": "docs/site-audit/expansion-20261109/kiat_home.json"
       }
     },
     {

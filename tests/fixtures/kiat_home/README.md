@@ -1,0 +1,1 @@
+Public KIAT procurement nodes captured 2026-11-09 from https://cont.kiat.or.kr/bidding/biddingList.do . Three lists and details seq=567/554; navigation/scripts removed. No credentials or company data.

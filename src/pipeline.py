@@ -19,7 +19,7 @@ from src.scrapers.registry import build_mvp_registry, build_registry
 
 CONFIG_PATH = Path(__file__).resolve().parents[1] / 'config' / 'sites.yaml'
 MVP_SOURCES = frozenset({'khidi_business', 'kised_bid_public', 'rda_bid', 'seoul_rnd_notice', 'kipa_bid'})
-SUPPORTED_SOURCES = MVP_SOURCES | {'ripc_pms', 'kista_ippro', 'tipa_legacy_bid'}
+SUPPORTED_SOURCES = MVP_SOURCES | {'ripc_pms', 'kista_ippro', 'tipa_legacy_bid', 'kiat_home'}
 ANALYSIS_MAX_CALLS_PER_RUN = 0  # retired compatibility constant; never invokes AI
 
 

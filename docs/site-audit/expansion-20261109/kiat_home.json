@@ -1,0 +1,343 @@
+{
+  "attachment_sample": {
+    "notice_id": "notice:v1:b99f240931c2965fa2940683af16d14486977421973d5f0382c2e303f37ae75e",
+    "resources": [
+      {
+        "error_code": null,
+        "name": "",
+        "source_url": "https://cont.kiat.or.kr/guideDownload/25685.do",
+        "status": "SUCCESS"
+      },
+      {
+        "error_code": null,
+        "name": "",
+        "source_url": "https://cont.kiat.or.kr/guideDownload/25686.do",
+        "status": "SUCCESS"
+      },
+      {
+        "error_code": null,
+        "name": "",
+        "source_url": "https://cont.kiat.or.kr/guideDownload/25687.do",
+        "status": "SUCCESS"
+      }
+    ],
+    "status": "SUCCESS",
+    "text_chars": 38966,
+    "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=567"
+  },
+  "checked_at": "2026-11-09T04:26:37.723511+00:00",
+  "collected": 45,
+  "external_ai_calls": 0,
+  "feed_count": 45,
+  "requests": [
+    {
+      "file": "response-000.html",
+      "phase": "list",
+      "url": "https://cont.kiat.or.kr/bidding/biddingList.do"
+    },
+    {
+      "file": "response-001.html",
+      "phase": "list",
+      "url": "https://cont.kiat.or.kr/bidding/biddingList.do?page=2"
+    },
+    {
+      "file": "response-002.html",
+      "phase": "list",
+      "url": "https://cont.kiat.or.kr/bidding/biddingList.do?page=3"
+    },
+    {
+      "file": "response-003.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=567"
+    },
+    {
+      "file": "response-004.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=566"
+    },
+    {
+      "file": "response-005.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=565"
+    },
+    {
+      "file": "response-006.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=564"
+    },
+    {
+      "file": "response-007.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=563"
+    },
+    {
+      "file": "response-008.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=562"
+    },
+    {
+      "file": "response-009.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=561"
+    },
+    {
+      "file": "response-010.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=560"
+    },
+    {
+      "file": "response-011.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=559"
+    },
+    {
+      "file": "response-012.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=558"
+    },
+    {
+      "file": "response-013.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=557"
+    },
+    {
+      "file": "response-014.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=556"
+    },
+    {
+      "file": "response-015.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=555"
+    },
+    {
+      "file": "response-016.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=554"
+    },
+    {
+      "file": "response-017.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=553"
+    },
+    {
+      "file": "response-018.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=552"
+    },
+    {
+      "file": "response-019.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=551"
+    },
+    {
+      "file": "response-020.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=550"
+    },
+    {
+      "file": "response-021.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=549"
+    },
+    {
+      "file": "response-022.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=548"
+    },
+    {
+      "file": "response-023.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=547"
+    },
+    {
+      "file": "response-024.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=546"
+    },
+    {
+      "file": "response-025.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=545"
+    },
+    {
+      "file": "response-026.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=544"
+    },
+    {
+      "file": "response-027.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=543"
+    },
+    {
+      "file": "response-028.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=542"
+    },
+    {
+      "file": "response-029.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=541"
+    },
+    {
+      "file": "response-030.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=540"
+    },
+    {
+      "file": "response-031.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=539"
+    },
+    {
+      "file": "response-032.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=538"
+    },
+    {
+      "file": "response-033.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=537"
+    },
+    {
+      "file": "response-034.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=536"
+    },
+    {
+      "file": "response-035.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=535"
+    },
+    {
+      "file": "response-036.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=534"
+    },
+    {
+      "file": "response-037.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=533"
+    },
+    {
+      "file": "response-038.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=532"
+    },
+    {
+      "file": "response-039.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=531"
+    },
+    {
+      "file": "response-040.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=530"
+    },
+    {
+      "file": "response-041.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=529"
+    },
+    {
+      "file": "response-042.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=528"
+    },
+    {
+      "file": "response-043.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=527"
+    },
+    {
+      "file": "response-044.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=526"
+    },
+    {
+      "file": "response-045.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=525"
+    },
+    {
+      "file": "response-046.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=524"
+    },
+    {
+      "file": "response-047.html",
+      "phase": "detail",
+      "url": "https://cont.kiat.or.kr/bidding/biddingView.do?seq=523"
+    }
+  ],
+  "source_id": "kiat_home",
+  "stage": "feed_v3",
+  "status": "PASS",
+  "unique_ids": 45,
+  "unknown_publication_dates": 45,
+  "url": "https://cont.kiat.or.kr/bidding/biddingList.do",
+  "unittest": {
+    "total": 726,
+    "skipped": 1,
+    "failures": 0,
+    "seconds": 226.88
+  },
+  "windows": {
+    "status": "SUCCESS",
+    "frozen": true,
+    "default_arguments": [
+      "--cache",
+      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\cache\\snapshot.json",
+      "--db",
+      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\performance.db"
+    ],
+    "sync": [
+      "UPDATED",
+      "UNCHANGED"
+    ],
+    "local_work_count": 45,
+    "local_work_grades": {
+      "EXCLUDE": 45
+    },
+    "local_work_states": {
+      "SUCCESS": 45
+    },
+    "local_work_runtime": {
+      "subprocess": true,
+      "external_calls": 0,
+      "elapsed_seconds": 3.998,
+      "active_sessions_after": 0
+    },
+    "github_state": "GitHub 연결 정상",
+    "source_cards": 9,
+    "source_status_available": true,
+    "notice_cards": 0,
+    "default_visible_count": 0,
+    "default_visible_titles": [],
+    "excluded_toggle_count": 15,
+    "excluded_reasons_available": true,
+    "closed_including_excluded": 30,
+    "active_projection": true,
+    "local_seen_state": true,
+    "removed_recommendation_selection": true,
+    "tk_patchlevel": "8.6.15",
+    "ui_title": "Notice · 업무 모니터링 대시보드",
+    "cache_path_correct": true,
+    "database_created": false
+  },
+  "local_ab": {
+    "source_id": "kiat_home",
+    "a_state": "SUCCESS",
+    "a_status": "EXCLUDE",
+    "b_state": "SUCCESS",
+    "matching_rows": 1,
+    "external_calls": 0,
+    "company_db_used": false
+  },
+  "limitations": [
+    "Publication date is unavailable in the public HTML and remains null; receipt start is not used as publication date.",
+    "Attachment extraction was sampled on one notice. Other attachments use the existing central OCR queue.",
+    "Strict A classification excludes all 45 local preview notices; no relevance criteria relaxed."
+  ]
+}

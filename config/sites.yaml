@@ -803,7 +803,7 @@
       "enabled": false,
       "access_status": "READABLE_LIST",
       "content_type": "STATIC_HTML",
-      "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
+      "classification_notes": "Public HTML list/detail and pageNo paging reproduced locally on 2026-11-09; 34 unique notices on 3 bounded pages.",
       "pagination": {
         "type": "OBSERVED_FORM_QUERY",
         "parameter": "pageNo",
@@ -811,29 +811,29 @@
         "second_page_verified": true
       },
       "detail": {
-        "example_url": null,
-        "reachable_without_login": null,
-        "body_available_in_html": null,
-        "notes": "미확인"
+        "example_url": "https://www.exportvoucher.com/portal/board/boardView?bbs_id=1&ntt_id=13038",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "Actual public provider recruitment notice, HWP/PDF attachments verified locally."
       },
       "html": {
         "list_visible_in_web_html": true,
-        "local_http_verified": false,
-        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+        "local_http_verified": true,
+        "notes": "Original public HTML parsed without executing JavaScript."
       },
       "json_api": {
-        "verified": null,
-        "endpoint": null,
-        "notes": "재현 가능한 공고 JSON/API 요청은 확인하지 못함. API 부재를 의미하지 않음."
+        "verified": true,
+        "endpoint": "https://www.exportvoucher.com/common/File2List",
+        "notes": "Attachment metadata only; anonymous detail CookieJar and official cache:false GET semantics."
       },
       "javascript": {
-        "required": null,
-        "notes": "JS 비활성 대조와 XHR/network 검증 미수행. 빈 텍스트만으로 JS 필수라 단정하지 않음."
+        "required": false,
+        "notes": "Observed JS navigation and file widget calls reproduced as ordinary public HTTP requests."
       },
       "auth": {
-        "required": null,
-        "method": null,
-        "notes": "목록 비로그인 조회. 로그인 메뉴 자체는 로그인 필수 근거가 아님."
+        "required": false,
+        "method": "ANONYMOUS",
+        "notes": "Verified public notices only; no login or access-control bypass."
       },
       "anti_bot": {
         "detected": null,
@@ -843,13 +843,13 @@
       "strategy_notes": "Public detail and File2List share an anonymous CookieJar; reproduce official AJAX request once after opening detail. No raw attachments persist.",
       "risk": {
         "level": "MEDIUM",
-        "notes": "상세 URL/본문 및 페이지 요청 검증 필요."
+        "notes": "Local collection passed. GitHub-hosted network repeatedly resets; precise server/network cause unconfirmed."
       },
-      "audit_status": "LOCAL_ATTACHMENTS_VERIFIED_PENDING_CENTRAL",
+      "audit_status": "LOCAL_VERIFIED_CLOUD_NETWORK_FAILED",
       "checked_on": "2026-11-09",
-      "blocker": null,
+      "blocker": "GitHub-hosted runner: Connection reset by peer / TLS handshake timeout; no successful cloud attachment download. Production remains disabled.",
       "mvp_priority": null,
-      "mvp_notes": null,
+      "mvp_notes": "Local download/text extraction and isolated EXE feed sync passed. Image OCR failed locally. Actual Actions attachment verification failed; central activation withheld.",
       "evidence": [
         {
           "url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
@@ -869,7 +869,7 @@
       "strategy_decision": "ANONYMOUS_SESSION_AJAX_ADAPTER",
       "fallback": {
         "strategy": "MANUAL_ONLY",
-        "trigger": "상세 URL/본문 및 페이지 요청 검증 필요.",
+        "trigger": "Public request failure, unresolved file group, or failed download validation",
         "url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
         "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
       },
@@ -883,7 +883,9 @@
         "durable_identity": "fileId; secCode is resolved afresh, not persisted",
         "raw_files_persisted": false,
         "local_sample": "ntt_id=13038: HWP 185856 bytes, PDF 498122 bytes; direct text extracted; native OCR PARTIAL",
-        "request_headers": "Official AJAX X-Requested-With and detail Referer, reproduced without claiming either is necessary"
+        "request_headers": "Official AJAX X-Requested-With and detail Referer, reproduced without claiming either is necessary",
+        "cache_false_query": "_={fresh millisecond nonce}, matching official jQuery cache:false GET",
+        "evidence": "docs/site-audit/exportvoucher-attachments-20261109.json"
       }
     },
     {

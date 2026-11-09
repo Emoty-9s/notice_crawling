@@ -14,6 +14,9 @@ feed v3, 추출/OCR 엔진과 Windows A/B 판정은 재사용한다. 외부 AI �
   목록 요청에는 이 값을 인자로 전달하지 않는다. 별도 hidden field를 추측하지 않는다.
 - 익명 상세를 연 CookieJar로 `/common/File2List?docId={data-doc-id}`를 호출한다.
   공식 AJAX의 X-Requested-With/Referer/Accept를 재현한다.
+  `ftFile2.js`의 `cache:false`에 맞춰 jQuery GET의 `_={밀리초 nonce}`도 붙인다.
+  이는 공식 호출 규칙 재현이며, 특정 헤더/nonce만으로 연결 오류가 해결됐다는
+  주장은 하지 않는다.
   헤더를 각각 비교할 때 상세를 매번 다시 열면 모두 2건이므로 특정 헤더가
   필수라는 주장은 하지 않는다. 상세 재접속 없는 반복 조회에서는 `[]`가 관찰됐다.
   따라서 세션 없는 독립 API 요청의 `[]`를 첨부 없음으로 취급하지 않는다.
@@ -34,5 +37,35 @@ feed v3, 추출/OCR 엔진과 Windows A/B 판정은 재사용한다. 외부 AI �
 - 신규 단위 테스트 6개 PASS. 전체 735개 PASS (Windows 전용 1개 skip).
 - 공개 HTML/JSON fixture만 저장하며, 발급 secCode/세션 속성은 제거했다.
 
-중앙 활성화는 별도 read-only Actions에서 실제 첨부 OCR 검증 후 진행한다.
-최종 Actions/Windows/커밋 증거는 검증 완료 후 아래에 기록한다.
+## 최종 결과: 완료 기준 미충족
+
+- 최종 구현 커밋: `6844e0ef2c88929391844b08b33c52245a5f7947`.
+- 공식 cache:false 요청을 포함한 최종 로컬 수집도 34건 PASS.
+  첨부 있는 공고 19건, 파일 메타데이터 43개, 실제 원문 다운로드는 **3개**다.
+  43개 모두를 다운로드했다고 주장하지 않는다.
+- 최종 코드 전체 unittest 재검증: 735개 PASS, 1개 skip (237.375초).
+  신규 수출바우처 테스트 6개와 기존 기관 회귀 테스트를 포함한다.
+- 별도 재빌드 EXE:
+  `dist/notice_crawling_exportvoucher_verified/notice_crawling_exportvoucher_verified.exe`.
+  실제 공개 수집 결과를 루프백 서버로 공급하여 격리된 임시 캐시에서
+  UPDATED → UNCHANGED, 수출바우처 34건/텍스트 47503자 동기화 PASS.
+  A 분석 SUCCESS 34건, 판정 EXCLUDE 30건/INSUFFICIENT 4건.
+  기본 목록 0건, 제외 포함 현재 3건/마감 31건으로 공통 정책을 유지했다.
+  사용자 DB를 열거나 생성하지 않았다. 배포된 중앙 Pages에서 수출바우처가
+  동기화됐다는 뜻은 아니다.
+- [최종 실제 Actions 42580372030](https://github.com/Emoty-9s/notice_crawling/actions/runs/42580372030)
+  **FAIL**. 목록 1/2페이지와 첫 상세/첨부 목록 조회는 성공했으나 다음 상세에서
+  `Connection reset by peer`가 반복됐다. 후속 진단은 기존/신규 익명 세션 모두
+  상세 단계에서 연결 재설정 또는 TLS handshake timeout으로 실패했다.
+  GitHub-hosted runner의 실제 첨부 다운로드/추출/OCR 성공은 확인하지 못했다.
+  서버 또는 네트워크의 정확한 원인은 확인되지 않았다.
+- 앞선 실패 실행: 42579413238, 42579557091, 42579672202, 42579905043, 42580171687.
+  이 중 42579557091은 검증 도구의 임시 제목 때문에 기존 제목 일치 검사에서
+  실패했고 수정했다. 나머지는 공개 HTTP 연결 실패다.
+- 중앙 workflow의 활성 소스 집합은 변경하지 않았다. 기존 9개 수집과 생산
+  history/OCR 캐시/사용자 설정/회사 DB를 대체하지 않았다. 다른 신규 사이트는
+  수정하지 않았다. 수출바우처의 정식 중앙 활성화와 배포 feed 기반 Windows
+  검증은 **보류**다.
+
+메타데이터와 해시만 포함한 상세 증거:
+[exportvoucher-attachments-20261109.json](exportvoucher-attachments-20261109.json).

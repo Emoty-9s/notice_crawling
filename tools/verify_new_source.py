@@ -15,10 +15,12 @@ from src.pipeline import load_site_configs
 from src.renderer.feed import write_feed
 from src.scrapers.tipa_legacy_bid import TipaBidScraper
 from src.scrapers.kiat_home import KiatBidScraper
+from src.scrapers.gbsa_bid import GbsaBidScraper
 
-ADAPTERS = {'tipa_legacy_bid': TipaBidScraper, 'kiat_home': KiatBidScraper}
+ADAPTERS = {'tipa_legacy_bid': TipaBidScraper, 'kiat_home': KiatBidScraper, 'gbsa_bid': GbsaBidScraper}
 URLS = {'tipa_legacy_bid': 'https://www.tipa.or.kr/s040305',
-        'kiat_home': 'https://cont.kiat.or.kr/bidding/biddingList.do'}
+        'kiat_home': 'https://cont.kiat.or.kr/bidding/biddingList.do',
+        'gbsa_bid': 'https://www.gbsa.or.kr/board/bid_info.do'}
 
 
 def main(argv=None):
@@ -33,6 +35,8 @@ def main(argv=None):
               'max_pages': 3, 'http': {'max_retries': 0, 'timeout_seconds': 25}}
     if args.source == 'kiat_home':
         config['pagination'] = {'parameter': 'page'}
+    if args.source == 'gbsa_bid':
+        config['pagination'] = {'parameter': 'pageIndex'}
     now = datetime.now(timezone.utc)
     report = dict(source_id=args.source, checked_at=now.isoformat(), url=config['list_url'],
                   status='FAILED', stage='collection', collected=0, external_ai_calls=0)

@@ -8,6 +8,7 @@ on:
         options:
           - tipa_legacy_bid
           - kiat_home
+          - gbsa_bid
 permissions:
   contents: read
 jobs:

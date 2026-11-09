@@ -1816,18 +1816,17 @@
           ]
         }
       ],
-      "list_url": null,
-      "detail_url_pattern": null,
+      "list_url": "https://www.gbsa.or.kr/board/bid_info.do",
+      "detail_url_pattern": "/board/bid_info.do?nttId={nttId}",
       "enabled": false,
-      "access_status": "TOOL_ERROR",
-      "content_type": "SPECIAL",
-      "classification_notes": "관찰된 응답을 기준으로 분류. SPECIAL은 기술 특성 미확인/특수 접근도 포함하며 DYNAMIC을 뜻하지 않음.",
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "실제 3페이지 상세 30건. 공통 추출·OCR 큐에 공식 eGov 첨부 URL 전달.",
       "pagination": {
-        "type": "UNVERIFIED",
-        "parameter": null,
-        "example_url": null,
-        "second_page_verified": false,
-        "notes": "목록/페이지 이동을 검증하지 못함"
+        "type": "OBSERVED_FORM_QUERY",
+        "parameter": "pageIndex",
+        "example_url": "https://www.gbsa.or.kr/board/bid_info.do?pageIndex=2",
+        "second_page_verified": true
       },
       "detail": {
         "example_url": null,
@@ -1858,15 +1857,15 @@
         "detected": null,
         "notes": "미확인"
       },
-      "recommended_strategy": "MANUAL_ONLY",
+      "recommended_strategy": "REQUESTS",
       "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
       "risk": {
         "level": "HIGH",
         "notes": "검색 인덱스는 직접 게시판 조회 성공 증거가 아님. 목록/상세 요청 재확인 필요."
       },
-      "audit_status": "LIMITED",
-      "checked_on": "2026-10-30",
-      "blocker": "검색 인덱스는 직접 게시판 조회 성공 증거가 아님. 목록/상세 요청 재확인 필요.",
+      "audit_status": "LIST_DETAIL_PAGINATION_ATTACHMENT_VERIFIED",
+      "checked_on": "2026-11-09",
+      "blocker": null,
       "mvp_priority": null,
       "mvp_notes": null,
       "evidence": [
@@ -1881,13 +1880,20 @@
           "result": "공식 도메인 검색 인덱스에 입찰정보가 있으나 web.open은 Bad Request."
         }
       ],
-      "mvp_status": "NOT_SELECTED",
-      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "mvp_status": "IMPLEMENTED",
+      "strategy_decision": "IMPLEMENTED_VERIFIED",
       "fallback": {
         "strategy": "MANUAL_ONLY",
         "trigger": "검색 인덱스는 직접 게시판 조회 성공 증거가 아님. 목록/상세 요청 재확인 필요.",
         "url": "https://www.gbsa.or.kr/board/bid_info.do",
         "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      },
+      "expansion_validation": {
+        "list_pages": 3,
+        "detail_count": 30,
+        "feed_count": 23,
+        "attachment_sample": "PARTIAL_UNSUPPORTED_RESOURCE",
+        "evidence": "docs/site-audit/expansion-20261109/gbsa_bid.json"
       }
     },
     {

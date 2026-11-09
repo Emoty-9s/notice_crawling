@@ -11,6 +11,7 @@ SOURCES = {
     'ripc_pms': '지역지식재산센터',
     'tipa_legacy_bid': '중소기업기술정보진흥원',
     'kiat_home': '한국산업기술진흥원',
+    'gbsa_bid': '경기도경제과학진흥원',
 }
 
 

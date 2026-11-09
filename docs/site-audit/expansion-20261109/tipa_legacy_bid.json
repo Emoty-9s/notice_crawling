@@ -283,5 +283,22 @@
     "error_type": "StructureError",
     "public_feed_count": 0,
     "windows_local_only": true
+  },
+  "central_access_diagnosis": {
+    "source_id": "tipa_legacy_bid",
+    "url": "https://www.tipa.or.kr/s040305",
+    "status": "FAILED",
+    "http_status": 200,
+    "final_url": "https://www.tipa.or.kr/eng",
+    "content_type": "text/html; charset=UTF-8",
+    "sha256": "ac30b1efbef63fea0343f76b554a0ea733e3a64745bdccd5a774a4a5df8775d5",
+    "bytes": 21988,
+    "title": [
+      "Main – 중소기업기술정보진흥원",
+      "중소기업기술정보진흥원"
+    ],
+    "tables": [],
+    "error_type": "StructureError",
+    "error": "expected one table {'cls': 'basic_table center'}, found 0"
   }
 }

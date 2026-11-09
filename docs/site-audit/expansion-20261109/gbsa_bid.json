@@ -1,0 +1,262 @@
+{
+  "attachment_sample": {
+    "notice_id": "notice:v1:93f98aa4014c3669ecb817ad5183d55b8eee2f86e0da1352971b63a511c60e1a",
+    "resources": [
+      {
+        "error_code": null,
+        "name": "",
+        "source_url": "https://www.gbsa.or.kr/cmm/fms/FileDown.do?atchFileId=FILE_000000000127832&fileSn=0",
+        "status": "UNSUPPORTED"
+      },
+      {
+        "error_code": null,
+        "name": "",
+        "source_url": "https://www.gbsa.or.kr/cmm/fms/FileDown.do?atchFileId=FILE_000000000127832&fileSn=1",
+        "status": "SUCCESS"
+      }
+    ],
+    "status": "PARTIAL",
+    "text_chars": 19519,
+    "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=12117&pageIndex=1&searchCnd=&searchWrd="
+  },
+  "checked_at": "2026-11-09T04:37:31.920258+00:00",
+  "collected": 30,
+  "external_ai_calls": 0,
+  "feed_count": 23,
+  "requests": [
+    {
+      "file": "response-000.html",
+      "phase": "list",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do"
+    },
+    {
+      "file": "response-001.html",
+      "phase": "list",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?pageIndex=2"
+    },
+    {
+      "file": "response-002.html",
+      "phase": "list",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?pageIndex=3"
+    },
+    {
+      "file": "response-003.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=12117&pageIndex=1&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-004.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=12116&pageIndex=1&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-005.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=12115&pageIndex=1&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-006.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=12112&pageIndex=1&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-007.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=12083&pageIndex=1&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-008.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=12042&pageIndex=1&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-009.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=12033&pageIndex=1&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-010.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=12005&pageIndex=1&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-011.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=12004&pageIndex=1&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-012.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11992&pageIndex=1&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-013.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11927&pageIndex=2&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-014.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11926&pageIndex=2&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-015.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11819&pageIndex=2&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-016.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11816&pageIndex=2&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-017.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11706&pageIndex=2&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-018.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11692&pageIndex=2&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-019.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11691&pageIndex=2&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-020.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11670&pageIndex=2&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-021.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11669&pageIndex=2&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-022.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11653&pageIndex=2&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-023.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11630&pageIndex=3&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-024.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11629&pageIndex=3&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-025.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11626&pageIndex=3&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-026.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11624&pageIndex=3&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-027.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11623&pageIndex=3&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-028.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11609&pageIndex=3&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-029.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11576&pageIndex=3&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-030.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11568&pageIndex=3&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-031.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11565&pageIndex=3&searchCnd=&searchWrd="
+    },
+    {
+      "file": "response-032.html",
+      "phase": "detail",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do?nttId=11563&pageIndex=3&searchCnd=&searchWrd="
+    }
+  ],
+  "source_id": "gbsa_bid",
+  "stage": "feed_v3",
+  "status": "PASS",
+  "unique_ids": 30,
+  "unknown_publication_dates": 0,
+  "url": "https://www.gbsa.or.kr/board/bid_info.do",
+  "unittest": {
+    "total": 728,
+    "skipped": 1,
+    "failures": 0,
+    "seconds": 228.822
+  },
+  "windows": {
+    "status": "SUCCESS",
+    "frozen": true,
+    "default_arguments": [
+      "--cache",
+      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\cache\\snapshot.json",
+      "--db",
+      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\performance.db"
+    ],
+    "sync": [
+      "UPDATED",
+      "UNCHANGED"
+    ],
+    "local_work_count": 23,
+    "local_work_grades": {
+      "EXCLUDE": 23
+    },
+    "local_work_states": {
+      "SUCCESS": 23
+    },
+    "local_work_runtime": {
+      "subprocess": true,
+      "external_calls": 0,
+      "elapsed_seconds": 2.161,
+      "active_sessions_after": 0
+    },
+    "github_state": "GitHub 연결 정상",
+    "source_cards": 10,
+    "source_status_available": true,
+    "notice_cards": 0,
+    "default_visible_count": 0,
+    "default_visible_titles": [],
+    "excluded_toggle_count": 4,
+    "excluded_reasons_available": true,
+    "closed_including_excluded": 19,
+    "active_projection": true,
+    "local_seen_state": true,
+    "removed_recommendation_selection": true,
+    "tk_patchlevel": "8.6.15",
+    "ui_title": "Notice · 업무 모니터링 대시보드",
+    "cache_path_correct": true,
+    "database_created": false
+  },
+  "local_ab": {
+    "source_id": "gbsa_bid",
+    "a_state": "SUCCESS",
+    "a_status": "EXCLUDE",
+    "b_state": "SUCCESS",
+    "matching_rows": 1,
+    "external_calls": 0,
+    "company_db_used": false
+  },
+  "limitations": [
+    "Attachment sample PARTIAL: one unsupported resource, one successfully extracted resource.",
+    "No official structured deadline is inferred from prose or title; unknown remains null.",
+    "23 public notices after existing prefilter; strict local A excludes all sampled public notices."
+  ]
+}

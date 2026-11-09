@@ -108,11 +108,12 @@ def build_registry(site_configs, *, transport_factory=None, clock=None, logger=N
     """Central registry: unchanged M05 builder plus explicitly enabled M16 sites."""
     from src.scrapers.ripc_pms import RipcScraper
     from src.scrapers.kista_ippro import KistaScraper
+    from src.scrapers.tipa_legacy_bid import TipaBidScraper
 
     configs = list(site_configs)
     registry = build_mvp_registry(configs, transport_factory=transport_factory, clock=clock, logger=logger)
     by_source = {config['source_id']: config for config in configs}
-    for adapter in (RipcScraper, KistaScraper):
+    for adapter in (RipcScraper, KistaScraper, TipaBidScraper):
         config = by_source.get(adapter.source)
         if config is None or not config.get('enabled', False):
             continue

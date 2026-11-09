@@ -32,7 +32,7 @@ max-width:760px;margin:10vh auto;padding:24px}a{color:#8db9ff}</style>
 <p>schema v3는 최신 Windows 앱이 필요합니다. 이전 v2 앱은 업데이트해 주세요.</p>
 <ul><li><a href="notices.json">공고 목록 · schema v3</a></li>
 <li><a href="metadata.json">생성 시각 및 공고 수</a></li>
-<li><a href="source_status.json">7개 기관 수집 상태</a></li></ul>
+<li><a href="source_status.json">기관별 수집 상태</a></li></ul>
 <p>실적 업로드와 실적 관리는 Windows 앱의 로컬 DB에서 처리합니다.</p>
 </html>
 '''

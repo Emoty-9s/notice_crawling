@@ -1,0 +1,277 @@
+{
+  "attachment_sample": {
+    "notice_id": "notice:v1:4974a4a008d56096f9fc5fc9feeb6882439f0ef8a9fe716922ceaee9aa5d55c7",
+    "resources": [
+      {
+        "error_code": null,
+        "name": "1._공고서_R26BK01817051_중소기업_RD_우수성과_50선_발굴_및_선정체계_개선방안_연구.pdf",
+        "source_url": "https://www.tipa.or.kr/s040305/file_down/id/22151/checksum/2e6986f3223f9e3df3d3747633297896",
+        "status": "PARTIAL"
+      },
+      {
+        "error_code": null,
+        "name": "2._제안요청서_중소기업_RD_우수성과_50선_발굴_및_선정체계_개선방안_연구.hwp",
+        "source_url": "https://www.tipa.or.kr/s040305/file_down/id/22152/checksum/02f01e8a72dde1b3423b7541bbe97eac",
+        "status": "PARTIAL"
+      },
+      {
+        "error_code": null,
+        "name": "3._상생결제제도_안내자료.pdf",
+        "source_url": "https://www.tipa.or.kr/s040305/file_down/id/22153/checksum/8a97b2c7e70f4e8f18401d6a93e9e71a",
+        "status": "PARTIAL"
+      }
+    ],
+    "status": "PARTIAL",
+    "text_chars": 42042,
+    "url": "https://www.tipa.or.kr/s040305/view/id/17890"
+  },
+  "checked_at": "2026-11-09T04:07:54.516054+00:00",
+  "collected": 30,
+  "external_ai_calls": 0,
+  "feed_count": 30,
+  "requests": [
+    {
+      "file": "response-000.html",
+      "phase": "list",
+      "url": "https://www.tipa.or.kr/s040305"
+    },
+    {
+      "file": "response-001.html",
+      "phase": "list",
+      "url": "https://www.tipa.or.kr/s040305/index/page/2"
+    },
+    {
+      "file": "response-002.html",
+      "phase": "list",
+      "url": "https://www.tipa.or.kr/s040305/index/page/3"
+    },
+    {
+      "file": "response-003.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17890"
+    },
+    {
+      "file": "response-004.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17857"
+    },
+    {
+      "file": "response-005.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17851"
+    },
+    {
+      "file": "response-006.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17840"
+    },
+    {
+      "file": "response-007.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17828"
+    },
+    {
+      "file": "response-008.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17822"
+    },
+    {
+      "file": "response-009.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17776"
+    },
+    {
+      "file": "response-010.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17726"
+    },
+    {
+      "file": "response-011.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17725"
+    },
+    {
+      "file": "response-012.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17694"
+    },
+    {
+      "file": "response-013.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17672"
+    },
+    {
+      "file": "response-014.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17649"
+    },
+    {
+      "file": "response-015.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17640"
+    },
+    {
+      "file": "response-016.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17626"
+    },
+    {
+      "file": "response-017.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17622"
+    },
+    {
+      "file": "response-018.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17583"
+    },
+    {
+      "file": "response-019.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17579"
+    },
+    {
+      "file": "response-020.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17573"
+    },
+    {
+      "file": "response-021.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17559"
+    },
+    {
+      "file": "response-022.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17558"
+    },
+    {
+      "file": "response-023.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17555"
+    },
+    {
+      "file": "response-024.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17550"
+    },
+    {
+      "file": "response-025.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17549"
+    },
+    {
+      "file": "response-026.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17545"
+    },
+    {
+      "file": "response-027.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17540"
+    },
+    {
+      "file": "response-028.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17521"
+    },
+    {
+      "file": "response-029.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17507"
+    },
+    {
+      "file": "response-030.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17503"
+    },
+    {
+      "file": "response-031.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17489"
+    },
+    {
+      "file": "response-032.html",
+      "phase": "detail",
+      "url": "https://www.tipa.or.kr/s040305/view/id/17474"
+    }
+  ],
+  "source_id": "tipa_legacy_bid",
+  "stage": "feed_v3",
+  "status": "PASS",
+  "unique_ids": 30,
+  "url": "https://www.tipa.or.kr/s040305",
+  "activation": "VERIFIED_READY_FOR_ACTIONS",
+  "unittest": {
+    "total": 724,
+    "skipped": 1,
+    "failures": 0,
+    "seconds": 220.313
+  },
+  "windows": {
+    "status": "SUCCESS",
+    "frozen": true,
+    "default_arguments": [
+      "--cache",
+      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\cache\\snapshot.json",
+      "--db",
+      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\performance.db"
+    ],
+    "sync": [
+      "UPDATED",
+      "UNCHANGED"
+    ],
+    "local_work_count": 30,
+    "local_work_grades": {
+      "EXCLUDE": 29,
+      "REVIEW": 1
+    },
+    "local_work_states": {
+      "SUCCESS": 30
+    },
+    "local_work_runtime": {
+      "subprocess": true,
+      "external_calls": 0,
+      "elapsed_seconds": 4.64,
+      "active_sessions_after": 0
+    },
+    "github_state": "GitHub 연결 정상",
+    "source_cards": 8,
+    "source_status_available": true,
+    "notice_cards": 1,
+    "default_visible_count": 1,
+    "default_visible_titles": [
+      "[자체입찰공고] 중소기업 R&D 우수성과 50선 발굴 및 선정체계 개선방안 연구"
+    ],
+    "excluded_toggle_count": 4,
+    "excluded_reasons_available": true,
+    "closed_including_excluded": 26,
+    "active_projection": true,
+    "local_seen_state": true,
+    "accordion": true,
+    "matching_count": 0,
+    "detail": true,
+    "seen_persisted": true,
+    "central_new_preserved": true,
+    "back": true,
+    "removed_recommendation_selection": true,
+    "tk_patchlevel": "8.6.15",
+    "ui_title": "Notice · 업무 모니터링 대시보드",
+    "cache_path_correct": true,
+    "database_created": false
+  },
+  "local_ab": {
+    "source_id": "tipa_legacy_bid",
+    "a_state": "SUCCESS",
+    "a_status": "REVIEW",
+    "b_state": "SUCCESS",
+    "matching_rows": 1,
+    "external_calls": 0,
+    "company_db_used": false
+  },
+  "limitations": [
+    "Only the sampled notice attachments were extracted locally; central pipeline processes all queued attachments.",
+    "Local OCR is PARTIAL; no successful full OCR claim.",
+    "Official deadline absent in HTML is null, never inferred from title. Common 21-day fallback remains in effect."
+  ]
+}

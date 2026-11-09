@@ -63,7 +63,7 @@
         {
           "name": "Create runtime enabled-site config",
           "shell": "bash",
-          "run": "mkdir -p .run\npython - <<'PY'\nimport json\nfrom pathlib import Path\n\nsrc = Path('config/sites.yaml')\ndst = Path('.run/sites.yaml')\ndata = json.loads(src.read_text(encoding='utf-8'))\n\nenabled = {\n    'khidi_business',\n    'kised_bid_public',\n    'rda_bid',\n    'seoul_rnd_notice',\n    'kipa_bid',\n    'kista_ippro',\n    'ripc_pms',\n}\n\nfor site in data['sites']:\n    site['enabled'] = site['source_id'] in enabled\n\ndst.write_text(\n    json.dumps(data, ensure_ascii=False, indent=2),\n    encoding='utf-8'\n)\n\nprint('runtime enabled sites:', sum(s['enabled'] for s in data['sites']))\nPY"
+          "run": "mkdir -p .run\npython - <<'PY'\nimport json\nfrom pathlib import Path\n\nsrc = Path('config/sites.yaml')\ndst = Path('.run/sites.yaml')\ndata = json.loads(src.read_text(encoding='utf-8'))\n\nenabled = {\n    'khidi_business',\n    'kised_bid_public',\n    'rda_bid',\n    'seoul_rnd_notice',\n    'kipa_bid',\n    'kista_ippro',\n    'ripc_pms',\n    'tipa_legacy_bid',\n}\n\nfor site in data['sites']:\n    site['enabled'] = site['source_id'] in enabled\n\ndst.write_text(\n    json.dumps(data, ensure_ascii=False, indent=2),\n    encoding='utf-8'\n)\n\nprint('runtime enabled sites:', sum(s['enabled'] for s in data['sites']))\nPY"
         },
         {
           "name": "Check enabled public sources (no AI configuration required)",

@@ -9,6 +9,7 @@ SOURCES = {
     'kipa_bid': '한국발명진흥회',
     'kista_ippro': '한국특허전략개발원',
     'ripc_pms': '지역지식재산센터',
+    'tipa_legacy_bid': '중소기업기술정보진흥원',
 }
 
 

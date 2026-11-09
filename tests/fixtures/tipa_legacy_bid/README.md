@@ -1,0 +1,1 @@
+Public TIPA procurement responses captured 2026-11-09. Navigation, scripts and session fields removed; observed board nodes retained. Source: https://www.tipa.or.kr/s040305 . list1–3 and details 17890 / 17857. No private/company data.

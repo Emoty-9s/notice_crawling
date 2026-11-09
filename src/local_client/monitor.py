@@ -117,6 +117,7 @@ SOURCE_LIST_URLS = {
     'seoul_rnd_notice': 'https://seoul.rnbd.kr/client/c030200/c030200_00.jsp',
     'kipa_bid': 'https://www.kipa.org/kipa/notice/kw_0402.jsp',
     'kista_ippro': 'https://biz.kista.re.kr/ippro//com/iprndMain/selectBusinessAnnounceList.do?bbsType=ac',
+    'tipa_legacy_bid': 'https://www.tipa.or.kr/s040305',
     'ripc_pms': 'https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do',
 }
 

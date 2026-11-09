@@ -114,11 +114,11 @@ class EligibilityTests(unittest.TestCase):
             self.assertEqual(result.feed_count, 3)  # Closed rows remain available for local date overrides.
 
 class PaginationTests(unittest.TestCase):
-    def test_seven_share_cap(self):
+    def test_supported_sources_share_cap(self):
         configs=[dict(c,enabled=c['source_id'] in SUPPORTED_SOURCES,max_pages=20) for c in load_site_configs()]
         registry=build_registry(configs)
         active=[s for s in registry._scrapers.values() if s.enabled]
-        self.assertEqual(len(active),7)
+        self.assertEqual(len(active),len(SUPPORTED_SOURCES))
         for scraper in active:self.assertEqual(scraper.max_pages,MAX_COLLECTION_PAGES)
 
     def test_observed_pages_one_two_three_cap_and_duplicate_ids(self):

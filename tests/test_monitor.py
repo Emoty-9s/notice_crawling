@@ -81,12 +81,12 @@ class MonitorTests(unittest.TestCase):
         for payload in (json.dumps(bad).encode(), b'x'*65537, b'{"schema_version":1,"schema_version":1}'):
             self.assertEqual(read_sources(BASE, self.cache, transport=Mock(return_value=payload)), (None, False))
 
-    def test_public_health_projection_has_only_seven_allowlisted_sources_and_fields(self):
+    def test_public_health_projection_has_only_allowlisted_sources_and_fields(self):
         statuses = {source: dict(status='ERROR', last_attempt_at=STAMP, error_message='PRIVATE',
                                  error_type='PRIVATE', notices_found=0) for source in SOURCES}
         statuses['private-source'] = dict(status='SUCCESS', error_message='PRIVATE')
         document = validate_source_status(public_source_status(statuses, STAMP))
-        self.assertEqual(len(document['sources']), 7)
+        self.assertEqual(len(document['sources']), len(SOURCES))
         self.assertNotIn('PRIVATE', json.dumps(document))
         self.assertNotIn('private-source', json.dumps(document))
         self.assertTrue(all(set(row) == {'source_id', 'status', 'checked_at', 'notices_found'} for row in document['sources']))

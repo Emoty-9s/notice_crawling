@@ -2844,29 +2844,28 @@
           ]
         }
       ],
-      "list_url": null,
-      "detail_url_pattern": null,
+      "list_url": "https://www.tipa.or.kr/s040305",
+      "detail_url_pattern": "/s040305/view/id/{id}",
       "enabled": false,
-      "access_status": "REDIRECT_OTHER",
-      "content_type": "SPECIAL",
-      "classification_notes": "직접 조회와 검색 인덱스가 불일치하므로 SPECIAL/보류 유지. 로그인 또는 JS 필수라고 추정하지 않음.",
+      "access_status": "READABLE_LIST",
+      "content_type": "STATIC_HTML",
+      "classification_notes": "2026-11-09 실제 HTTP 목록 3페이지·상세 30건·PDF/HWPX 다운로드 확인.",
       "pagination": {
-        "type": "UNVERIFIED",
+        "type": "OBSERVED_PATH",
         "parameter": null,
-        "example_url": null,
-        "second_page_verified": false,
-        "notes": "목록/페이지 이동을 검증하지 못함"
+        "example_url": "https://www.tipa.or.kr/s040305/index/page/2",
+        "second_page_verified": true
       },
       "detail": {
-        "example_url": null,
-        "reachable_without_login": null,
-        "body_available_in_html": null,
-        "notes": "미확인"
+        "example_url": "https://www.tipa.or.kr/s040305/view/id/17890",
+        "reachable_without_login": true,
+        "body_available_in_html": true,
+        "notes": "첨부 중심 공고; 기존 추출/OCR 큐를 통함."
       },
       "html": {
-        "list_visible_in_web_html": null,
-        "local_http_verified": false,
-        "notes": "web 도구의 text/html 변환 결과 기준. 원본 HTML 바이트/JS 비활성 비교는 미검증."
+        "list_visible_in_web_html": true,
+        "local_http_verified": true,
+        "notes": "실제 urllib 수집 검증"
       },
       "json_api": {
         "verified": null,
@@ -2886,17 +2885,17 @@
         "detected": null,
         "notes": "미확인"
       },
-      "recommended_strategy": "MANUAL_ONLY",
-      "strategy_notes": "현재 증거로 자동수집 경로를 확정할 수 없어 수동 확인 대상으로 보류. 우회하지 않음.",
+      "recommended_strategy": "REQUESTS",
+      "strategy_notes": "BoardScraper 공통 추출·증분·오류 격리를 재사용. 관측된 경로 페이저만 탐색.",
       "risk": {
-        "level": "HIGH",
-        "notes": "입찰 게시판으로 연결되는 현재 공개 경로 재확인 필요. 원본 링크가 목록을 제공하지 않음."
+        "level": "MEDIUM",
+        "notes": "첨부 OCR 일부 PARTIAL. 공식 마감일이 HTML에 없으면 null 유지; 공통 21일 정책 적용."
       },
-      "audit_status": "LIMITED",
-      "checked_on": "2026-10-30",
-      "blocker": "공식 도메인 검색에는 입찰 목록/상세가 있으나 실제 목록·2페이지·상세 직접 조회는 모두 /eng로 이동. 검색 결과만으로 STATIC_HTML로 승격하지 않고 MANUAL_ONLY 유지.",
+      "audit_status": "LIST_DETAIL_PAGINATION_ATTACHMENT_VERIFIED",
+      "checked_on": "2026-11-09",
+      "blocker": null,
       "mvp_priority": null,
-      "mvp_notes": null,
+      "mvp_notes": "기존 엄격한 업무 판정 유지. 제목만으로 관련 공고 확정 금지.",
       "evidence": [
         {
           "url": "https://www.tipa.or.kr/s040305",
@@ -2928,17 +2927,33 @@
           "checked_on": "2026-10-30",
           "audit_round": "M01 completion",
           "result": "보완 조사: 검색에서 발견한 공고 상세를 직접 열었으나 /eng로 이동."
+        },
+        {
+          "url": "https://www.tipa.or.kr/s040305",
+          "method": "live Python adapter + Windows packaged smoke",
+          "result": "3페이지 상세 30건·feed v3 30건·Windows A 30건 SUCCESS, B SUCCESS. OCR PARTIAL 명시."
         }
       ],
-      "mvp_status": "NOT_SELECTED",
-      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "mvp_status": "IMPLEMENTED",
+      "strategy_decision": "IMPLEMENTED_VERIFIED",
       "fallback": {
         "strategy": "MANUAL_ONLY",
         "trigger": "공식 도메인 검색에는 입찰 목록/상세가 있으나 실제 목록·2페이지·상세 직접 조회는 모두 /eng로 이동. 검색 결과만으로 STATIC_HTML로 승격하지 않고 MANUAL_ONLY 유지.",
         "url": "https://www.tipa.or.kr/s040305",
         "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
       },
-      "followup_checked_on": "2026-10-30"
+      "followup_checked_on": "2026-10-30",
+      "expansion_validation": {
+        "checked_on": "2026-11-09",
+        "list_pages": 3,
+        "detail_count": 30,
+        "attachment_downloads_verified": [
+          "PDF",
+          "HWPX"
+        ],
+        "ocr_status": "PARTIAL_LOCAL_ENGINE",
+        "evidence": "docs/site-audit/expansion-20261109/tipa_legacy_bid.json"
+      }
     },
     {
       "source_id": "snip_bid",

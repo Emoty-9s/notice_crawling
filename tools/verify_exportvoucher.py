@@ -4,7 +4,6 @@ import hashlib
 import json
 import time
 from pathlib import Path
-from urllib.parse import urlsplit
 from unittest.mock import patch
 
 from src.ai.prefilter import Prefilter
@@ -14,6 +13,7 @@ from src.pipeline import load_site_configs
 from src.renderer.feed import write_feed
 from src.local_client.sync import validate_pair
 from src.scrapers.exportvoucher_notice import ExportVoucherScraper, ExportVoucherSession, notice_url
+from tools.exportvoucher_diagnostics import RequestAudit,environment,error_metadata
 
 
 def main(argv=None):
@@ -21,31 +21,24 @@ def main(argv=None):
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--sample-only',action='store_true')
     parser.add_argument('--require-ocr',action='store_true',help='Require real image attachment OCR, for the installed Actions runtime')
+    parser.add_argument('--interval',type=float,default=0,help='Minimum seconds between public requests (0..15)')
     args=parser.parse_args(argv)
     args.output.mkdir(parents=True,exist_ok=False)
     config=next(c for c in load_site_configs() if c['source_id']=='exportvoucher_notice')
     config={**config,'enabled':True,'max_pages':3,'pagination':{'parameter':'pageNo'},
             'http':{'timeout_seconds':25,'max_retries':2,'backoff_seconds':2}}
+    report=dict(source_id='exportvoucher_notice',status='FAILED',external_ai_calls=0,downloads=[],stage='collection',
+                environment=environment(),requests=[],extraction_stages=[])
+    audit=RequestAudit(report['requests'],interval=args.interval)
+    original_init=ExportVoucherSession.__init__
+    def audited_init(session,**options):
+        original_init(session,**options)
+        session.opener=audit.wrap(session.opener)
+    trace=patch.object(ExportVoucherSession,'__init__',audited_init)
+    trace.start()
     scraper=ExportVoucherScraper(config)
     queue=ExtractionQueue()
     scraper.extractor=queue
-    report=dict(source_id=scraper.source_id,status='FAILED',external_ai_calls=0,downloads=[],stage='collection')
-    original_get=ExportVoucherSession.get
-    def traced_get(session,url,**options):
-        started=time.monotonic()
-        record=dict(path=urlsplit(url).path)
-        report.setdefault('requests',[]).append(record)
-        try:
-            result=original_get(session,url,**options)
-            record['status']='SUCCESS'
-            return result
-        except Exception as error:
-            record.update(status='FAILED',error_type=type(error).__name__,error=str(error))
-            raise
-        finally:
-            record['elapsed_seconds']=round(time.monotonic()-started,2)
-    trace=patch.object(ExportVoucherSession,'get',traced_get)
-    trace.start()
     try:
         if not args.sample_only:
             notices=scraper.run()
@@ -69,6 +62,8 @@ def main(argv=None):
                 from src.core.extraction import discover
                 queue.enrich(notice,discover(parsed.body_html,url))
                 notices.append(notice)
+                report['collected_count']=len(notices)
+                report['attachment_counts']={k:len(v) for k,v in scraper.attachment_results.items()}
         report['attachment_counts']={k:len(v) for k,v in scraper.attachment_results.items()}
         assert report['attachment_counts'].get('13038',0)>=1
         assert report['attachment_counts'].get('13047')==0
@@ -84,7 +79,10 @@ def main(argv=None):
         with patch.object(ExportVoucherSession,'download',audited):
             for n in notices:
                 if 'ntt_id=13038' in n.url or 'ntt_id=13034' in n.url:
+                    started=time.monotonic()
                     n=extractor.enrich(n,queue.resources[n.notice_id])
+                    report['extraction_stages'].append(dict(status=n.extraction.get('status'),
+                        elapsed_seconds=round(time.monotonic()-started,3)))
                     field='extraction' if 'ntt_id=13038' in n.url else 'image_extraction'
                     report[field]=dict(status=n.extraction.get('status'),resources=[dict(
                         source_url=r.get('source_url'),name=r.get('name'),status=r['status'],
@@ -94,8 +92,9 @@ def main(argv=None):
                         methods=sorted({p.get('method') for p in r.get('parts',[]) if p.get('method')}))
                         for r in n.extraction.get('resources',[])])
                 checked.append(n)
-        assert len(report['downloads'])>=1 and all(d['bytes']>0 for d in report['downloads'])
-        assert any(r['successful_text_parts']>0 and r['text_characters']>100 for r in report['extraction']['resources'])
+        assert {'.hwp','.pdf'} <= {Path(d['name']).suffix.lower() for d in report['downloads'] if d['bytes']>0}
+        assert {'.hwp','.pdf'} <= {Path(r['name']).suffix.lower() for r in report['extraction']['resources']
+                                if r['successful_text_parts']>0 and r['text_characters']>100}
         if args.require_ocr:
             assert any('/common.FileDownload.do?' in r['source_url'] and r['successful_ocr_parts']>0
                        for r in report['image_extraction']['resources']), 'ATTACHMENT_OCR_NOT_VERIFIED'
@@ -109,9 +108,8 @@ def main(argv=None):
         validate_pair(feed,meta)
         report.update(status='PASS',stage='feed_v3',feed_count=len(feed['notices']),raw_attachments_persisted=False)
     except Exception as error:
-        report.update(error_type=type(error).__name__,error=str(error))
-        if error.__cause__:
-            report['cause']=str(error.__cause__)
+        report.update(error_metadata(error))
+        if error.__cause__: report['cause']=error_metadata(error.__cause__)
     _atomic_json(args.output/'report.json',report)
     trace.stop()
     print(json.dumps(report,ensure_ascii=True,indent=2))

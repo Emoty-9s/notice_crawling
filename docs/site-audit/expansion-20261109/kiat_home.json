@@ -286,12 +286,6 @@
   "windows": {
     "status": "SUCCESS",
     "frozen": true,
-    "default_arguments": [
-      "--cache",
-      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\cache\\snapshot.json",
-      "--db",
-      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\performance.db"
-    ],
     "sync": [
       "UPDATED",
       "UNCHANGED"
@@ -339,5 +333,12 @@
     "Publication date is unavailable in the public HTML and remains null; receipt start is not used as publication date.",
     "Attachment extraction was sampled on one notice. Other attachments use the existing central OCR queue.",
     "Strict A classification excludes all 45 local preview notices; no relevance criteria relaxed."
-  ]
+  ],
+  "central_validation": {
+    "run_id": 42564213368,
+    "source_status": "SUCCESS",
+    "collected": 45,
+    "feed_count": 45,
+    "windows_production_verified": true
+  }
 }

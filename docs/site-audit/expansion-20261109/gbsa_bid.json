@@ -205,12 +205,6 @@
   "windows": {
     "status": "SUCCESS",
     "frozen": true,
-    "default_arguments": [
-      "--cache",
-      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\cache\\snapshot.json",
-      "--db",
-      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\performance.db"
-    ],
     "sync": [
       "UPDATED",
       "UNCHANGED"
@@ -258,5 +252,12 @@
     "Attachment sample PARTIAL: one unsupported resource, one successfully extracted resource.",
     "No official structured deadline is inferred from prose or title; unknown remains null.",
     "23 public notices after existing prefilter; strict local A excludes all sampled public notices."
-  ]
+  ],
+  "central_validation": {
+    "run_id": 42564213368,
+    "source_status": "SUCCESS",
+    "collected": 30,
+    "feed_count": 30,
+    "windows_production_verified": true
+  }
 }

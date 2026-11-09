@@ -1,5 +1,23 @@
 # Current State
 
+Latest source expansion (2026-11-09): existing seven sources retained; KIAT and
+GBSA added after live list/detail/pagination/attachment, feed v3 and Windows
+verification. Central run 42564213368 collected all nine active sources
+successfully (KIAT 45, GBSA 30); published feed v3 has 311 records. TIPA's local
+30-record verification did not pass Actions: the server redirected to /eng.
+TIPA is quarantined from production, with its adapter retained for diagnosis.
+All 47 workbook Source IDs have explicit states and evidence in
+[the expansion report](../site-audit/expansion-20261109/RESULT.md).
+
+The 18,350,338-byte OCR-enriched feed exceeds the older Windows 16 MiB download
+limit. Commit 2ec71d0 raises the bounded limit to 64 MiB; use the rebuilt folder
+dist/notice_crawling_sites_20261109 in full. Packaged live sync UPDATED/UNCHANGED,
+A processing of all 311 rows, cards/details and source health passed. Windows
+full suite: 729 discovered, 728 passed, one environment-dependent skip. Local
+A/B/matcher algorithms, company DB, user preferences and the 21-day policy are
+unchanged. Prior history IDs/first_seen and all prior OCR cache paths survived
+the actual central state restore. Older entries below are historical.
+
 Latest v3/local A-B work (2026-11-04): central Gemini runtime, key checks and
 queue execution removed; archived default provider transport disabled. Public
 active CANDIDATE/REVIEW projection now uses explicit schema v3. History and old

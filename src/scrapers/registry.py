@@ -105,7 +105,7 @@ def build_mvp_registry(site_configs, *, transport_factory=None, clock=None, logg
 
 
 def build_registry(site_configs, *, transport_factory=None, clock=None, logger=None):
-    """Central registry: unchanged M05 builder plus explicitly enabled M16 sites."""
+    """Central registry: unchanged M05 builder plus explicitly enabled adapters."""
     from src.scrapers.ripc_pms import RipcScraper
     from src.scrapers.kista_ippro import KistaScraper
     from src.scrapers.tipa_legacy_bid import TipaBidScraper

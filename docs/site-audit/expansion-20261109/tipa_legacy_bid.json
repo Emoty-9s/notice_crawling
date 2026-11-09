@@ -211,12 +211,6 @@
   "windows": {
     "status": "SUCCESS",
     "frozen": true,
-    "default_arguments": [
-      "--cache",
-      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\cache\\snapshot.json",
-      "--db",
-      "C:\\Users\\이재혁\\AppData\\Local\\NoticeCrawling\\performance.db"
-    ],
     "sync": [
       "UPDATED",
       "UNCHANGED"

@@ -4,7 +4,6 @@ python -m tools.verify_new_source --source tipa_legacy_bid --output .run/tipa-ch
 """
 import argparse
 import json
-from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 

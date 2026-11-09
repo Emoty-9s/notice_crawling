@@ -1,9 +1,11 @@
 # 사업공고 모니터링 시스템
 
-GitHub Actions는 7개 기관의 공개 공고를 수집하고 history를 보존합니다.
+GitHub Actions는 검증된 기관의 공개 공고를 수집하고 history를 보존합니다.
 결정적 사전 필터에서 CANDIDATE/REVIEW인 유효 공고를 **feed v3**로 게시합니다.
 중앙 Gemini 호출·키 검사·호출 예산·재시도 queue 처리는 제거했습니다.
 이전 Gemini 결과와 queue 필드는 과거 이력으로 보존하며, 실제 provider 기본 transport도 비활성입니다.
+
+2026-11-09 사이트 확장 후 공개 feed가 기존 실행파일의 다운로드 한도를 넘었습니다. 최신 동기화에는 새 배포 폴더 `dist/notice_crawling_sites_20261109/` 전체를 사용하세요. [47개 수집원별 상태와 실제 배포 검증](docs/site-audit/expansion-20261109/RESULT.md)에 연결 완료·추가 개발·보류 및 EXE 호환성 근거를 정리했습니다.
 
 Windows의 내장 ONNX INT8 `intfloat/multilingual-e5-small`을 재사용합니다.
 **A: 업무 지원 가능성**은 공개 공고만 사용하며 회사 DB/실적과 독립입니다.
@@ -19,7 +21,7 @@ Windows의 내장 ONNX INT8 `intfloat/multilingual-e5-small`을 재사용합니�
 powershell -NoProfile -ExecutionPolicy Bypass -File .\build_windows.ps1
 ```
 
-checked-in `config/sites.yaml` 활성 상태는 유지합니다. Actions가 `.run/sites.yaml`에서 7개 기관을 활성화합니다.
+checked-in `config/sites.yaml` 활성 상태는 유지합니다. Actions가 `.run/sites.yaml`에서 운영 검증된 기관만 활성화합니다. 신규 47개 수집원 조사·연결 상태는 [확장 검증 결과](docs/site-audit/expansion-20261109/RESULT.md)를 참고하세요.
 cron은 `17 22 * * *`, 매일 한국시간 07:17 예정이며 지연될 수 있습니다. 기관별 최대 수집은 3페이지입니다.
 중앙 실행에는 AI 키나 모델이 필요 없습니다. 종료 코드는 0=정상, 1=수집 일부 실패, 2=설정/저장/검증 오류입니다.
 history는 마감·무관·미관측 공고도 보존합니다. 만료일 미상은 명시적 종료 근거가 없으면 검토 대상으로 유지합니다.
@@ -197,7 +199,7 @@ Tk를 포함한 Python의 표준 Tkinter로 실행합니다. 웹 서버/추가 �
 ```
 
 앱이 먼저 표시된 뒤 GitHub 공개 feed를 백그라운드에서 동기화합니다.
-**GitHub 상태 → 7개 기관의 마지막 중앙 수집 상태 → 신규 공고 → 카드별 실적 매칭 펼치기** 순서입니다.
+**GitHub 상태 → 기관별 마지막 중앙 수집 상태 → 신규 공고 → 카드별 실적 매칭 펼치기** 순서입니다.
 제목을 누르면 앱 내부 상세 페이지로 이동하고, 원문 보기 버튼을 눌렀을 때만 기본 브라우저를 엽니다.
 추천 선택용 별도 패널은 제거했습니다. DB 경로와 feed/cache 경로는 상단 설정·정보에서 지정합니다.
 기준 연도는 자동으로 현재 연도를 사용하지 않습니다. 명령에서 생략하면 화면에서 직접 입력해야 합니다.
@@ -215,7 +217,7 @@ NEW는 현재 중앙 run의 `is_new`입니다. 로컬 확인 상태와 독립이
 
 기관 상태는 `source_status.json`의 마지막 중앙 수집 결과만 표시합니다. 로컬에서 기관 사이트를 검사하지 않습니다.
 이 선택적 문서가 미배포/누락되면 회색, 저장된 상태를 사용하면 저장 상태와 확인 시각을 표시합니다.
-공개 projection은 7개 허용 source의 `source_id/status/checked_at/notices_found`만 포함하며 private state나 오류 메시지는 공개하지 않습니다.
+공개 projection은 허용된 source의 `source_id/status/checked_at/notices_found`만 포함하며 private state나 오류 메시지는 공개하지 않습니다.
 기존 notices.json/metadata.json 및 state artifact 계약은 유지합니다.
 
 실사용 관찰은 [이슈](docs/usage/ISSUES.md)와 [개선 후보](docs/usage/IMPROVEMENTS.md)에 비식별 내용으로 기록할 수 있습니다.

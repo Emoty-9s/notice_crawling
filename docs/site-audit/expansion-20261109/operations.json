@@ -1,0 +1,241 @@
+{
+  "central_run_id": 42564213368,
+  "central_run_url": "https://github.com/Emoty-9s/notice_crawling/actions/runs/42564213368",
+  "active_sources": [
+    "gbsa_bid",
+    "khidi_business",
+    "kiat_home",
+    "kipa_bid",
+    "kised_bid_public",
+    "kista_ippro",
+    "rda_bid",
+    "ripc_pms",
+    "seoul_rnd_notice"
+  ],
+  "all_active_sources_success": true,
+  "central_source_counts": {
+    "gbsa_bid": 30,
+    "khidi_business": 36,
+    "kiat_home": 45,
+    "kipa_bid": 30,
+    "kised_bid_public": 30,
+    "kista_ippro": 60,
+    "rda_bid": 30,
+    "ripc_pms": 30,
+    "seoul_rnd_notice": 30
+  },
+  "feed_v3_count": 311,
+  "feed_bytes": 18350338,
+  "feed_state_equal": true,
+  "public_health_equal": true,
+  "client_download_limit_bytes": 67108864,
+  "capacity_fix_commit": "2ec71d0",
+  "exe_sha256": "997d89c1544b32bd4c2f4cc0ab3956c9c2f147035fc41849acf9235715e7c120",
+  "local_unittest": {
+    "total": 729,
+    "passed": 728,
+    "skipped": 1,
+    "failures": 0,
+    "seconds": 256.058
+  },
+  "windows_production": {
+    "status": "SUCCESS",
+    "frozen": true,
+    "sync": [
+      "UPDATED",
+      "UNCHANGED"
+    ],
+    "local_work_count": 311,
+    "local_work_grades": {
+      "REVIEW": 95,
+      "EXCLUDE": 205,
+      "INSUFFICIENT": 4,
+      "HIGH": 7
+    },
+    "local_work_states": {
+      "SUCCESS": 311
+    },
+    "local_work_runtime": {
+      "subprocess": true,
+      "external_calls": 0,
+      "elapsed_seconds": 24.516,
+      "active_sessions_after": 0
+    },
+    "github_state": "GitHub 연결 정상",
+    "source_cards": 10,
+    "source_status_available": true,
+    "notice_cards": 7,
+    "default_visible_count": 7,
+    "default_visible_titles": [
+      "(입찰공고) 2026년도 자동차 분야 기반구축 사업 성과분석 용역",
+      "(입찰공고) 소재부품산업기술개발기반구축 종합분석 및 성과평가 용역",
+      "(입찰공고) 2026년 산업기술혁신산업 종합 성과조사 분석 연구용역",
+      "(입찰공고) 2026년도 산업기술국제협력사업 종합성과 조사분석 연구",
+      "(입찰공고) 월드클래스 10대 날개 프로젝트 기획연구",
+      "2026년 표준특허 협력기관 후보군(풀) 모집 공고",
+      "2026년 IP-R&D 전략지원 사업 협력기관 풀(POOL) 상시 모집 공고"
+    ],
+    "excluded_toggle_count": 39,
+    "excluded_reasons_available": true,
+    "closed_including_excluded": 272,
+    "active_projection": true,
+    "local_seen_state": true,
+    "accordion": true,
+    "matching_count": 0,
+    "detail": true,
+    "seen_persisted": true,
+    "central_new_preserved": true,
+    "back": true,
+    "removed_recommendation_selection": true,
+    "tk_patchlevel": "8.6.15",
+    "ui_title": "Notice · 업무 모니터링 대시보드",
+    "cache_path_correct": true,
+    "database_created": false
+  },
+  "windows_preferences": {
+    "status": "SUCCESS",
+    "frozen": true,
+    "native_mouse_verified": false,
+    "day20_visible_day21_hidden": true,
+    "dark_night_ui": true,
+    "source_cards": 10,
+    "deadline_save_edit_clear_official_preserved": true,
+    "card_detail_delete_and_restore": true,
+    "date_cannot_promote_a_exclusion": true,
+    "a_b_caches_unchanged_by_preferences": true,
+    "sync_preserves_preferences_and_a_matcher": true,
+    "restart_preserves_deadline_and_deletion": true,
+    "settings_atomic_file": true,
+    "company_database_created": false,
+    "external_calls": 0,
+    "real_onnx": true
+  },
+  "windows_ab": {
+    "a_cache_reused_without_model": true,
+    "a_real_onnx": true,
+    "a_same_with_100_performances": true,
+    "a_subprocess": true,
+    "a_unchanged_after_crud": true,
+    "a_without_performances": "HIGH",
+    "b_delete_removes": true,
+    "b_edit_invalidates": true,
+    "b_lazy": true,
+    "b_real_onnx": true,
+    "b_subprocess": true,
+    "battery_score": 0.893478,
+    "dark_night_ui": true,
+    "external_inference_calls": 0,
+    "food_score": 0.805209,
+    "frozen": true,
+    "main_thread_heartbeat_ticks": 548,
+    "matcher_unchanged": true,
+    "max_heartbeat_gap_ms": 300.77,
+    "model_version": "intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3:qint8",
+    "native_picker_click_verified": false,
+    "source_cards": 10,
+    "status": "SUCCESS"
+  },
+  "incremental_replay": {
+    "run_id": 42564213368,
+    "status": "PASS",
+    "sources": [
+      {
+        "source_id": "kiat_home",
+        "reused": 45,
+        "http_requests": 3,
+        "attachment_jobs": 0,
+        "metrics": {
+          "mode": "INCREMENTAL",
+          "baseline_date": "2026-11-06",
+          "window_start": "2026-11-02",
+          "window_end": "2026-11-09",
+          "list_pages": 3,
+          "list_rows": 45,
+          "listed_notices": 45,
+          "detail_requests": 0,
+          "detail_http_requests": 0,
+          "list_http_requests": 3,
+          "http_requests": 3,
+          "detail_skipped": 45,
+          "frozen_skipped": 0,
+          "new_notices": 0,
+          "recent_rechecked": 0,
+          "early_stop": false,
+          "ordering": "UNVERIFIED",
+          "fallback_reason": null,
+          "range_complete": true
+        }
+      },
+      {
+        "source_id": "gbsa_bid",
+        "reused": 30,
+        "http_requests": 3,
+        "attachment_jobs": 0,
+        "metrics": {
+          "mode": "INCREMENTAL",
+          "baseline_date": "2026-11-06",
+          "window_start": "2026-11-02",
+          "window_end": "2026-11-09",
+          "list_pages": 3,
+          "list_rows": 30,
+          "listed_notices": 30,
+          "detail_requests": 0,
+          "detail_http_requests": 0,
+          "list_http_requests": 3,
+          "http_requests": 3,
+          "detail_skipped": 30,
+          "frozen_skipped": 0,
+          "new_notices": 0,
+          "recent_rechecked": 0,
+          "early_stop": false,
+          "ordering": "UNVERIFIED",
+          "fallback_reason": null,
+          "range_complete": true
+        }
+      }
+    ],
+    "external_calls": 0,
+    "production_state_written": false
+  },
+  "final_actions_regression": {
+    "run_id": 42567985120,
+    "url": "https://github.com/Emoty-9s/notice_crawling/actions/runs/42567985120",
+    "commit_sha": "2ec71d0e879fd53c0129e39f27ff7e756fcbe42e",
+    "status": "SUCCESS",
+    "discovered": 728,
+    "passed": 666,
+    "skipped": 62,
+    "failures": 0,
+    "seconds": 93.027,
+    "source_access": {
+      "source_id": "gbsa_bid",
+      "url": "https://www.gbsa.or.kr/board/bid_info.do",
+      "status": "PASS",
+      "http_status": 200,
+      "final_url": "https://www.gbsa.or.kr/board/bid_info.do",
+      "content_type": "text/html;charset=UTF-8",
+      "sha256": "4a591cca04be2b4f315a87dfcbdd516ada04cbe2983ad9b589071ce7ab6d23d6",
+      "bytes": 110579,
+      "title": [
+        "입찰정보 ㅣ 경기도경제과학진흥원"
+      ],
+      "tables": [
+        {
+          "attributes": {
+            "class": "tbl-basic bbs-list"
+          },
+          "headings": [
+            "번호",
+            "제 목",
+            "작성자",
+            "등록일",
+            "조회수",
+            "첨부"
+          ]
+        }
+      ],
+      "list_count": 10
+    },
+    "skip_reason": "Optional desktop/ONNX-dependent tests are skipped in the central OCR runtime; Windows executes those checks locally."
+  }
+}

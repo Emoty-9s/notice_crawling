@@ -21,10 +21,15 @@ jobs:
           python -m pip install -r requirements-ocr.txt
       - name: Verify public list, distinct page, files, extraction and no-attachment notice
         run: python -m tools.verify_exportvoucher --output .run/exportvoucher-check --sample-only --require-ocr
+      - name: Diagnose public session differences after failure
+        if: failure()
+        run: python -m tools.probe_exportvoucher_session --output .run/exportvoucher-check/session-probe.json
       - name: Save metadata-only verification report
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: exportvoucher-attachments-${{ github.run_id }}
-          path: .run/exportvoucher-check/report.json
+          path: |
+            .run/exportvoucher-check/report.json
+            .run/exportvoucher-check/session-probe.json
           retention-days: 14

@@ -12,7 +12,6 @@ from src.pipeline import load_site_configs
 from src.renderer.feed import write_feed
 from src.local_client.sync import validate_pair
 from src.scrapers.exportvoucher_notice import ExportVoucherScraper, ExportVoucherSession, notice_url
-from src.scrapers._board import NoticeLink
 
 
 def main(argv=None):
@@ -39,11 +38,12 @@ def main(argv=None):
             page2=scraper.parse_list(scraper.request_text(config['list_url']+'&pageNo=2'))
             assert {i.source_notice_id for i in page1}!={i.source_notice_id for i in page2}
             report.update(list_count=len(page1),page2_count=len(page2),distinct_pages=True)
+            listed={i.source_notice_id:i for i in page1+page2}
             notices=[]
             for identity in ('13038','8410','13047','13034'):
                 url=notice_url(identity)
                 report['stage']='detail_'+identity
-                item=NoticeLink(identity,identity,url)
+                item=listed[identity]
                 # Use the same fetch/parse/discovery code as the real collector.
                 detail=scraper.fetch_detail(item)
                 parsed=scraper.parse_detail(detail,item)

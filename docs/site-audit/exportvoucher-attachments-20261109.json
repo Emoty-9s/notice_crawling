@@ -161,7 +161,7 @@
     "local_work_runtime": {
       "subprocess": true,
       "external_calls": 0,
-      "elapsed_seconds": 2.767,
+      "elapsed_seconds": 2.887,
       "active_sessions_after": 0
     },
     "source_cards": 11,
@@ -313,5 +313,16 @@
     "tools/probe_exportvoucher_session.py",
     "tools/verify_exportvoucher.py",
     "tools/windows_entry.py"
-  ]
+  ],
+  "tests": {
+    "suite": "python -m unittest discover -s tests -v",
+    "count": 735,
+    "status": "PASS",
+    "skipped": 1,
+    "seconds": 237.375
+  },
+  "windows_executable": {
+    "path": "dist/notice_crawling_exportvoucher_verified/notice_crawling_exportvoucher_verified.exe",
+    "rebuilt": true
+  }
 }

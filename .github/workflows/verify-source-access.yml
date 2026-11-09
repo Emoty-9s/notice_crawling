@@ -1,0 +1,34 @@
+name: Verify public source access (read only)
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        type: choice
+        required: true
+        options:
+          - tipa_legacy_bid
+          - kiat_home
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Read public list and validate parser
+        env:
+          SOURCE: ${{ inputs.source }}
+        run: python -m tools.source_access_probe --source "$SOURCE" --output .run/source-access.json
+      - name: Save safe diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: source-access-${{ inputs.source }}-${{ github.run_id }}
+          path: .run/source-access.json
+          retention-days: 7

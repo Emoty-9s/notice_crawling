@@ -6,10 +6,13 @@ from datetime import datetime,timezone
 from email.message import Message
 from pathlib import Path
 from unittest.mock import Mock,patch
+from urllib.error import HTTPError,URLError
+from urllib.parse import urlsplit,parse_qs
+import ssl
 
 from src.core.extraction import Extractor,Resource,discover,INCOMPLETE
 from src.scrapers.exportvoucher_notice import (ExportVoucherScraper,ExportVoucherSession,
-    PublicAttachment,parse_file_list,attachment_groups,validate_attachment,notice_url,LIST)
+    PublicAttachment,parse_file_list,attachment_groups,validate_attachment,notice_url,LIST,retryable)
 from src.scrapers._html import StructureError
 
 ROOT=Path(__file__).parent/'fixtures/exportvoucher_notice'
@@ -17,7 +20,7 @@ def read(name): return (ROOT/name).read_text(encoding='utf-8')
 def scraper(transport=None):
     return ExportVoucherScraper(dict(source_id='exportvoucher_notice',institution='수출바우처',
         list_url=LIST,enabled=True,pagination={'parameter':'pageNo'}),transport=transport,
-        clock=lambda:datetime(2026,11,9,tzinfo=timezone.utc))
+        clock=lambda:datetime(2026,11,9,tzinfo=timezone.utc),sleep=lambda seconds:None)
 def sample(s,identity='13038'):
     return next(i for i in s.parse_list(read('list1.html')) if i.source_notice_id==identity)
 def parsed_sample():
@@ -63,7 +66,7 @@ class ExportVoucherTests(unittest.TestCase):
         self.assertEqual(s.transport.get.call_count,1)
         self.assertEqual(attachment_groups(read('detail-13047.html')),[])
         self.assertEqual(s.parse_attachments('<a href="/policy.pdf">global policy</a>'),[])
-        s.transport.get.side_effect=[read('detail-13038.html'),'[]']
+        s.transport.get.side_effect=[read('detail-13038.html'),'[]',read('detail-13038.html'),'[]']
         with self.assertRaises(StructureError): s.fetch_detail(sample(s))
         with self.assertRaises(StructureError): s.parse_detail(read('detail-13038.html'),sample(s))
 
@@ -87,7 +90,7 @@ class ExportVoucherTests(unittest.TestCase):
         opener.open.side_effect=[Response(read('detail-13038.html').encode(),n.url,'text/html;charset=utf-8'),
             Response(json.dumps(rows).encode(), 'https://www.exportvoucher.com/common/File2List?docId=DOC_000000003940343','application/json'),
             Response(payload,file.download_url,'application/octet-stream')]
-        client=ExportVoucherSession(opener=opener)
+        client=ExportVoucherSession(opener=opener,interval_seconds=0)
         data,name=client.download(resources[1],notice=n)
         self.assertEqual(data,payload)
         self.assertEqual(name,file.name)
@@ -101,6 +104,58 @@ class ExportVoucherTests(unittest.TestCase):
         self.assertTrue(query['_'][0].isdecimal())
         self.assertEqual(calls[2].args[0].full_url,file.download_url)
         self.assertIsNone(api_request.get_header('Authorization'))
+
+    def test_empty_group_refreshes_public_detail_once_and_is_not_no_attachment(self):
+        s=scraper(Mock())
+        s.transport.get.side_effect=[read('detail-13038.html'),'[]',read('detail-13038.html'),read('files-13038.json')]
+        item=sample(s)
+        s.fetch_detail(item)
+        self.assertEqual(len(s.attachment_results['13038']),2)
+        self.assertEqual([urlsplit(c.args[0]).path for c in s.transport.get.call_args_list],
+            ['/portal/board/boardView','/common/File2List','/portal/board/boardView','/common/File2List'])
+
+    def test_failed_file_restarts_public_context_without_redownloading_successful_sibling(self):
+        n,resources=parsed_sample()
+        payloads=[bytes.fromhex('d0cf11e0a1b11ae1')+b'public',b'%PDF-1.7 public']
+        rows=json.loads(read('files-13038.json'))
+        for row,data in zip(rows,payloads): row['fileSize']=len(data)
+        files=parse_file_list(json.dumps(rows))
+        def detail(): return Response(read('detail-13038.html').encode(),n.url,'text/html;charset=utf-8')
+        def listing(): return Response(json.dumps(rows).encode(),'https://www.exportvoucher.com/common/File2List','application/json')
+        opener=Mock()
+        opener.open.side_effect=[detail(),listing(),Response(payloads[0],files[0].download_url,'application/octet-stream'),
+            URLError(ConnectionResetError(104,'reset')),detail(),listing(),Response(payloads[1],files[1].download_url,'application/octet-stream')]
+        delays=[]
+        client=ExportVoucherSession(opener=opener,interval_seconds=0,sleep=delays.append)
+        self.assertEqual(client.download(resources[0],notice=n)[0],payloads[0])
+        self.assertEqual(client.download(resources[1],notice=n)[0],payloads[1])
+        self.assertEqual(delays,[2])
+        downloaded=[parse_qs(urlsplit(c.args[0].full_url).query)['file_id'][0]
+                    for c in opener.open.call_args_list if urlsplit(c.args[0].full_url).path=='/common.FileDownload.do']
+        self.assertEqual(downloaded,[files[0].file_id,files[1].file_id,files[1].file_id])
+
+    def test_download_recovery_is_bounded_and_does_not_retry_access_or_certificate_denial(self):
+        n,resources=parsed_sample()
+        opener=Mock()
+        opener.open.side_effect=URLError(ConnectionResetError(104,'reset'))
+        client=ExportVoucherSession(opener=opener,interval_seconds=0,sleep=lambda seconds:None)
+        with self.assertRaises(URLError): client.download(resources[0],notice=n)
+        self.assertEqual(opener.open.call_count,2)
+        self.assertFalse(retryable(HTTPError('https://test',403,'denied',{},None)))
+        self.assertFalse(retryable(URLError(ssl.SSLCertVerificationError('verification failed'))))
+        self.assertFalse(retryable(ValueError('EXPORTVOUCHER_INVALID_FILE_SIGNATURE')))
+
+    def test_failed_http_attempt_also_observes_request_spacing(self):
+        now=[0.]
+        delays=[]
+        def sleep(seconds):
+            delays.append(seconds); now[0]+=seconds
+        opener=Mock()
+        opener.open.side_effect=[URLError(ConnectionResetError(104,'reset')),Response(b'list',LIST,'text/html')]
+        client=ExportVoucherSession(opener=opener,clock=lambda:now[0],sleep=sleep)
+        with self.assertRaises(URLError): client.get(LIST,timeout=25,headers={})
+        self.assertEqual(client.get(LIST,timeout=25,headers={}), 'list')
+        self.assertEqual(delays,[5])
 
     def test_empty_html_wrong_signature_and_size_are_never_download_success(self):
         for data,name,content_type,size in [(b'','a.pdf','application/pdf',1),

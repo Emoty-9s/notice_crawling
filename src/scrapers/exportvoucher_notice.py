@@ -6,14 +6,17 @@ durable identities. Only file_id is retained in extraction work manifests;
 download() reopens the public notice and resolves a fresh browser session.
 """
 from dataclasses import dataclass, replace
+from contextlib import contextmanager
 from html import escape
 from http.cookiejar import CookieJar
 import json
 import re
+import ssl
 import time
 from pathlib import PurePosixPath
 from urllib.parse import parse_qs, urlencode, urlsplit
 from urllib.request import HTTPCookieProcessor, Request, build_opener
+from urllib.error import HTTPError,URLError
 
 from src.scrapers._board import BoardScraper, NoticeLink, date_field
 from src.scrapers._html import StructureError, parse_html
@@ -21,6 +24,19 @@ from src.scrapers._html import StructureError, parse_html
 BASE = 'https://www.exportvoucher.com'
 LIST = BASE + '/portal/board/boardList?bbs_id=1'
 FILE_PATH = '/common.FileDownload.do'
+
+
+class FileGroupUnavailable(StructureError):
+    """A known file widget returned []; never equivalent to no widget."""
+
+
+def retryable(error):
+    if isinstance(error,HTTPError):
+        return error.code in {429,500,502,503,504}
+    if isinstance(getattr(error,'reason',error),ssl.SSLCertVerificationError):
+        return False
+    return (isinstance(error,(URLError,TimeoutError,ConnectionError,FileGroupUnavailable))
+            or isinstance(error,ValueError) and str(error) in {'EXPORTVOUCHER_EMPTY_DOWNLOAD','EXPORTVOUCHER_ERROR_DOCUMENT'})
 
 
 def public_url(url, path):
@@ -70,7 +86,9 @@ def parse_file_list(text):
         data = json.loads(text)
     except (TypeError, ValueError):
         raise StructureError('EXPORTVOUCHER_FILE_LIST_NOT_JSON') from None
-    if not isinstance(data, list) or not data or len(data) > 100:
+    if data == []:
+        raise FileGroupUnavailable('EXPORTVOUCHER_EMPTY_OR_INVALID_FILE_GROUP')
+    if not isinstance(data, list) or len(data) > 100:
         raise StructureError('EXPORTVOUCHER_EMPTY_OR_INVALID_FILE_GROUP')
     result = {}
     for row in data:
@@ -111,11 +129,26 @@ def validate_attachment(data, name, content_type, expected_size):
 
 class ExportVoucherSession:
     """One anonymous cookie jar. No login, token forgery or raw-file storage."""
-    def __init__(self, *, opener=None):
+    def __init__(self, *, opener=None, interval_seconds=5, sleep=time.sleep, clock=time.monotonic):
+        if not 0 <= interval_seconds <= 15:
+            raise ValueError('invalid public request interval')
         self.opener = opener if opener is not None else build_opener(HTTPCookieProcessor(CookieJar()))
+        self.interval_seconds,self._sleep,self._clock=interval_seconds,sleep,clock
+        self._last_response=None
         self.detail_url = None
         self.files = None
         self.ajax_nonce = int(time.time()*1000)
+
+    @contextmanager
+    def response(self,request,*,timeout):
+        if self._last_response is not None:
+            delay=self.interval_seconds-(self._clock()-self._last_response)
+            if delay>0: self._sleep(delay)
+        try:
+            with self.opener.open(request,timeout=timeout) as response:
+                yield response
+        finally:
+            self._last_response=self._clock()
 
     def get(self, url, *, timeout, headers):
         parts = urlsplit(url)
@@ -126,7 +159,7 @@ class ExportVoucherSession:
             if not self.detail_url:
                 raise StructureError('EXPORTVOUCHER_DETAIL_SESSION_REQUIRED')
             options.update({'X-Requested-With': 'XMLHttpRequest', 'Referer': self.detail_url, 'Accept': 'application/json'})
-        with self.opener.open(Request(url, headers=options), timeout=timeout) as response:
+        with self.response(Request(url, headers=options), timeout=timeout) as response:
             if urlsplit(response.url).netloc != 'www.exportvoucher.com' or urlsplit(response.url).path != parts.path:
                 raise StructureError('EXPORTVOUCHER_UNEXPECTED_REDIRECT')
             data = response.read(3_000_001)
@@ -135,6 +168,7 @@ class ExportVoucherSession:
             text = data.decode(response.headers.get_content_charset() or 'utf-8')
         if parts.path == '/portal/board/boardView':
             self.detail_url = url
+            self.files = None
         return text
 
     def list_attachments(self, html, *, request_text=None):
@@ -152,7 +186,6 @@ class ExportVoucherSession:
         return list(files.values())
 
     def download(self, resource, *, notice):
-        from src.core.extraction import MAX_BYTES
         query = public_url(resource.url, FILE_PATH)
         ids = query.get('file_id', [])
         if set(query) != {'file_id'} or len(ids) != 1 or not re.fullmatch(r'FILE_[0-9]+', ids[0]):
@@ -160,17 +193,32 @@ class ExportVoucherSession:
         context = public_url(notice.url, '/portal/board/boardView')
         if context.get('bbs_id') != ['1'] or len(context.get('ntt_id', [])) != 1 or not context['ntt_id'][0].isdecimal():
             raise StructureError('INVALID_EXPORTVOUCHER_NOTICE_CONTEXT')
+        # One bounded recovery only, beginning at the public detail page.
+        # Successful sibling resources are not downloaded again. The caller's
+        # existing SUCCESS extraction/cache records remain authoritative.
+        for attempt in range(2):
+            try:
+                return self._download_file(ids[0],notice)
+            except Exception as error:
+                if attempt or not retryable(error):
+                    raise
+                self.files=None
+                self._sleep(2)
+        raise AssertionError('unreachable file recovery')
+
+    def _download_file(self,file_id,notice):
+        from src.core.extraction import MAX_BYTES
         if self.detail_url != notice.url or self.files is None:
             html = self.get(notice.url, timeout=25, headers={'User-Agent': 'NoticeMonitor/0.2'})
             self.files = self.list_attachments(html)
-        item = next((f for f in self.files if f.file_id == ids[0]), None)
+        item = next((f for f in self.files if f.file_id == file_id), None)
         if item is None:
             raise ValueError('EXPORTVOUCHER_FILE_NOT_IN_PUBLIC_NOTICE')
         if item.size > MAX_BYTES:
             raise ValueError('ATTACHMENT_BYTE_LIMIT')
         request = Request(item.download_url, headers={'User-Agent': 'NoticeMonitor/0.2',
                           'Referer': notice.url, 'Accept-Encoding': 'identity'})
-        with self.opener.open(request, timeout=15) as response:
+        with self.response(request, timeout=15) as response:
             public_url(response.url, FILE_PATH)
             chunks, total, deadline = [], 0, time.monotonic()+45
             while True:
@@ -225,11 +273,19 @@ class ExportVoucherScraper(BoardScraper):
         return [pages[p] for p in sorted(pages)]
 
     def fetch_detail(self, item):
-        html = super().fetch_detail(item)
-        # Resolve only the notice widget, not the site's global policy downloads.
-        files = self.attachment_session.list_attachments(html, request_text=self.request_text)
-        self.attachment_results[item.source_notice_id] = files
-        return html
+        self.attachment_results.pop(item.source_notice_id,None)
+        for attempt in range(2):
+            html = super().fetch_detail(item)
+            try:
+                # Resolve the notice widget, not global policy downloads.
+                files = self.attachment_session.list_attachments(html, request_text=self.request_text)
+            except FileGroupUnavailable:
+                if attempt: raise
+                self._sleep(min(30,self.http_settings.backoff_seconds))
+                continue
+            self.attachment_results[item.source_notice_id] = files
+            return html
+        raise AssertionError('unreachable group recovery')
 
     def parse_detail(self, response, item):
         root = parse_html(response)

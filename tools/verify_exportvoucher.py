@@ -110,6 +110,16 @@ def main(argv=None):
     except Exception as error:
         report.update(error_metadata(error))
         if error.__cause__: report['cause']=error_metadata(error.__cause__)
+    report['stages']={}
+    for stage in ('list','detail','attachment_list','attachment_download'):
+        events=[e for e in report['requests'] if e['stage']==stage]
+        successes=sum(e['status']=='SUCCESS' for e in events)
+        report['stages'][stage]=dict(status=('NOT_REACHED' if not events else 'SUCCESS' if successes==len(events)
+                                                   else 'PARTIAL' if successes else 'FAILED'),
+            attempts=len(events),successes=successes,failures=len(events)-successes,
+            retries=sum(e['retry_count']>0 for e in events))
+    for stage,field in (('text_extraction','extraction'),('image_ocr','image_extraction')):
+        report['stages'][stage]=dict(status=report.get(field,{}).get('status','NOT_REACHED'))
     _atomic_json(args.output/'report.json',report)
     trace.stop()
     print(json.dumps(report,ensure_ascii=True,indent=2))

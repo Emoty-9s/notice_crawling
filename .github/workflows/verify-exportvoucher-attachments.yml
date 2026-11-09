@@ -20,7 +20,12 @@ jobs:
           sudo apt-get install -y tesseract-ocr tesseract-ocr-kor tesseract-ocr-eng
           python -m pip install -r requirements-ocr.txt
       - name: Verify public list, distinct page, files, extraction and no-attachment notice
+        # Offline regression still runs after a network failure; source activation
+        # is a separate, deliberately gated change to the central workflow.
         run: python -m tools.verify_exportvoucher --output .run/exportvoucher-check --sample-only --require-ocr --interval 5
+      - name: Offline regression including existing nine sources and Windows A/B
+        if: always()
+        run: python -m unittest discover -s tests -v
       - name: Save metadata-only verification report
         if: always()
         uses: actions/upload-artifact@v7

@@ -69,3 +69,7 @@ feed v3, 추출/OCR 엔진과 Windows A/B 판정은 재사용한다. 외부 AI �
 
 메타데이터와 해시만 포함한 상세 증거:
 [exportvoucher-attachments-20261109.json](exportvoucher-attachments-20261109.json).
+
+후속 Actions 연결 진단/제한 재시도 결과:
+[exportvoucher-actions-stability-20261109.md](exportvoucher-actions-stability-20261109.md).
+5초 간격에서도 HTTP 응답 전 연결 재설정이 재현돼 중앙 비활성 상태를 유지했다.

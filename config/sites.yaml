@@ -847,7 +847,7 @@
       },
       "audit_status": "LOCAL_VERIFIED_CLOUD_NETWORK_FAILED",
       "checked_on": "2026-11-09",
-      "blocker": "GitHub-hosted runner: Connection reset by peer / TLS handshake timeout; no successful cloud attachment download. Production remains disabled.",
+      "blocker": "GitHub-hosted runner: detail GET resets before HTTP response (0 bytes) on 3 bounded attempts even with 5s spacing; access restriction suspected, exact server/network policy unconfirmed. Dedicated check failed, production remains disabled.",
       "mvp_priority": null,
       "mvp_notes": "Local download/text extraction and isolated EXE feed sync passed. Image OCR failed locally. Actual Actions attachment verification failed; central activation withheld.",
       "evidence": [
@@ -885,7 +885,15 @@
         "local_sample": "ntt_id=13038: HWP 185856 bytes, PDF 498122 bytes; direct text extracted; native OCR PARTIAL",
         "request_headers": "Official AJAX X-Requested-With and detail Referer, reproduced without claiming either is necessary",
         "cache_false_query": "_={fresh millisecond nonce}, matching official jQuery cache:false GET",
-        "evidence": "docs/site-audit/exportvoucher-attachments-20261109.json"
+        "evidence": "docs/site-audit/exportvoucher-attachments-20261109.json",
+        "request_interval_seconds": 5,
+        "max_public_context_recoveries": 1,
+        "latest_actions_evidence": "docs/site-audit/exportvoucher-actions-stability-20261109.json"
+      },
+      "http": {
+        "timeout_seconds": 25,
+        "max_retries": 2,
+        "backoff_seconds": 2
       }
     },
     {

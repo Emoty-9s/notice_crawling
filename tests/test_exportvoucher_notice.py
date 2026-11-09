@@ -95,6 +95,10 @@ class ExportVoucherTests(unittest.TestCase):
         api_request=calls[1].args[0]
         self.assertEqual(api_request.get_header('X-requested-with'),'XMLHttpRequest')
         self.assertEqual(api_request.get_header('Referer'),n.url)
+        from urllib.parse import parse_qs,urlsplit
+        query=parse_qs(urlsplit(api_request.full_url).query)
+        self.assertEqual(query['docId'],['DOC_000000003940343'])
+        self.assertTrue(query['_'][0].isdecimal())
         self.assertEqual(calls[2].args[0].full_url,file.download_url)
         self.assertIsNone(api_request.get_header('Authorization'))
 

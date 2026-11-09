@@ -115,6 +115,7 @@ class ExportVoucherSession:
         self.opener = opener if opener is not None else build_opener(HTTPCookieProcessor(CookieJar()))
         self.detail_url = None
         self.files = None
+        self.ajax_nonce = int(time.time()*1000)
 
     def get(self, url, *, timeout, headers):
         parts = urlsplit(url)
@@ -140,7 +141,11 @@ class ExportVoucherSession:
         get = request_text or (lambda url: self.get(url, timeout=25, headers={'User-Agent': 'NoticeMonitor/0.2'}))
         files = {}
         for doc in attachment_groups(html):
-            for item in parse_file_list(get(BASE+'/common/File2List?'+urlencode({'docId': doc}))):
+            # ftFile2.js explicitly sets jQuery cache:false. jQuery 1.9.1
+            # appends a fresh _ nonce to GET requests; do not replay a cached
+            # session-bound file list / secCode from the bare docId URL.
+            self.ajax_nonce += 1
+            for item in parse_file_list(get(BASE+'/common/File2List?'+urlencode({'docId': doc,'_':self.ajax_nonce}))):
                 if item.file_id in files and files[item.file_id] != item:
                     raise StructureError('CONFLICTING_EXPORTVOUCHER_FILE_GROUP')
                 files[item.file_id] = item

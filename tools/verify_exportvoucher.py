@@ -2,7 +2,9 @@
 import argparse
 import hashlib
 import json
+import time
 from pathlib import Path
+from urllib.parse import urlsplit
 from unittest.mock import patch
 
 from src.ai.prefilter import Prefilter
@@ -23,11 +25,27 @@ def main(argv=None):
     args.output.mkdir(parents=True,exist_ok=False)
     config=next(c for c in load_site_configs() if c['source_id']=='exportvoucher_notice')
     config={**config,'enabled':True,'max_pages':3,'pagination':{'parameter':'pageNo'},
-            'http':{'timeout_seconds':25,'max_retries':2}}
+            'http':{'timeout_seconds':25,'max_retries':2,'backoff_seconds':2}}
     scraper=ExportVoucherScraper(config)
     queue=ExtractionQueue()
     scraper.extractor=queue
     report=dict(source_id=scraper.source_id,status='FAILED',external_ai_calls=0,downloads=[],stage='collection')
+    original_get=ExportVoucherSession.get
+    def traced_get(session,url,**options):
+        started=time.monotonic()
+        record=dict(path=urlsplit(url).path)
+        report.setdefault('requests',[]).append(record)
+        try:
+            result=original_get(session,url,**options)
+            record['status']='SUCCESS'
+            return result
+        except Exception as error:
+            record.update(status='FAILED',error_type=type(error).__name__,error=str(error))
+            raise
+        finally:
+            record['elapsed_seconds']=round(time.monotonic()-started,2)
+    trace=patch.object(ExportVoucherSession,'get',traced_get)
+    trace.start()
     try:
         if not args.sample_only:
             notices=scraper.run()
@@ -95,6 +113,7 @@ def main(argv=None):
         if error.__cause__:
             report['cause']=str(error.__cause__)
     _atomic_json(args.output/'report.json',report)
+    trace.stop()
     print(json.dumps(report,ensure_ascii=True,indent=2))
     return int(report['status']!='PASS')
 

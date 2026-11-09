@@ -121,6 +121,8 @@ def smoke_check(report_path, feed_url, *, database_path=None):
             window.close()
     except Exception as error:
         report['error_type'] = type(error).__name__
+        if hasattr(error, 'code') and isinstance(error.code, str):
+            report['error_code'] = error.code
     finally:
         if root is not None:
             root.destroy()

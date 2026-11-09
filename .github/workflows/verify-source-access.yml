@@ -9,12 +9,16 @@ on:
           - tipa_legacy_bid
           - kiat_home
           - gbsa_bid
+      regression:
+        type: boolean
+        description: Run the complete offline regression suite before the public-list probe
+        default: false
 permissions:
   contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
         with:
@@ -22,6 +26,15 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
+      - name: Install offline document and OCR runtime for regression
+        if: ${{ inputs.regression }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-kor tesseract-ocr-eng
+          python -m pip install -r requirements-ocr.txt
+      - name: Complete offline unittest regression
+        if: ${{ inputs.regression }}
+        run: python -m unittest discover -s tests -v
       - name: Read public list and validate parser
         env:
           SOURCE: ${{ inputs.source }}

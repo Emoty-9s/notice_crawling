@@ -18,7 +18,9 @@ from src.core.eligibility import PUBLIC_SCHEMA_VERSION, deadline_state
 
 
 DEFAULT_CACHE_DIR = Path(__file__).resolve().parents[2] / 'local' / 'cache'
-MAX_DOWNLOAD_BYTES = 16 * 1024 * 1024
+# OCR-enriched multi-source v3 feeds can exceed the legacy 16 MiB ceiling.
+# Keep an explicit finite bound; validation and last-good atomic cache stay intact.
+MAX_DOWNLOAD_BYTES = 64 * 1024 * 1024
 NOTICE_FIELDS = frozenset({
     'notice_id', 'source_id', 'institution', 'title', 'category', 'participation_type',
     'published_at', 'apply_start', 'apply_end', 'url', 'summary', 'keywords',

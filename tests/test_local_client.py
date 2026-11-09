@@ -94,6 +94,23 @@ class LocalClientTests(unittest.TestCase):
         self.assertEqual(self.client.sync().feed['notices'], [])
         self.assertEqual(self.client.load_cache()['metadata']['notice_count'], 0)
 
+    def test_ocr_feed_above_legacy_size_limit_syncs_without_truncation(self):
+        # Leading JSON whitespace grows the payload without altering the schema
+        # or its public hashes. The real expanded production feed is >16 MiB.
+        payload = b' ' * (16 * 1024 * 1024 + 1) + encoded(self.feed)
+        self.assertLess(len(payload), MAX_DOWNLOAD_BYTES)
+        response = Mock()
+        response.read.return_value = payload
+        response.__enter__ = Mock(return_value=response)
+        response.__exit__ = Mock(return_value=False)
+        with patch('src.local_client.sync.urlopen', return_value=response):
+            self.assertEqual(download(BASE+'notices.json', 7), payload)
+        self.transport.side_effect = [encoded(self.metadata), payload]
+        result = self.client.sync()
+        self.assertEqual(result.status, 'UPDATED')
+        self.assertEqual(result.feed, self.feed)
+        self.assertEqual(self.client.load_cache()['feed'], self.feed)
+
     def test_timeout_and_network_errors_fallback_to_last_good_cache(self):
         before = self.seed()
         for error, code in [(TimeoutError(SECRET), 'TIMEOUT'), (URLError(TimeoutError(SECRET)), 'TIMEOUT'),

@@ -13,7 +13,6 @@ from src.renderer.feed import write_feed
 from src.local_client.sync import validate_pair
 from src.scrapers.exportvoucher_notice import ExportVoucherScraper, ExportVoucherSession, notice_url
 from src.scrapers._board import NoticeLink
-from src.scrapers._html import parse_html
 
 
 def main(argv=None):
@@ -25,7 +24,7 @@ def main(argv=None):
     args.output.mkdir(parents=True,exist_ok=False)
     config=next(c for c in load_site_configs() if c['source_id']=='exportvoucher_notice')
     config={**config,'enabled':True,'max_pages':3,'pagination':{'parameter':'pageNo'},
-            'http':{'timeout_seconds':25,'max_retries':1}}
+            'http':{'timeout_seconds':25,'max_retries':2}}
     scraper=ExportVoucherScraper(config)
     queue=ExtractionQueue()
     scraper.extractor=queue
@@ -43,9 +42,8 @@ def main(argv=None):
             notices=[]
             for identity in ('13038','8410','13047','13034'):
                 url=notice_url(identity)
-                html=scraper.request_text(url)
-                title=parse_html(html).one('div',cls='bbsInfo').one('h3').text()
-                item=NoticeLink(identity,title,url)
+                report['stage']='detail_'+identity
+                item=NoticeLink(identity,identity,url)
                 # Use the same fetch/parse/discovery code as the real collector.
                 detail=scraper.fetch_detail(item)
                 parsed=scraper.parse_detail(detail,item)

@@ -799,17 +799,16 @@
         }
       ],
       "list_url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
-      "detail_url_pattern": null,
+      "detail_url_pattern": "/portal/board/boardView?bbs_id=1&ntt_id={ntt_id}",
       "enabled": false,
       "access_status": "READABLE_LIST",
       "content_type": "STATIC_HTML",
       "classification_notes": "HTML 응답의 텍스트에서 목록/본문을 확인한 기준의 잠정 분류. 로컬 HTTP 재현 검증은 남아 있음.",
       "pagination": {
-        "type": "UI_NUMERIC_UNRESOLVED",
-        "parameter": null,
-        "example_url": null,
-        "second_page_verified": false,
-        "notes": "페이지 UI 확인, 인자/전송방식 미확인."
+        "type": "OBSERVED_FORM_QUERY",
+        "parameter": "pageNo",
+        "example_url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1&pageNo=2",
+        "second_page_verified": true
       },
       "detail": {
         "example_url": null,
@@ -841,14 +840,14 @@
         "notes": "미확인"
       },
       "recommended_strategy": "REQUESTS",
-      "strategy_notes": "공개 HTML 조회를 먼저 재현한다. 상세/페이지 이동의 미확인 항목을 검증한 뒤 구현.",
+      "strategy_notes": "Public detail and File2List share an anonymous CookieJar; reproduce official AJAX request once after opening detail. No raw attachments persist.",
       "risk": {
         "level": "MEDIUM",
         "notes": "상세 URL/본문 및 페이지 요청 검증 필요."
       },
-      "audit_status": "LIMITED",
-      "checked_on": "2026-10-30",
-      "blocker": "상세 URL/본문 및 페이지 요청 검증 필요.",
+      "audit_status": "LOCAL_ATTACHMENTS_VERIFIED_PENDING_CENTRAL",
+      "checked_on": "2026-11-09",
+      "blocker": null,
       "mvp_priority": null,
       "mvp_notes": null,
       "evidence": [
@@ -866,13 +865,25 @@
       "merged_aliases": [
         "exportvoucher_notice_alias"
       ],
-      "mvp_status": "NOT_SELECTED",
-      "strategy_decision": "DEFERRED_WITH_FALLBACK",
+      "mvp_status": "IMPLEMENTED",
+      "strategy_decision": "ANONYMOUS_SESSION_AJAX_ADAPTER",
       "fallback": {
         "strategy": "MANUAL_ONLY",
         "trigger": "상세 URL/본문 및 페이지 요청 검증 필요.",
         "url": "https://www.exportvoucher.com/portal/board/boardList?bbs_id=1",
         "action": "공식 원문/공식 메뉴에서 수동 확인하고 결과를 기록한다. 로그인·CAPTCHA·접근통제를 우회하지 않는다."
+      },
+      "attachment_validation": {
+        "doc_id_attribute": "data-doc-id",
+        "group_selector": ".bbsViewArea [data-file-download]",
+        "list_url": "/common/File2List",
+        "parameter": "docId",
+        "requires_anonymous_detail_session": true,
+        "download_url": "/common.FileDownload.do?file_id={fileId}&sec_code={secCode}",
+        "durable_identity": "fileId; secCode is resolved afresh, not persisted",
+        "raw_files_persisted": false,
+        "local_sample": "ntt_id=13038: HWP 185856 bytes, PDF 498122 bytes; direct text extracted; native OCR PARTIAL",
+        "request_headers": "Official AJAX X-Requested-With and detail Referer, reproduced without claiming either is necessary"
       }
     },
     {

@@ -111,11 +111,12 @@ def build_registry(site_configs, *, transport_factory=None, clock=None, logger=N
     from src.scrapers.tipa_legacy_bid import TipaBidScraper
     from src.scrapers.kiat_home import KiatBidScraper
     from src.scrapers.gbsa_bid import GbsaBidScraper
+    from src.scrapers.exportvoucher_notice import ExportVoucherScraper
 
     configs = list(site_configs)
     registry = build_mvp_registry(configs, transport_factory=transport_factory, clock=clock, logger=logger)
     by_source = {config['source_id']: config for config in configs}
-    for adapter in (RipcScraper, KistaScraper, TipaBidScraper, KiatBidScraper, GbsaBidScraper):
+    for adapter in (RipcScraper, KistaScraper, TipaBidScraper, KiatBidScraper, GbsaBidScraper, ExportVoucherScraper):
         config = by_source.get(adapter.source)
         if config is None or not config.get('enabled', False):
             continue

@@ -120,6 +120,7 @@ SOURCE_LIST_URLS = {
     'tipa_legacy_bid': 'https://www.tipa.or.kr/s040305',
     'kiat_home': 'https://cont.kiat.or.kr/bidding/biddingList.do',
     'gbsa_bid': 'https://www.gbsa.or.kr/board/bid_info.do',
+    'exportvoucher_notice': 'https://www.exportvoucher.com/portal/board/boardList?bbs_id=1',
     'ripc_pms': 'https://pms.ripc.org/pms/biz/partner/tenderNotice/list.do',
 }
 

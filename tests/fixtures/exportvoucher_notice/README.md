@@ -1,0 +1,1 @@
+Public exportvoucher HTML/JSON captured 2026-11-09. Source: https://www.exportvoucher.com/portal/board/boardList?bbs_id=1 . Notice 13038 has HWP/PDF; 8410 PDF; 13034 JPG; 13047 has no attachment widget. Scope reduced to actual board nodes; anonymous file-access attributes removed and issued secCodes replaced with test values. No attachment original bytes are stored.

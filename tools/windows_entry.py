@@ -61,6 +61,10 @@ def smoke_check(report_path, feed_url, *, database_path=None):
             # This is opt-in smoke only; normal startup stays asynchronous.
             import time
             from collections import Counter
+            report['feed_source_counts']=dict(Counter(n['source_id'] for n in first.feed['notices']))
+            report['feed_text_characters_by_source']=dict(Counter({
+                source:sum(len(n.get('content_text','')) for n in first.feed['notices'] if n['source_id']==source)
+                for source in report['feed_source_counts']}))
             deadline=time.monotonic()+60
             while len(window.work_results)<len(first.feed['notices']) and time.monotonic()<deadline:
                 root.update();time.sleep(.01)

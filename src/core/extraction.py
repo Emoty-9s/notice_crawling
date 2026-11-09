@@ -397,6 +397,7 @@ class Extractor:
         seen = set(' '.join(line.split()) for line in re.split(r'\n|(?<=[.!?])\s+', original) if line.strip())
         metrics = self.metrics.setdefault(notice.source_id, dict(targets=0, success=0, failed=0, partial=0, deferred=0, unsupported=0, cache_hits=0, downloads=0, completed_reused=0, ocr_targets=0, ocr_success=0, ocr_failed=0, ocr_characters=0, elapsed_seconds=0))
         prior = {r.get('resource_id'):r for r in previous_resources}
+        export_session = None
         for resource in resources:
             metrics['targets'] += 1
             identity = resource.url[7:] if resource.url.startswith('cached:') else hashlib.sha256(resource.url.encode()).hexdigest()
@@ -410,7 +411,14 @@ class Extractor:
                 else:
                     self._check_time()
                     metrics['downloads'] += 1
-                    data, name = self.fetch(resource)
+                    if (notice.source_id == 'exportvoucher_notice' and self.fetch is download
+                            and urlsplit(resource.url).path == '/common.FileDownload.do'):
+                        from src.scrapers.exportvoucher_notice import ExportVoucherSession
+                        if export_session is None:
+                            export_session = ExportVoucherSession()
+                        data, name = export_session.download(resource, notice=notice)
+                    else:
+                        data, name = self.fetch(resource)
                     result = self.document(data, name, resource.kind)
             except Exception as error:
                 result = dict(failure(error),parts=[])

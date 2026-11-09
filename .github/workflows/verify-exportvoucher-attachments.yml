@@ -1,0 +1,30 @@
+name: Verify exportvoucher public attachments (read only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Install existing offline extraction and OCR runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-kor tesseract-ocr-eng
+          python -m pip install -r requirements-ocr.txt
+      - name: Verify public list, distinct page, files, extraction and no-attachment notice
+        run: python -m tools.verify_exportvoucher --output .run/exportvoucher-check --sample-only --require-ocr
+      - name: Save metadata-only verification report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: exportvoucher-attachments-${{ github.run_id }}
+          path: .run/exportvoucher-check/report.json
+          retention-days: 14
